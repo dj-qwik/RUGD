@@ -63,8 +63,45 @@ button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 
 .view{position:absolute;inset:0;display:flex;flex-direction:column;z-index:2}
 
+/* ---------- title screen backdrop: synthwave trading floor ---------- */
+#menuBg{position:absolute;inset:0;z-index:1;overflow:hidden;background:radial-gradient(ellipse at 50% 115%,#ff2fa0 0%,#7a1fa8 26%,#26104a 55%,#0b0518 100%)}
+#screen.ingame #menuBg{display:none}
+.sun{position:absolute;left:50%;bottom:38%;width:min(46vw,460px);aspect-ratio:1;transform:translate(-50%,50%);border-radius:50%;
+  background:repeating-linear-gradient(to bottom,transparent 0 58%,#26104a 58% 62%,transparent 62% 70%,#26104a 70% 73%,transparent 73% 80%,#26104a 80% 82%,transparent 82%),
+    linear-gradient(#ffee1f,#ff4f6e 70%,#c2185b);filter:drop-shadow(0 0 40px rgba(255,79,110,.7));opacity:.9}
+.grid{position:absolute;left:-60%;right:-60%;bottom:-6%;height:46%;transform:perspective(420px) rotateX(62deg);transform-origin:50% 100%;
+  background-image:linear-gradient(rgba(255,79,216,.75) 2px,transparent 2px),linear-gradient(90deg,rgba(255,79,216,.75) 2px,transparent 2px);
+  background-size:70px 70px;animation:gridmove 1s linear infinite;mask-image:linear-gradient(transparent,#000 30%)}
+@keyframes gridmove{to{background-position:0 70px}}
+#menuChart{position:absolute;inset:0;width:100%;height:100%}
+#rain{position:absolute;inset:0;pointer-events:none}
+#rain i{position:absolute;top:-60px;font-style:normal;animation:fall linear infinite;filter:drop-shadow(0 4px 6px rgba(0,0,0,.4))}
+@keyframes fall{to{transform:translateY(calc(100vh + 120px)) rotate(var(--rot))}}
+.tape{position:absolute;left:0;right:0;height:38px;background:#0a0a0a;border-block:3px solid var(--yel);overflow:hidden;z-index:2;display:flex;align-items:center;
+  box-shadow:0 0 30px rgba(255,238,31,.35)}
+.tape.top{top:0}.tape.bot{bottom:0;border-color:#ff4fd8;box-shadow:0 0 30px rgba(255,79,216,.35)}
+.track{display:flex;gap:34px;white-space:nowrap;animation:tape 60s linear infinite;padding-left:20px;font-family:var(--disp);font-size:19px;color:#fff;letter-spacing:.02em}
+.track.rev{animation-duration:75s;animation-direction:reverse}
+.track b{color:var(--yel);font-weight:400}.track .u{color:#4dff9a}.track .d{color:#ff5a7a}
+@keyframes tape{to{transform:translateX(-50%)}}
+#menu,#lobby{z-index:3}
+#menu .cardbox,#lobby .cardbox{background:rgba(16,6,34,.78);border-color:#000;color:#fff;backdrop-filter:blur(6px);
+  box-shadow:0 10px 0 #000,0 0 0 3px #ff4fd8,0 0 60px rgba(255,79,216,.55),0 30px 80px rgba(0,0,0,.6)}
+#menu .field{color:#c9b6ff}
+#menu .field input,#menu #codeIn{background:#0b0418;color:var(--yel);border-color:#ff4fd8}
+#menu .field input:focus,#menu #codeIn:focus{background:#1a0a33;box-shadow:0 0 18px rgba(255,79,216,.6)}
+#menu .btn.ghost,#lobby .btn.ghost{background:#0b0418;color:#fff;border-color:#ff4fd8;box-shadow:0 7px 0 #000}
+#menu .netnote{color:#c9b6ff}
+.live{font-weight:700;font-size:15px;color:#ff8fb8;animation:blink 1.6s steps(2) infinite;min-height:1.2em}
+#lobby .lbl{color:#c9b6ff}#lobby .lobrow{color:#fff}
+#lobby #seats li{background:#0b0418;color:#fff;border-color:#ff4fd8}
+.logo{animation:wob 2.4s ease-in-out infinite;filter:drop-shadow(0 0 24px rgba(255,238,31,.55))}
+@keyframes wob{0%,100%{transform:rotate(-3deg) scale(1)}50%{transform:rotate(-1deg) scale(1.04)}}
+.sticker.flip{animation:flip .35s ease-out}
+@keyframes flip{from{transform:rotate(3deg) rotateX(90deg)}}
 /* ---------- menu ---------- */
-#menu,#lobby{align-items:center;justify-content:center;padding:20px;overflow:auto}
+#menu,#lobby{align-items:center;justify-content:flex-start;padding:48px 20px;overflow:auto}
+.menu-in,.lob{margin:auto;flex:none}
 .menu-in{width:min(940px,100%);display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center;padding:28px 30px 32px}
 .logo{font-family:var(--disp);font-size:clamp(76px,12vw,140px);line-height:.85;margin:0;color:var(--yel);-webkit-text-stroke:10px var(--ink);paint-order:stroke fill;
   text-shadow:0 9px 0 var(--ink);letter-spacing:.01em;transform:rotate(-3deg)}
@@ -77,7 +114,7 @@ button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .mbtns{display:flex;flex-direction:column;gap:14px}
 .joinrow{display:grid;grid-template-columns:1fr auto;gap:10px}
 #codeIn{text-transform:uppercase;letter-spacing:.3em;text-align:center;min-width:0}
-.how{background:#fff59a;border-radius:4px;padding:20px 20px 16px;font-size:18px;line-height:1.25;transform:rotate(2deg);
+.how{color:var(--ink);background:#fff59a;border-radius:4px;padding:20px 20px 16px;font-size:18px;line-height:1.25;transform:rotate(2deg);
   box-shadow:0 14px 24px rgba(0,0,0,.18),inset 0 -30px 40px rgba(255,200,0,.18);position:relative}
 .how::before{content:"";position:absolute;top:-12px;left:42%;width:90px;height:26px;background:rgba(255,255,255,.65);transform:rotate(-4deg);box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .how h3{font-family:var(--mark);font-size:22px;margin:0 0 8px;color:#c2185b;font-weight:400}
@@ -98,10 +135,10 @@ button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 
 /* ---------- game layout ---------- */
 #game{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto}
-#topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:12px 18px 6px;position:relative;z-index:3}
+#topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:8px 18px 4px;position:relative;z-index:3}
 .tl{display:flex;gap:10px;align-items:center}
 .chip{white-space:nowrap;font-family:var(--disp);font-size:20px;background:#fff;border:4px solid var(--ink);border-radius:14px;padding:4px 14px;box-shadow:0 5px 0 var(--ink)}
-.neon{font-family:var(--disp);font-size:clamp(28px,4vw,52px);letter-spacing:.12em;line-height:1;padding:4px 18px;border-radius:14px;
+.neon{font-family:var(--disp);font-size:clamp(26px,3.4vw,44px);letter-spacing:.12em;line-height:1;padding:4px 18px;border-radius:14px;
   background:rgba(20,8,30,.85);border:4px solid #2a1838;box-shadow:0 6px 0 rgba(0,0,0,.35)}
 .neon span{color:#fff;text-shadow:0 0 6px #ff4fd8,0 0 16px #ff4fd8,0 0 32px #ff2fc0;animation:flick 4s infinite}
 .neon .ng{display:none;color:#fff;text-shadow:0 0 6px #ff2847,0 0 16px #ff2847,0 0 32px #ff0030}
@@ -112,11 +149,11 @@ button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .wallet .wl{font-size:12px;font-weight:700;color:#777;line-height:1;text-align:right}
 #myTotal{font-family:var(--disp);font-size:clamp(22px,2.4vw,32px);line-height:1}
 
-#mid{display:grid;grid-template-columns:minmax(190px,250px) minmax(0,1fr) minmax(190px,250px);grid-template-rows:minmax(0,1fr);gap:20px;padding:6px 18px 0;min-height:0;position:relative;z-index:2}
+#mid{display:grid;grid-template-columns:minmax(180px,236px) minmax(0,1fr) minmax(180px,236px);grid-template-rows:minmax(0,1fr);gap:18px;padding:4px 18px 0;min-height:0;position:relative;z-index:2}
 
 /* whiteboard leaderboard */
 .wb{align-self:start;max-height:100%;display:flex;flex-direction:column;background:#fff;border:9px solid #c4c9d1;border-radius:10px;
-  box-shadow:0 8px 0 rgba(0,0,0,.15),inset 0 0 30px rgba(0,0,0,.05);padding:6px 6px 10px;position:relative;margin-top:6px}
+  box-shadow:0 8px 0 rgba(0,0,0,.15),inset 0 0 30px rgba(0,0,0,.05);padding:4px 6px 8px;position:relative;margin-top:0}
 .wb::after{content:"";position:absolute;left:20%;right:20%;bottom:-18px;height:9px;background:#aab0ba;border-radius:0 0 6px 6px}
 .wbh{font-family:var(--mark);font-size:22px;color:#1d4ed8;transform:rotate(-2deg);padding:2px 6px 4px;white-space:nowrap}
 #board{list-style:none;margin:0;padding:0;font-size:16px;font-weight:600;overflow:hidden}
@@ -128,11 +165,11 @@ button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 
 /* the monitor */
 #monWrap{display:flex;flex-direction:column;min-height:0}
-.mon{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;background:#0f0f0f;border-radius:24px;padding:14px 14px 0;
+.mon{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;background:#0f0f0f;border-radius:22px;padding:11px 11px 0;
   box-shadow:0 6px 0 #000,0 26px 50px rgba(30,10,50,.35),inset 0 2px 0 #333}
 .monin{flex:1;min-height:0;display:flex;flex-direction:column;border-radius:10px;overflow:hidden;background:var(--scr)}
-.monhead{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;align-items:center;gap:8px 12px;background:var(--head);padding:6px 14px 6px 8px;border-bottom:3px solid #b9c9e2}
-#myValue{font-family:var(--disp);font-size:clamp(28px,3.3vw,46px);color:var(--blue);line-height:1}
+.monhead{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;align-items:center;gap:8px 12px;background:var(--head);padding:4px 12px 4px 6px;border-bottom:3px solid #b9c9e2}
+#myValue{font-family:var(--disp);font-size:clamp(26px,2.9vw,40px);color:var(--blue);line-height:1}
 .coin{min-width:0;text-align:center}
 #coinName{font-family:var(--disp);font-size:clamp(16px,1.7vw,24px);line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #coinSub{font-size:14px;font-weight:600;color:#55627a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -149,10 +186,10 @@ button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 #price{font-family:var(--disp);font-weight:400;font-size:20px}
 #mcap{opacity:.75;font-size:14px}
 #chartMsg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:var(--disp);font-size:34px;color:#fff;-webkit-text-stroke:5px var(--ink);paint-order:stroke fill}
-.chin{height:44px;flex:none;background:linear-gradient(#e2e2e2,#bdbdbd);margin:12px -14px 0;border-radius:0 0 24px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 22px;font-weight:600;font-size:17px;color:#333}
-#myState{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.chin{height:36px;flex:none;background:linear-gradient(#e2e2e2,#bdbdbd);margin:9px -11px 0;border-radius:0 0 22px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 22px;font-weight:600;font-size:17px;color:#333}
+#myState{flex:none;max-width:48%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .chin .brand{font-family:var(--disp);color:#8a8a8a;letter-spacing:.08em;font-size:14px;white-space:nowrap}
-.stand{width:20%;min-width:90px;height:30px;margin:0 auto;flex:none;background:linear-gradient(90deg,#c7c7c7,#f2f2f2 50%,#bfbfbf);clip-path:polygon(30% 0,70% 0,88% 100%,12% 100%)}
+.stand{width:20%;min-width:90px;height:16px;margin:0 auto;flex:none;background:linear-gradient(90deg,#c7c7c7,#f2f2f2 50%,#bfbfbf);clip-path:polygon(30% 0,70% 0,88% 100%,12% 100%)}
 .sticky{position:absolute;z-index:3;width:92px;padding:8px 6px;font-family:var(--mark);font-size:13px;line-height:1.1;text-align:center;font-style:normal;
   box-shadow:0 4px 8px rgba(0,0,0,.3);color:#333}
 .n1{left:-18px;top:62px;background:#fff59a;transform:rotate(-9deg)} .n2{right:-16px;bottom:72px;background:#ffb3d1;transform:rotate(8deg)}
@@ -179,27 +216,27 @@ button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 #chatIn{width:100%;background:#fff;border:0;border-radius:0 0 16px 16px;padding:8px 12px;font-size:15px;outline:none}
 
 /* desk + keys */
-#deskRow{position:relative;z-index:1;background:linear-gradient(var(--desk),var(--desk2));padding:14px 18px 22px;
+#deskRow{position:relative;z-index:1;background:linear-gradient(var(--desk),var(--desk2));padding:10px 18px 16px;
   box-shadow:inset 0 10px 0 rgba(255,255,255,.14),inset 0 -14px 0 rgba(0,0,0,.12)}
-#quip{text-align:center;color:#fff;font-weight:600;font-size:17px;text-shadow:0 2px 0 rgba(0,0,0,.25);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#quip{flex:1;min-width:0;text-align:center;color:#6b6b6b;font-style:italic;font-weight:500;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tray{display:grid;grid-template-columns:1fr 1fr;gap:24px;width:min(100%,900px);margin:0 auto;background:linear-gradient(#fff,#ececf2);
-  border-radius:24px;padding:16px 20px 26px;box-shadow:0 10px 0 #cbc8d6,0 24px 30px rgba(40,10,60,.35);transform:perspective(1100px) rotateX(14deg);transform-origin:50% 100%}
-.big{font-family:var(--disp);font-size:clamp(46px,6.6vw,92px);line-height:.95;color:#fff;-webkit-text-stroke:7px var(--ink);paint-order:stroke fill;text-shadow:0 6px 0 var(--ink);
-  border:0;border-radius:24px;padding:16px 10px 12px;cursor:pointer;position:relative;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
-  background:linear-gradient(170deg,#fff977 0%,var(--yel) 35%,#ffe600 100%);box-shadow:0 18px 0 var(--yel2),0 20px 0 rgba(0,0,0,.2),0 0 40px rgba(255,238,31,.55);transition:filter .15s}
+  border-radius:22px;padding:10px 18px 20px;box-shadow:0 8px 0 #cbc8d6,0 20px 28px rgba(40,10,60,.35);transform:perspective(1100px) rotateX(12deg);transform-origin:50% 100%}
+.big{font-family:var(--disp);font-size:clamp(42px,5.4vw,78px);line-height:.95;color:#fff;-webkit-text-stroke:7px var(--ink);paint-order:stroke fill;text-shadow:0 6px 0 var(--ink);
+  border:0;border-radius:22px;padding:10px 10px 8px;cursor:pointer;position:relative;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  background:linear-gradient(170deg,#fff977 0%,var(--yel) 35%,#ffe600 100%);box-shadow:0 14px 0 var(--yel2),0 16px 0 rgba(0,0,0,.2),0 0 40px rgba(255,238,31,.55);transition:filter .15s}
 .big::after{content:"";position:absolute;left:8%;right:8%;top:8px;height:22%;border-radius:16px;background:linear-gradient(rgba(255,255,255,.55),rgba(255,255,255,0))}
 .big small{display:block;font-family:var(--body);font-weight:700;font-size:clamp(13px,1.3vw,17px);letter-spacing:.14em;color:#4a3b00;-webkit-text-stroke:0;text-shadow:none;margin-top:4px}
-.big.press,.big:active{transform:translateY(14px);box-shadow:0 4px 0 var(--yel2),0 6px 0 rgba(0,0,0,.2),0 0 60px rgba(255,238,31,.8)}
-.big.off{background:linear-gradient(170deg,#a4a4a4,#8b8b8b);box-shadow:0 18px 0 #666,0 20px 0 rgba(0,0,0,.2)}
+.big.press,.big:active{transform:translateY(11px);box-shadow:0 4px 0 var(--yel2),0 6px 0 rgba(0,0,0,.2),0 0 60px rgba(255,238,31,.8)}
+.big.off{background:linear-gradient(170deg,#a4a4a4,#8b8b8b);box-shadow:0 14px 0 #666,0 20px 0 rgba(0,0,0,.2)}
 .big.off small{color:#3e3e3e}
 .big.off.press,.big.off:active{box-shadow:0 4px 0 #666}
 .big.nope{animation:nope .32s}
 @keyframes nope{20%{translate:-8px 0}40%{translate:8px 0}60%{translate:-5px 0}80%{translate:4px 0}}
 .props{position:absolute;inset:0;pointer-events:none}
-.can{position:absolute;left:3%;bottom:44%;width:52px;height:96px;border-radius:10px;background:linear-gradient(90deg,#0f0f0f,#2c2c2c 40%,#111);border:3px solid var(--ink);
+.can{position:absolute;left:3%;bottom:38%;width:52px;height:96px;border-radius:10px;background:linear-gradient(90deg,#0f0f0f,#2c2c2c 40%,#111);border:3px solid var(--ink);
   color:#b6ff3b;font-family:var(--disp);font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center;text-align:center;writing-mode:vertical-rl;transform:rotate(-6deg);box-shadow:0 8px 0 rgba(0,0,0,.25)}
 .can::before{content:"";position:absolute;top:-8px;left:6px;right:6px;height:8px;background:#bbb;border-radius:4px 4px 0 0}
-.mug{position:absolute;right:5%;bottom:46%;width:70px;height:66px;background:#fff;border:4px solid var(--ink);border-radius:6px 6px 16px 16px;
+.mug{position:absolute;right:5%;bottom:38%;width:70px;height:66px;background:#fff;border:4px solid var(--ink);border-radius:6px 6px 16px 16px;
   font-family:var(--disp);font-size:26px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 0 rgba(0,0,0,.2)}
 .mug::after{content:"";position:absolute;right:-24px;top:12px;width:20px;height:28px;border:4px solid var(--ink);border-left:0;border-radius:0 14px 14px 0;background:transparent}
 
@@ -216,7 +253,7 @@ button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .rinfo{font-weight:700;color:#666}
 .cd{font-family:var(--disp);font-size:clamp(70px,11vw,130px);color:#4ade80;-webkit-text-stroke:9px var(--ink);paint-order:stroke fill;text-shadow:0 8px 0 var(--ink);line-height:1;margin-top:6px}
 .cd.cdp{animation:cdpop .3s ease-out}
-@keyframes cdpop{from{transform:scale(1.6);opacity:.3}}
+@keyframes cdpop{from{transform:scale(.45);opacity:.2}}
 .ovl.rug{background:rgba(160,0,24,.62)}
 .rugscene{position:absolute;inset:0;z-index:1;pointer-events:none}
 .carpet{position:absolute;left:-6%;width:112%;top:28%;height:40%;border:14px double #ffcf4a;border-left:0;border-right:0;
@@ -266,8 +303,11 @@ table.st tr.me td{background:rgba(255,236,0,.6)}
   padding:8px 18px;border-radius:16px;font-size:20px;font-weight:700;max-width:90%;text-align:center}
 
 @media (max-width:1100px){ .props{display:none} }
+@media (max-width:1240px) and (min-width:901px){ #mid{grid-template-columns:minmax(150px,190px) minmax(0,1fr) minmax(150px,190px);gap:12px} .sticky{display:none} #board{font-size:14.5px} #board li{grid-template-columns:16px 10px minmax(0,1fr) 18px 50px;gap:4px} .wbh{font-size:18px} }
 @media (max-width:900px){
   .menu-in{grid-template-columns:1fr}
+  .tape{height:30px}.track{font-size:15px}
+  #menu,#lobby{padding-top:42px;padding-bottom:42px}
   #mid{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:10px}
   .phone{display:none}
   #peek{display:block}
@@ -288,7 +328,8 @@ table.st tr.me td{background:rgba(255,236,0,.6)}
   .mini{font-size:13px;padding:2px 7px}
   .wallet{padding:1px 2px 1px 8px}.wallet .wl{display:none}.bill{width:40px;height:28px}
   #mid{padding:4px 10px 0}
-  #board{grid-template-columns:minmax(0,1fr);max-height:11vh}
+  #board{grid-template-columns:minmax(0,1fr);max-height:9vh}
+  #quip{display:none}
   #menu,#lobby{padding:10px}
   .menu-in{padding:18px 16px 22px;gap:18px}
   .logo{font-size:72px}
@@ -310,16 +351,17 @@ table.st tr.me td{background:rgba(255,236,0,.6)}
   .monhead{grid-template-columns:auto auto minmax(0,1fr);padding:4px 8px 4px 4px}
   .monhead .pill{grid-column:1 / -1;justify-self:center;padding:1px 12px}
   .pxbox{font-size:13px;right:6px;top:6px}#price{font-size:15px}#mcap{display:none}
-  .chin{height:34px;margin:9px -9px 0;font-size:14px;padding:0 14px}.chin .brand{display:none}
-  .stand{height:18px}
+  .chin{height:30px;margin:8px -9px 0;font-size:14px;padding:0 14px}.chin .brand{display:none}
+  .stand{height:10px}
   #deskRow{padding:8px 10px 14px}
-  #quip{font-size:14px;margin-bottom:6px}
   .tray{gap:14px;padding:12px 12px 20px}
   .big{border-radius:18px;padding:12px 6px 8px;-webkit-text-stroke:6px var(--ink)}
   #seats{grid-template-columns:1fr}
   .facts,.cols{grid-template-columns:1fr}
 }
 @media (max-width:600px) and (max-height:760px){ .facts li:nth-child(n+4){display:none} .rinfo{display:none} .cd{font-size:52px;margin-top:2px} .cname{margin:4px 0 0} }
+@media (max-height:760px) and (min-width:601px){ .card{padding:14px 20px} .cname{font-size:clamp(34px,5vw,58px)} .facts{margin:8px auto} .cd{font-size:72px} .res h2{font-size:38px} table.st{font-size:16px} .champname{font-size:58px} }
+@media (max-height:640px) and (min-width:601px){ .facts li:nth-child(n+3){display:none} .rinfo{display:none} .cd{font-size:58px} table.st{font-size:14px} table.st td{padding:1px 6px} .mvp{margin:2px 0} .res .sub{margin:2px 0 6px;font-size:16px} }
 @media (max-width:440px){ #topbar{grid-template-columns:auto auto auto} #myTotal{font-size:16px} .wallet .bill{display:none} .wallet{padding:2px 8px} .neon{font-size:15px;padding:3px 6px;letter-spacing:.02em} #quitBtn{padding:2px 5px} #muteBtn{display:none} .bill{width:30px} }
 @media (max-height:500px){
   #mid{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important;padding-top:2px}
@@ -341,18 +383,26 @@ table.st tr.me td{background:rgba(255,236,0,.6)}
     <div class="window w2"><div class="sky"><i class="rocket">🚀</i><i class="star" style="left:20%;top:30%;animation-delay:.4s"></i><i class="star" style="left:55%;top:14%"></i><i class="star" style="left:88%;top:24%;animation-delay:1s"></i></div><div class="blinds"></div></div>
   </div>
 
+  <div id="menuBg" aria-hidden="true">
+    <div class="sun"></div><div class="grid"></div>
+    <canvas id="menuChart"></canvas>
+    <div id="rain"></div>
+    <div class="tape top"><div class="track" id="tapeTop"></div></div>
+    <div class="tape bot"><div class="track rev" id="tapeBot"></div></div>
+  </div>
   <!-- main menu -->
   <section id="menu" class="view">
     <div class="menu-in cardbox">
       <div>
         <h1 class="logo">RUG<span>D</span></h1>
-        <div class="sticker">dev is definitely not rugging this one™</div>
+        <div class="sticker" id="tagline">dev is definitely not rugging this one™</div>
         <label class="field">YOUR DEGEN NAME<input id="nameIn" maxlength="16" autocomplete="off" spellcheck="false"></label>
         <div class="mbtns">
           <button class="btn" id="soloBtn">PLAY VS 9 BOTS<small>playtest mode</small></button>
           <button class="btn alt" id="hostBtn">HOST ONLINE ROOM<small>up to 10 degens</small></button>
           <div class="joinrow"><input id="codeIn" maxlength="4" placeholder="CODE" autocomplete="off" spellcheck="false"><button class="btn ghost" id="joinBtn">JOIN</button></div>
           <div class="netnote" id="netNote"></div>
+          <div class="live" id="liveStat"></div>
         </div>
       </div>
       <div class="how">
@@ -403,7 +453,7 @@ table.st tr.me td{background:rgba(255,236,0,.6)}
             </div>
             <div class="monscreen"><canvas id="chart"></canvas><div class="pxbox"><span id="price"></span><span id="chg"></span><span id="mcap"></span></div><div id="chartMsg"></div><div id="peek"></div></div>
           </div>
-          <div class="chin"><span id="myState">—</span><span class="brand">RUGBOOK PRO</span></div>
+          <div class="chin"><span id="myState">—</span><span id="quip"></span><span class="brand">RUGBOOK PRO</span></div>
         </div>
         <div class="stand"></div>
       </div>
@@ -415,7 +465,6 @@ table.st tr.me td{background:rgba(255,236,0,.6)}
     </div>
     <div id="deskRow">
       <div class="props"><div class="can">DEGEN FUEL</div><div class="mug">GM</div></div>
-      <div id="quip"></div>
       <div class="tray" id="btns">
         <button class="big" id="buyBtn">BUY<small>APE IN · B</small></button>
         <button class="big" id="sellBtn">SELL<small>JEET · S</small></button>
@@ -495,16 +544,22 @@ const RUGD = (() => {
   const PRE = ['BABY', 'TURBO', 'GIGA', 'SAFE', 'MEGA', 'BASED', 'SUPER', 'DEGEN', 'ULTRA', 'LIL', 'BIG', 'ROYAL', 'FAT', 'ANGRY', 'DRUNK', 'HAIRY', 'WET', 'SPICY', 'SAD', 'HORNY',
     'TINY', 'MOIST', 'FERAL', 'CURSED', 'THICC', 'SNEAKY', 'HUNGRY', 'CRISPY', 'SOGGY', 'GOLDEN', 'STINKY', 'SLEEPY', 'SMELLY', 'LUMPY', 'CHUNKY', 'SAUCY',
     'RABID', 'COSMIC', 'QUANTUM', 'NAKED', 'DIRTY', 'ANCIENT', 'BALD', 'SWEATY', 'HYPER', 'OMEGA', 'SIGMA', 'ALPHA', 'GREASY', 'HAUNTED', 'LOUD', 'FRISKY',
-    'SAVAGE', 'WOKE', 'UNHINGED', 'DEFINITELY NOT A', 'OFFICIAL', 'REAL', 'MOTHER', 'DADDY', 'GRANDMA'];
+    'SAVAGE', 'WOKE', 'UNHINGED', 'DEFINITELY NOT A', 'OFFICIAL', 'REAL', 'MOTHER', 'DADDY', 'GRANDMA',
+    'NAUGHTY', 'KINKY', 'SPANKED', 'WRINKLY', 'STICKY', 'THROBBING', 'LUBED', 'SWOLLEN', 'CHAFED', 'CRUSTY', 'JUICY', 'STEPBRO', 'SUSSY', 'HUNG',
+    'FREAKY', 'THIRSTY', 'NASTY', 'FILTHY', 'BUSTED', 'LIMP', 'ITCHY', 'RASH', 'SLOPPY'];
   const MID = ['FART', 'SHIT', 'BUTT', 'TURD', 'PISS', 'NUTS', 'GOBLIN', 'FROG', 'HAMSTER', 'POOP', 'BOOGER', 'DUMPSTER', 'WIENER', 'TOOT', 'CRAP', 'SKUNK', 'RAT', 'JORTS', 'TAINT', 'GREMLIN',
     'GOOSE', 'BEAVER', 'BURRITO', 'NUGGET', 'WEASEL', 'PICKLE', 'RACCOON', 'PIGEON', 'MULLET', 'DIAPER', 'CHEETO', 'SHART', 'CABBAGE', 'DINGLEBERRY', 'DOOKIE',
     'LLAMA', 'POSSUM', 'BURP', 'SOCK', 'TOENAIL', 'MEATBALL', 'HOTDOG', 'TROLL', 'CLOWN', 'BANANA', 'BEANS', 'TACO', 'DONKEY', 'GRAVY', 'TURTLE', 'WAFFLE',
     'TOILET', 'GOAT', 'SHRIMP', 'CHIHUAHUA', 'MOOSE', 'BIGFOOT', 'UNICORN', 'BALLSACK', 'NIPPLE', 'SPERM WHALE', 'COCKROACH', 'MAYO', 'KEBAB', 'SAUSAGE', 'BOOMER',
-    'KAREN', 'LANDLORD', 'DENTIST', 'PLUMBER', 'JANITOR', 'RUG', 'JEET', 'BAGHOLDER', 'LAMBO', 'WIFE', 'BOYFRIEND', 'DEV'];
+    'KAREN', 'LANDLORD', 'DENTIST', 'PLUMBER', 'JANITOR', 'RUG', 'JEET', 'BAGHOLDER', 'LAMBO', 'WIFE', 'BOYFRIEND', 'DEV',
+    'DONG', 'WANG', 'SCHLONG', 'BOOTY', 'CHEEKS', 'BUTTPLUG', 'NUTSACK', 'BOOBIES', 'THONG', 'SKIDMARK', 'QUEEF', 'TWERK', 'DILDO', 'PEEPEE', 'POOPOO',
+    'TESTICLE', 'UNDIES', 'BIDET', 'HEMORRHOID', 'SPHINCTER', 'BONER', 'TITTY', 'BEAVER', 'TAINTSTICK', 'NIPSLIP', 'WEDGIE', 'MANGINA', 'BALLSWEAT'];
   const SUF = ['INU', 'COIN', 'AI', 'MOON', 'X', '69', '420', '2.0', 'ROCKET', 'GPT', 'DAO', 'CASH', 'TOKEN', 'MAXXING', 'CHAIN', 'PUMP', 'WIF HAT', 'CLASSIC', 'ON SOL',
     'ZILLA', 'VERSE', 'SWAP', 'FI', 'ONCHAIN', 'PRO MAX', '2049', '9000', 'LAUNCH', 'CULT', 'INU 2.0', 'KING', 'LORD', 'HUB', 'CORE', 'ETF', 'V2', 'BET',
     'NETWORK', 'PROTOCOL', 'FINANCE', 'CAPITAL', 'RESERVE', 'MAFIA', 'ARMY', 'GANG', 'SQUAD', 'OF WALL STREET', 'IN A HAT', 'WITH LASER EYES', 'ON STEROIDS',
-    'BUT ANGRY', 'ULTRA EDITION', 'TO THE MOON', 'FOREVER', 'REBORN', 'RETURNS', 'STRIKES BACK', 'DELUXE', 'EXTRA CRISPY', 'TREASURY', 'BANK', 'LABS'];
+    'BUT ANGRY', 'ULTRA EDITION', 'TO THE MOON', 'FOREVER', 'REBORN', 'RETURNS', 'STRIKES BACK', 'DELUXE', 'EXTRA CRISPY', 'TREASURY', 'BANK', 'LABS',
+    'GONE WILD', 'AFTER DARK', 'XXX', 'UNCUT', 'FULL MOON', 'IN THE BUTT', 'HAPPY ENDING', 'NO LUBE', 'RAW', 'BEHIND THE DUMPSTER', 'FOR ADULTS',
+    'LOVE CHAIN', 'STIMULUS', 'EXTENDED CUT', 'DIRECTOR\'S CUT', 'UNRATED', 'SPECIAL MASSAGE', 'AT 3AM', 'IN YOUR MOM'];
   function coin(rand) {
     const pk = a => a[Math.floor(rand() * a.length)];
     const a = rand() < 0.6 ? pk(PRE) : '', b = pk(MID), c = pk(SUF);
@@ -847,6 +902,105 @@ const BOT_NAMES = ['PaperHandsPete', 'ExitLiquidity', 'WenLambo', 'RugPullRick',
   'LadderTopLarry', 'JeetJerry', 'DegenDiane', 'Wassie420', 'PumpItPaul', 'CrabbyCarl', 'SnipeBot9000', 'DiamondDick', 'MoonBoyMarco', 'SolanaSusan',
   'HopiumHarry', 'RektRandy', 'BullTrapBetty', 'SlippageSam', 'CopiumCarla', 'DumpTruckDan', 'GigaBrainGreg', 'HodlHannah', 'PonziPatty', 'AlphaLeakAl',
   'BottomBuyerBo', 'TxFailTina', 'ChartGazerChad', 'GreenCandleGina', 'LiquidatedLou', 'SatoshiNakaNOPE', 'FrogFlipFrank', 'WhaleWannabe', 'ShillShawn', 'MintMaxine'];
+// even more filth, merged into TXT. Templates use {n} (a player's name), {s} (seconds) or {k} (a number).
+const MORE = {
+  rug: [
+    "The dev pulled out. You did not.", "You got screwed without even getting dinner first.", "That rug pull was faster than your last relationship.",
+    "You got fucked raw by a smart contract.", "Dev finished in 20 seconds and left. Classic.", "No lube, no warning, no liquidity.",
+    "Bent over by a coin named after a body part.", "Your wallet just got railed.", "That's what you get for going in without protection.",
+    "You held it too long and now it's limp.", "The chart went soft at the worst possible moment.", "Dev ghosted you harder than your last Tinder match.",
+    "You got pumped, dumped and left on read.", "The dev came, saw, and cashed out.", "Your bags are emptier than the dev's promises.",
+    "Even your wife's boyfriend is embarrassed for you.", "You trusted a coin with 'BUTT' in the name. That's on you.",
+    "That's not a dip, that's a fucking sinkhole with your name on it.", "Dev said 'just the tip'. It was everything.",
+    "You got rugged so hard your ancestors felt it.", "Dev blew his load and your savings at the same time.",
+    "Congrats, you just got financially pegged.", "The dev gave you the full experience. No refunds.", "That was a hit and run. You were the hit."
+  ],
+  survive: [
+    "No rug. The dev couldn't get it up this round.", "Dev went limp at the last second. You lived.", "Rug-free round. Practice safe trading, kids.",
+    "The dev pulled out early. For once that's good news.", "No rug this time. The dev is edging you.", "You survived. The dev is just saving his load for later."
+  ],
+  final: [
+    "Winner, buy yourself something nice. Like a personality.", "GG. Wipe yourself off and run it back.", "That was quicker than the dev's last relationship.",
+    "Somebody hose down the trading floor.", "Everybody got screwed, some just enjoyed it more."
+  ],
+  launch: [
+    "Dev promises it's 'just the tip' of the roadmap.", "Comes with zero lube and maximum friction.", "Marketing: the dev's nudes (of his Lambo).",
+    "Fully doxxed: the dev's Tinder bio is the whitepaper.", "LP locked in the dev's mom's basement next to his body pillow.", "Rated NSFW: Not Safe For Wallets."
+  ],
+  facts: [
+    ["STAMINA", "30 seconds, like the dev"], ["SIZE", "'above average' (dev's words)"], ["PERFORMANCE", "finishes early"], ["SAFE WORD", "'rug'"],
+    ["FOREPLAY", "none, straight to the pump"], ["PROTECTION", "none, raw-dogging the blockchain"], ["POSITION", "dev on top, you on bottom"],
+    ["EXIT STRATEGY", "pulls out early"], ["CLIMAX", "about 20 seconds in"], ["TARGET AUDIENCE", "lonely men at 3am"], ["TOP HOLDER", "the dev's stepbro"],
+    ["DEV'S WIFE", "left him for a whale"], ["DEV'S GIRLFRIEND", "lives in Canada"], ["LP LOCKED", "in the dev's mom's basement"],
+    ["TOKENOMICS", "69% dev, 31% vibes"], ["LIQUIDITY", "shallower than the dev"], ["CHART", "rock hard (for now)"], ["GIRTH", "impressive, for a shitcoin"],
+    ["LUBE", "not included"], ["KINK", "watching you lose money"], ["TURN-ONS", "volume and bag holders"], ["TURN-OFFS", "people who read contracts"],
+    ["RELATIONSHIP STATUS", "married to the bag"], ["BODY COUNT", "4,200 wallets"], ["PULL-OUT GAME", "legendary"], ["HARD CAP", "the only hard thing here"],
+    ["SOFT RUG", "for beginners"], ["HARD RUG", "for you"], ["TELEGRAM", "moaning, nonstop"], ["NSFW", "Not Safe For Wallets"],
+    ["DEV'S HOBBIES", "rugging, gym, lying"], ["AFTERCARE", "none. you're on your own."], ["KYC", "Kinda Yolo, Chief"], ["DAO", "Dev Always Owns"],
+    ["APR", "Absolutely Pure Robbery"], ["NFA", "Not Fucking Accountable"], ["DYOR", "Dev Yanks Our Reserves"], ["HODL", "Hold On, Dev's Leaving"],
+    ["FOMO", "Fuck Off, Money's Ours"], ["SAFU", "Seriously Awful, Fully Unsafe"], ["ICO", "I Cash Out"], ["LP", "Lol, Pulled"],
+    ["ROI", "Rug Obviously Imminent"], ["TVL", "Totally Vanishing Liquidity"], ["DEFI", "Dev's Enormous Financial Incentive"], ["GM", "Get Mugged"]
+  ],
+  launchBanner: [
+    "🍆 THE DEV IS BACK AT IT 🍆", "💦 FRESH SHITCOIN, STILL WET 💦", "🔞 NSFW: NOT SAFE FOR WALLETS 🔞", "⚠ CONTAINS 0% LUBE ⚠",
+    "🍑 BUTT-BASED TOKEN JUST DROPPED 🍑", "🧻 DEV JUST TOOK A FRESH ONE 🧻"
+  ],
+  rugYou: ["YOU GOT FUCKED RAW.", "THE DEV PULLED OUT. YOU DIDN'T.", "YOU GOT BENT OVER BY A SHITCOIN.", "NO LUBE. NO MERCY. NO MONEY.", "YOU GOT FINANCIALLY PEGGED."],
+  rugSafe: ["YOU PULLED OUT IN TIME. RESPONSIBLE.", "PROTECTION WORKS, KIDS.", "YOU DIDN'T GET SCREWED. TODAY.", "ABSTINENCE PAYS OFF."],
+  champ: ["BIG DICK ENERGY OF THE TRENCHES", "LORD OF THE PUMP AND DUMP", "THE DEGEN DADDY", "CERTIFIED PROFIT DADDY", "THE ONE WHO PULLED OUT IN TIME"],
+  loser: ["bent over and broke", "the dev's bitch this game", "donated their whole ass", "got pumped and dumped (literally)", "raw-dogged by the blockchain"],
+  pumpChat: ["this chart is giving me a semi", "green dildos all the way up", "the chart is throbbing boys", "I'm moaning rn", "harder daddy",
+    "chart so hard it could cut glass", "I just nutted", "bullish and horny", "pump it harder", "my portfolio is erect", "better than porn honestly",
+    "god candle got me feeling things"],
+  dumpChat: ["the chart went limp", "who pulled out early??", "red dildo straight up my portfolio", "I've been bent over", "worse than my divorce",
+    "this is erectile dysfunction in chart form", "dev blue-balled us", "no lube on this dip"],
+  rugChat: ["I got fucked without the kiss", "dev didn't even buy me dinner", "I've been violated", "raw-dogged by the blockchain", "I'm sore",
+    "last time I trust a coin named after a butt"],
+  holdQuip: ["you're in deep. like, real deep.", "hold it… hold it… don't finish early.", "grip it firmly. not too firmly.", "you're pregnant with bags now."],
+  cashQuip: ["pulled out. smart boy.", "abstinence: 100% rug-proof.", "keeping it in your pants. respect.", "edging the buy button, huh?"],
+  alreadyIn: ["You're already in. All the way in. Balls deep.", "Can't stick it in twice, champ."],
+  noBag: ["You pulled out already, relax.", "Nothing left to blow, big guy."],
+  // new spots
+  tagline: [
+    "dev is definitely not rugging this one™", "where your money goes to die (fake money, relax)", "not financial advice. barely a game.",
+    "buy high, sell low, cry often", "100% rug-free* (*not really)", "the only exit liquidity is you", "shitcoins. degenerates. violence.",
+    "pump it, dump it, rug it, cry", "WAGMI (statistically, no)", "your wife's boyfriend plays this", "harder than your last pump",
+    "finishes in 90 seconds. like the dev.", "come for the gains, stay for the trauma", "rated R for rug", "pull out before the dev does",
+    "it's not gambling if it's fake money", "ape in. jeet out. repeat.", "audited by nobody, sponsored by nobody", "where diamond hands go to die",
+    "now with 69% more rug", "sell before it goes limp", "the trenches are calling, dumbass", "may contain traces of hopium",
+    "built different (built to rug)", "certified bag holder training", "GM. you're about to get rugged.", "for entertainment and emotional damage",
+    "no lube. no refunds. no mercy.", "like Wall Street but dumber and hornier", "the dev has your number"
+  ],
+  liveStat: ["🔴 LIVE: {k} degens getting rugged right now", "🔥 {k} wallets drained in the last hour", "💀 {k} bags held to zero today",
+    "🚀 {k} coins launched this minute (all rugs)", "🍆 {k} devs pulling out as we speak", "🧻 {k} paper hands folded today"],
+  lobbyWait: [
+    "waiting for the host to start the pump…", "host is checking the contract (he isn't)…", "host is stretching his paper hands…",
+    "the dev is warming up the rug…", "host went to get a Monster Energy…", "loading liquidity (and lube)…", "host is googling 'what is a rug pull'…",
+    "waiting for the host to grow a pair and hit start…", "host is updating his LinkedIn to 'crypto founder'…", "the bots are getting horny for volatility…",
+    "host is sending his rent to a hot wallet…", "waiting on the host. classic jeet behavior.", "host is reading the whitepaper (napkin)…",
+    "stretch your fingers, degen…", "host is choosing violence. please hold."
+  ],
+  nextIn: ["next shitcoin launches in {s}…", "dev is deploying another scam in {s}…", "new bag to hold in {s}…", "reloading the hopium in {s}…",
+    "the next rug is being woven… {s}", "cleaning the blood off the chart… {s}", "fresh liquidity (victims) in {s}…", "dev's alt account launches in {s}…",
+    "next pump & dump in {s}…", "lube up. next coin in {s}…"],
+  finalIn: ["final standings in {s}…", "counting the bodies… {s}", "calculating who's NGMI… {s}", "tallying the damage… {s}"],
+  spectate: ["you'll get a seat next game", "spectating. no bag, no balls.", "watching other people lose money. relaxing.", "popcorn mode: on"],
+  roastBuy: ["{n} just aped in. top signal 📉", "lmao {n} bought the top", "{n} with the diamond hands, let's see how long", "{n} you're my exit liquidity, thanks bby",
+    "{n} bought?? oh it's going to zero", "welcome to the bag, {n}", "{n} paid full price, couldn't be me", "{n} just bent over for the dev",
+    "{n} aping like rent isn't due", "{n} went in without protection", "bless {n}'s heart", "{n} is the reason charts go down",
+    "{n} bought with his wife's boyfriend's money", "nice entry {n} (it's not)", "{n} buys like he's got a death wish", "{n} full port. absolute madman",
+    "someone tell {n} about stop losses", "{n} just bought my bags, ty king", "{n} you sweet summer child", "{n} going in raw 😳"],
+  roastSell: ["{n} paper-handed lmaooo", "{n} jeeted. typical.", "bye {n}, enjoy your scraps", "{n} sold the bottom, legend", "{n} pulled out early. again.",
+    "{n} couldn't handle the heat", "scared money don't make money, {n}", "{n} jeeted like a little bitch", "{n} just finished early. awkward.",
+    "{n} with the tissue paper hands", "{n} cashed out to buy nuggets", "{n} sold and now it'll pump, lol", "smells like fear in here, {n}",
+    "{n} you'll be back. they always come back.", "{n} jeet of the year nominee", "{n} sold?? ngmi"],
+  roastRug: ["{n} GOT RUGGED HAHAHAHA", "rip {n}'s bag 💀", "{n} held to zero. iconic.", "{n} you absolute bag holder", "F for {n}",
+    "{n} just donated to the dev's Lambo fund", "{n} got fucked raw by the dev", "pour one out for {n}", "{n} diamond hands to dust",
+    "{n} should've jeeted lol", "{n} is a long term holder now", "{n} got rugged harder than his last relationship", "someone check on {n}",
+    "{n} just learned what a rug is", "{n} bent over and the dev said thanks"]
+};
+for (const k in MORE) TXT[k] = (TXT[k] || []).concat(MORE[k]);
+const fill = (t, o) => t.replace(/\{(\w)\}/g, (m, c) => (o[c] != null ? o[c] : m));
 const COLORS = ['#16a34a', '#e11d48', '#d97706', '#2563eb', '#9333ea', '#ea580c', '#0d9488', '#db2777', '#65a30d', '#1f2937'];
 const INTRO_MS = 4200, RUG_MS = 5600, RESULTS_MS = 7500;
 
@@ -976,9 +1130,15 @@ function hostTrade(id, side, kReq) {
   const p = G.players.find(q => q.id === id); if (!p) return false;
   const R = G.R; let k = Math.round(+kReq); if (!isFinite(k)) k = R.k;
   k = Math.max(R.k - 8, Math.min(R.k, k)); // honour a click up to 400 ms old (network lag), never a future price
-  if (side === 'b') return RUGD.buy(p, R.path[k], k);
-  if (side === 's') return RUGD.sell(p, R.path[k], k);
-  return false;
+  const ok = side === 'b' ? RUGD.buy(p, R.path[k], k) : side === 's' ? RUGD.sell(p, R.path[k], k) : false;
+  if (ok && !p.bot) roast(side === 'b' ? 'roastBuy' : 'roastSell', p, 0.35);
+  return ok;
+}
+// bots dunk on humans by name in the trollbox
+function roast(key, p, chance) {
+  if (!G || Math.random() > chance || (G.roastAt || 0) > G.R.k) return;
+  const bots = G.players.filter(q => q.bot); if (!bots.length) return;
+  say(pick(bots), fill(line(key), { n: p.name })); G.roastAt = G.R.k + 24;
 }
 function hostRug(now) {
   const R = G.R, price = R.path[R.k], holders = [];
@@ -987,7 +1147,7 @@ function hostRug(now) {
   settle();
   sys(`🚨 LIQUIDITY REMOVED. ${R.coin.tick} IS DEAD.`, 'rug');
   let said = 0;
-  holders.forEach(([p, v]) => { if (!p.bot) sys(`💀 ${p.name} got rugged holding $${money(v)}`, 'rug'); else if (said++ < 4) say(p, line('rugChat')); });
+  holders.forEach(([p, v]) => { if (!p.bot) { sys(`💀 ${p.name} got rugged holding $${money(v)}`, 'rug'); G.roastAt = 0; roast('roastRug', p, 0.9); } else if (said++ < 4) say(p, line('rugChat')); });
   if (!holders.length) sys('Nobody was holding. The dev rugged an empty room. Sad.', 'rug');
   G.res = roundRes(true);
   G.ph = 'rugged'; G.phEnd = now + RUG_MS;
@@ -1182,6 +1342,7 @@ function resetUI() { Object.assign(UI, { ph: '', gen: -1, rn: -1, ys: null, chat
 function showView(v) {
   if (UI.view === v) return; UI.view = v;
   ['menu', 'lobby', 'game'].forEach(n => { $('#' + n).hidden = n !== v; });
+  $('#screen').classList.toggle('ingame', v === 'game');
   $('#quitBtn').hidden = v === 'menu';
 }
 function toMenu() { $('#screen').classList.remove('ngmi'); MODE = 'menu'; G = null; V = null; resetUI(); showView('menu'); renderMenuNet(); }
@@ -1376,7 +1537,7 @@ function renderChat() {
 function renderDock(k, path, now) {
   const me = myP(), buy = $('#buyBtn'), sell = $('#sellBtn');
   if (!me) {
-    $('#myState').textContent = '👀 SPECTATING'; $('#quip').textContent = "you'll get a seat next game";
+    $('#myState').textContent = '👀 SPECTATING'; if (UI.quipState !== 'spec') { UI.quipState = 'spec'; $('#quip').textContent = line('spectate'); }
     $('#myRound').textContent = '—'; $('#myTotal').textContent = '—'; $('#myValue').textContent = '$—';
     buy.classList.add('off'); sell.classList.add('off'); return;
   }
@@ -1426,6 +1587,7 @@ function onPhase(ph, now) {
       `<div class="sub">${esc(res.line)}</div>` + (top ? `<div class="mvp">ROUND MVP: <span style="color:${okColor(top.c)}">${esc(top.n)}</span> ${smoney(top.r)}</div>` : '') +
       standings(res.rows, true) + `<div class="nextin" id="nextIn"></div></div>`;
     if (!res.rugged) SFX.bell();
+    UI.nextTpl = line(V.rn < 2 ? 'nextIn' : 'finalIn');
   } else if (ph === 'final') renderFinal();
 }
 function standings(rows, round) {
@@ -1452,7 +1614,7 @@ function overlayTick(now) {
     const s = Math.max(1, Math.ceil(phaseLeft(now) / 1000) - 1), el = $('#cd');
     if (el && s !== UI.cdLast) { UI.cdLast = s; el.textContent = s <= 3 ? s : 'GET READY'; el.classList.remove('cdp'); void el.offsetWidth; el.classList.add('cdp'); if (s <= 3) SFX.beep(false); }
   } else if (V.ph === 'results') {
-    const el = $('#nextIn'); if (el) { const s = Math.max(0, Math.ceil(phaseLeft(now) / 1000)); el.textContent = V.rn < 2 ? `next shitcoin launches in ${s}…` : `final standings in ${s}…`; }
+    const el = $('#nextIn'); if (el) { const s = Math.max(0, Math.ceil(phaseLeft(now) / 1000)); el.textContent = fill(UI.nextTpl || '{s}…', { s }); }
   }
 }
 
@@ -1479,7 +1641,7 @@ function renderLobby() {
   $('#seats').innerHTML = seats.join('');
   $('#hostRow').hidden = !host; $('#guestRow').hidden = host;
   $('#fillBots').checked = NET.fill;
-  $('#lobbyWait').textContent = `waiting for the host to start the pump… (${fill ? 'empty seats get bots' : 'no bots'})`;
+  $('#lobbyWait').textContent = `${line('lobbyWait')} (${fill ? 'empty seats get bots' : 'no bots'})`;
 }
 /* ---------- input ---------- */
 $('#nameIn').value = store.get('rugd.name', '') || 'degen' + (100 + Math.floor(Math.random() * 900));
@@ -1540,6 +1702,56 @@ addEventListener('keydown', e => {
 });
 function flashBtn(sel) { const b = $(sel); b.classList.add('press'); setTimeout(() => b.classList.remove('press'), 110); }
 
+/* ---------- title screen backdrop ---------- */
+// A fake chart pumps across the screen behind the menu and sometimes gets rugged.
+const MB = { cv: $('#menuChart'), path: null, rug: -1, t0: 0, w: 0, h: 0, lo: 0, hi: 0 };
+function mbNew(now) {
+  MB.path = RUGD.pricePath((Math.random() * 4294967296) >>> 0); MB.t0 = now;
+  MB.rug = Math.random() < 0.45 ? RUGD.pickRugTick(MB.path, Math.random) : -1;
+  let lo = Infinity, hi = 0; for (const v of MB.path) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+  MB.lo = Math.log(lo) - 0.2; MB.hi = Math.log(hi) + 0.2;
+}
+function menuBgFrame(now) {
+  const cv = MB.cv, d = Math.min(1.5, window.devicePixelRatio || 1), r = cv.getBoundingClientRect();
+  const w = Math.round(r.width * d), h = Math.round(r.height * d);
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  if (!MB.path) mbNew(now);
+  const c = cv.getContext('2d'), k = Math.min(RUGD.ROUND_TICKS, Math.floor((now - MB.t0) / 22));
+  const end = MB.rug >= 0 ? Math.min(k, MB.rug) : k, hold = MB.rug >= 0 && k >= MB.rug;
+  c.clearRect(0, 0, w, h);
+  const X = t => t / RUGD.ROUND_TICKS * w, Y = v => h * 0.12 + (1 - (Math.log(v) - MB.lo) / (MB.hi - MB.lo)) * h * 0.55;
+  const up = MB.path[end] >= 1, col = up ? '#4dff9a' : '#ff4f6e';
+  c.lineWidth = 5 * d; c.lineJoin = 'round'; c.strokeStyle = col; c.shadowColor = col; c.shadowBlur = 24 * d; c.globalAlpha = 0.8;
+  c.beginPath(); c.moveTo(0, Y(MB.path[0])); for (let i = 1; i <= end; i++) c.lineTo(X(i), Y(MB.path[i])); c.stroke();
+  c.beginPath(); c.arc(X(end), Y(MB.path[end]), 9 * d, 0, 7); c.fillStyle = '#fff'; c.fill();
+  if (hold) {
+    const x = X(MB.rug), y = Y(MB.path[MB.rug]);
+    c.strokeStyle = '#ff2b3d'; c.shadowColor = '#ff2b3d'; c.lineWidth = 8 * d;
+    c.beginPath(); c.moveTo(x, y); c.lineTo(x + 6 * d, h + 20); c.stroke();
+    c.shadowBlur = 0; c.globalAlpha = Math.min(0.9, (k - MB.rug) / 20);
+    c.font = `${Math.round(h * 0.16)}px "Lilita One", Impact, sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.lineWidth = 12 * d; c.strokeStyle = '#000'; c.strokeText('RUGGED', w / 2, h * 0.45); c.fillStyle = '#ff2b3d'; c.fillText('RUGGED', w / 2, h * 0.45);
+    if (k - MB.rug > 70) mbNew(now);
+  } else if (k >= RUGD.ROUND_TICKS) mbNew(now);
+  c.globalAlpha = 1; c.shadowBlur = 0;
+}
+// scrolling ticker tapes and falling junk
+(function buildBackdrop() {
+  const item = () => {
+    const c = RUGD.coin(Math.random), r = Math.random();
+    const ch = r < 0.18 ? '<span class="d">RUGGED 💀</span>' : r < 0.55 ? `<span class="d">-${(Math.random() * 99).toFixed(1)}%</span>` : `<span class="u">+${(Math.random() * Math.random() * 9000).toFixed(1)}% ${pick(['🚀', '🌕', '🍆', '💦', '📈', '🔥'])}</span>`;
+    return `<span><b>${esc(c.tick)}</b> ${ch}</span>`;
+  };
+  ['#tapeTop', '#tapeBot'].forEach(id => { const one = Array.from({ length: 18 }, item).join(''); $(id).innerHTML = one + one; });
+  const junk = ['💸', '🚀', '💀', '💩', '🪙', '🐸', '🌕', '🧻', '🍆', '💦', '🍑', '📉', '📈', '💎', '🤡'];
+  $('#rain').innerHTML = Array.from({ length: 22 }, () => `<i style="left:${(Math.random() * 100).toFixed(1)}%;font-size:${20 + Math.random() * 26 | 0}px;animation-duration:${7 + Math.random() * 9}s;animation-delay:-${(Math.random() * 16).toFixed(1)}s;--rot:${(Math.random() * 720 - 360) | 0}deg">${pick(junk)}</i>`).join('');
+})();
+setInterval(() => {
+  if (UI.view === 'menu') { const t = $('#tagline'); t.textContent = line('tagline'); t.classList.remove('flip'); void t.offsetWidth; t.classList.add('flip'); }
+  if (UI.view === 'lobby' && NET.role === 'guest') UI.lobbyKey = '';
+}, 3400);
+setInterval(() => { if (UI.view === 'menu') $('#liveStat').textContent = fill(line('liveStat'), { k: (1000 + Math.random() * 9000 | 0).toLocaleString('en-US') }); }, 2200);
+
 /* ================= main loop ================= */
 function sendSnap(now) {
   if (MODE === 'online' && NET.role === 'host' && NET.room && now - NET.sentAt >= 50) {
@@ -1562,6 +1774,7 @@ function frame(now) {
     if (G) { hostStep(now); V = buildSnap(now); V._at = now; }
     else if (MODE === 'online' && NET.role === 'host') V = buildSnap(now);
     sendSnap(now);
+    if (UI.view === 'menu' || UI.view === 'lobby') menuBgFrame(now);
     if (MODE === 'online' && NET.role === 'guest') {
       const since = NET.hostSeen ? now - NET.hostSeen : now - NET.joinedAt;
       if (since > 9000) netLeave(NET.hostSeen ? 'The host left. The whole room got rugged.' : 'No room with that code (or the host is asleep).');
@@ -1573,7 +1786,7 @@ function frame(now) {
 // keep the match running when the host's tab is in the background
 setInterval(() => { if (document.hidden) { const now = performance.now(); if (G) hostStep(now); sendSnap(now); } }, 100);
 SFX.setMute(SFX.muted);
-renderMenuNet();
+renderMenuNet(); showView('menu'); $('#liveStat').textContent = fill(line('liveStat'), { k: '4,269' });
 requestAnimationFrame(frame);
 </script>
 </body>
