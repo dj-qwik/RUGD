@@ -1090,6 +1090,14 @@ function forcedPlan() {
   const m = /[?&]rug=([01]{3})/.exec(location.search || '');
   return MODE === 'solo' && m ? m[1].split('').map(c => c === '1') : null;
 }
+// The trollbox never goes quiet: bots talk when there are bots, and fake Telegram lurkers
+// (names not seated in the game) fill in the rest, so human-only rooms feel the same as bot games.
+const LURK_COLORS = ['#64748b', '#0891b2', '#7c3aed', '#be185d', '#15803d', '#b45309', '#4338ca'];
+function speaker(not) {
+  const bots = G.players.filter(q => q.bot && q !== not);
+  if (bots.length && Math.random() < Math.min(0.85, bots.length / 6)) return pick(bots);
+  return G.lurkers.length ? pick(G.lurkers) : null;
+}
 function hostNewGame(humans, fill) {
   const players = humans.slice(0, RUGD.SEATS).map((h, i) => RUGD.player(h.id, h.name, COLORS[i], null));
   if (fill) {
@@ -1097,7 +1105,9 @@ function hostNewGame(humans, fill) {
     for (let n = 0; players.length < RUGD.SEATS; n++) players.push(RUGD.player('bot' + n, names[n], COLORS[players.length], RUGD.makeBot(Math.random, styles[n])));
   }
   G = { gen: (G ? G.gen : (Math.random() * 1e6 | 0)) + 1, ph: 'intro', rn: 0, plan: forcedPlan() || RUGD.rugPlan(Math.random), players,
-    chat: [], chatN: 0, chatCd: 0, res: null, fin: null, rugs: 0, phEnd: performance.now() + INTRO_MS, R: null };
+    chat: [], chatN: 0, chatCd: 0, res: null, fin: null, rugs: 0, phEnd: performance.now() + INTRO_MS, R: null,
+    lurkers: shuffle(BOT_NAMES.filter(n => !players.some(q => q.name === n))).slice(0, 14).map((n, i) => ({ name: n, color: LURK_COLORS[i % LURK_COLORS.length] })),
+    ambAt: 0 };
   hostRound(0);
 }
 function hostRound(rn) {
@@ -1131,14 +1141,17 @@ function hostTrade(id, side, kReq) {
   const R = G.R; let k = Math.round(+kReq); if (!isFinite(k)) k = R.k;
   k = Math.max(R.k - 8, Math.min(R.k, k)); // honour a click up to 400 ms old (network lag), never a future price
   const ok = side === 'b' ? RUGD.buy(p, R.path[k], k) : side === 's' ? RUGD.sell(p, R.path[k], k) : false;
-  if (ok && !p.bot) roast(side === 'b' ? 'roastBuy' : 'roastSell', p, 0.35);
+  if (ok && !p.bot) {
+    if (k - (p.saidAt == null ? -99 : p.saidAt) >= 14) { say(p, line(side === 'b' ? 'buyChat' : 'sellChat')); p.saidAt = k; }
+    roast(side === 'b' ? 'roastBuy' : 'roastSell', p, 0.45);
+  }
   return ok;
 }
 // bots dunk on humans by name in the trollbox
 function roast(key, p, chance) {
   if (!G || Math.random() > chance || (G.roastAt || 0) > G.R.k) return;
-  const bots = G.players.filter(q => q.bot); if (!bots.length) return;
-  say(pick(bots), fill(line(key), { n: p.name })); G.roastAt = G.R.k + 24;
+  const who = speaker(p); if (!who) return;
+  say(who, fill(line(key), { n: p.name })); G.roastAt = G.R.k + 20;
 }
 function hostRug(now) {
   const R = G.R, price = R.path[R.k], holders = [];
@@ -1147,7 +1160,7 @@ function hostRug(now) {
   settle();
   sys(`🚨 LIQUIDITY REMOVED. ${R.coin.tick} IS DEAD.`, 'rug');
   let said = 0;
-  holders.forEach(([p, v]) => { if (!p.bot) { sys(`💀 ${p.name} got rugged holding $${money(v)}`, 'rug'); G.roastAt = 0; roast('roastRug', p, 0.9); } else if (said++ < 4) say(p, line('rugChat')); });
+  holders.forEach(([p, v]) => { if (!p.bot) { say(p, line('rugChat')); sys(`💀 ${p.name} got rugged holding $${money(v)}`, 'rug'); G.roastAt = 0; roast('roastRug', p, 0.9); } else if (said++ < 4) say(p, line('rugChat')); });
   if (!holders.length) sys('Nobody was holding. The dev rugged an empty room. Sad.', 'rug');
   G.res = roundRes(true);
   G.ph = 'rugged'; G.phEnd = now + RUG_MS;
@@ -1156,7 +1169,8 @@ function hostClose(now) {
   const price = G.R.path[RUGD.ROUND_TICKS];
   G.players.forEach(p => { if (p.coins > 0) RUGD.sell(p, price, RUGD.ROUND_TICKS); });
   settle();
-  sys('🔔 Round over, bags auto-sold. ' + line('surviveChat'));
+  sys('🔔 Round over, bags auto-sold.');
+  const who = speaker(); if (who) say(who, line('surviveChat'));
   G.res = roundRes(false); G.ph = 'results'; G.phEnd = now + RESULTS_MS;
 }
 function settle() { G.players.forEach(p => { p.rpnl = p.cash - RUGD.START_CASH; p.total += p.rpnl; }); }
@@ -1181,11 +1195,14 @@ function botsAct(k) {
 function chatter(k) {
   if (k < G.chatCd) return;
   const p = G.R.path, ret = p[k] / p[Math.max(0, k - 30)] - 1;
-  const key = ret > 0.3 ? 'pumpChat' : ret < -0.22 ? 'dumpChat' : Math.random() < 0.004 ? 'crabChat' : null;
+  const fewBots = G.players.filter(q => q.bot).length < 5;
+  let key = ret > 0.3 ? 'pumpChat' : ret < -0.22 ? 'dumpChat' : Math.random() < 0.004 ? 'crabChat' : null;
+  // fewer bots trading = fewer trade lines, so lurkers keep talking about whatever the chart is doing
+  if (!key && fewBots && k >= G.ambAt) { key = ret > 0.06 ? 'pumpChat' : ret < -0.06 ? 'dumpChat' : pick(['crabChat', 'pumpChat', 'dumpChat', 'crabChat']); G.ambAt = k + 26 + (Math.random() * 30 | 0); }
   if (!key) return;
-  const bots = G.players.filter(q => q.bot);
-  if (!bots.length || Math.random() < 0.5) { G.chatCd = k + 10; return; }
-  say(pick(bots), line(key)); G.chatCd = k + 22 + (Math.random() * 20 | 0);
+  if (Math.random() < (fewBots ? 0.2 : 0.5)) { G.chatCd = k + 10; return; }
+  const who = speaker(); if (!who) return;
+  say(who, line(key)); G.chatCd = k + 18 + (Math.random() * 18 | 0);
 }
 const say = (p, text) => pushChat(p.name, p.color, text, '');
 const sys = (text, kind = 'sys') => pushChat('', '', text, kind);
