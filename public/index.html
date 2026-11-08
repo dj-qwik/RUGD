@@ -6,306 +6,400 @@
 <title>RUGD</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%92%80%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=VT323&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Fredoka:wght@400;500;600;700&family=Permanent+Marker&display=swap">
 <style>
-/* Layout: a beige CRT monitor fills the window; everything happens on its green phosphor screen.
-   Game view = ticker header, big chart + leaderboard/trollbox, giant BUY/SELL buttons at the bottom. */
+/* Layout: a cartoon degen office. Wall with night-sky windows behind blinds and a neon sign up top,
+   a whiteboard leaderboard (left), the big black-bezel trading monitor (center), a phone with the
+   coin's Telegram trollbox (right), and a purple desk with chunky 3D BUY/SELL keys on a white tray. */
 :root{
-  --g:#39ff7a; --g2:#19c45a; --gdim:rgba(57,255,122,.35); --r:#ff3d5a; --amber:#ffbf2e;
-  --txt:#c9ffd9; --dim:#6fbf8c; --bez1:#e8e0ca; --bez2:#b8ad93;
-  --term:"VT323",ui-monospace,Menlo,Consolas,monospace;
-  --disp:"Bungee",Impact,"Arial Black",system-ui,sans-serif;
+  --ink:#161616; --wall:#fbefd8; --wall2:#f3dcc0; --desk:#9a7fb8; --desk2:#7f66a0; --yel:#ffee1f; --yel2:#ffc414;
+  --up:#12a150; --dn:#e0193f; --head:#e3edfb; --blue:#1f6fa8; --scr:#7d7d7d;
+  --disp:"Lilita One","Arial Rounded MT Bold",Impact,system-ui,sans-serif;
+  --body:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --mark:"Permanent Marker","Comic Sans MS",cursive;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html,body{height:100%;margin:0;overflow:hidden;color:var(--txt);font-family:var(--term);
-  background:#120d0a radial-gradient(ellipse at 50% 25%,#3b2b1d 0%,#160f0b 60%,#070504 100%);}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--wall);color:var(--ink);font-family:var(--body)}
 button,input{font:inherit;color:inherit}
-#rig{height:100vh;height:100dvh;display:flex;justify-content:center;padding:min(2.2vh,20px) min(2.2vw,24px)}
-#monitor{position:relative;flex:1;max-width:1560px;display:flex;flex-direction:column;
-  background:linear-gradient(160deg,var(--bez1),var(--bez2));border-radius:30px;padding:20px 20px 0;
-  box-shadow:0 30px 70px rgba(0,0,0,.7),inset 0 2px 0 rgba(255,255,255,.75),inset 0 -8px 14px rgba(0,0,0,.25)}
-#screen{position:relative;flex:1;min-height:0;border-radius:22px;overflow:hidden;
-  background:radial-gradient(ellipse at 50% 40%,#0c2516 0%,#04110a 70%,#020805 100%);
-  box-shadow:inset 0 0 0 3px #0a0a0a,inset 0 0 90px rgba(0,0,0,.85),0 0 0 6px #91876f,0 0 0 9px #6c6450}
-#screen::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:60;
-  background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.2) 2px 3px)}
-#screen::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:61;
-  background:radial-gradient(ellipse at 28% 6%,rgba(255,255,255,.08),transparent 38%),
-             radial-gradient(ellipse at 50% 50%,transparent 62%,rgba(0,0,0,.55) 100%)}
-#screen.shake{animation:shake .7s cubic-bezier(.36,.07,.19,.97) both}
-@keyframes shake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(5px,-3px)}30%,50%,70%{transform:translate(-9px,4px) rotate(-.6deg)}40%,60%{transform:translate(9px,-4px) rotate(.6deg)}}
-#bezel{height:48px;display:flex;align-items:center;gap:14px;padding:0 8px;color:#5b533f;user-select:none}
-#bezel .brand{font-family:var(--disp);font-size:17px;letter-spacing:.06em;text-shadow:0 1px 0 rgba(255,255,255,.6)}
-#bezel .model{flex:1;font-size:17px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#bezel button{background:linear-gradient(#d8cfb6,#a99f86);border:2px solid #7d745f;border-radius:8px;padding:2px 10px;
-  font-size:17px;color:#3f392b;cursor:pointer;box-shadow:0 3px 0 #6f6753}
-#bezel button:active{transform:translateY(2px);box-shadow:0 1px 0 #6f6753}
-#bezel .led{width:11px;height:11px;border-radius:50%;background:#43ff6a;box-shadow:0 0 10px #43ff6a,inset 0 -2px 2px rgba(0,0,0,.3)}
+.up{color:var(--up)} .dn{color:var(--dn)}
+.stroke{-webkit-text-stroke:6px var(--ink);paint-order:stroke fill}
 
-.view{position:absolute;inset:0;display:flex;flex-direction:column}
-.glow{text-shadow:0 0 8px currentColor}
-.up{color:var(--g)} .dn{color:var(--r)}
+#screen{position:relative;height:100vh;height:100dvh;overflow:hidden;
+  background:linear-gradient(to bottom,var(--wall) 0%,var(--wall2) 100%)}
+#screen.shake{animation:shake .7s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes shake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(5px,-3px)}30%,50%,70%{transform:translate(-10px,4px) rotate(-.6deg)}40%,60%{transform:translate(10px,-4px) rotate(.6deg)}}
+
+/* ---------- the room ---------- */
+.room{position:absolute;inset:0;pointer-events:none}
+.window{position:absolute;top:0;height:52%;border:14px solid #6d6d6d;border-top:0;box-shadow:inset 0 0 0 4px #565656}
+.w1{left:2%;width:40%} .w2{right:2%;width:46%}
+.sky{position:absolute;inset:0;background:linear-gradient(#0a1633,#243a72 70%,#4b4f8a);overflow:hidden}
+.moon{position:absolute;left:30%;top:16%;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fffbe0,#f6e7a6 60%,#e2cf86);
+  box-shadow:0 0 40px 12px rgba(255,245,190,.45);transition:transform 1.4s cubic-bezier(.6,0,.9,.4)}
+.moon::before,.moon::after{content:"";position:absolute;border-radius:50%;background:rgba(190,170,100,.45)}
+.moon::before{width:18px;height:18px;left:22%;top:50%}.moon::after{width:11px;height:11px;left:58%;top:28%}
+.star{position:absolute;width:3px;height:3px;background:#fff;border-radius:50%;box-shadow:0 0 6px #fff;animation:tw 2s infinite alternate}
+@keyframes tw{to{opacity:.25}}
+.rocket{position:absolute;top:30%;left:-15%;font-size:34px;animation:fly 16s linear infinite}
+@keyframes fly{0%{transform:translate(0,40px) rotate(45deg)}40%,100%{transform:translate(160vw,-60px) rotate(45deg)}}
+.blinds{position:absolute;inset:0;background:repeating-linear-gradient(to bottom,#a9a9a9 0 20px,#959595 20px 25px,transparent 25px 31px)}
+#screen.ngmi .moon{transform:translateY(420%)}
+#screen.ngmi .sky{background:linear-gradient(#200a12,#5a1424 70%,#7d2030)}
+
+/* ---------- shared cartoon pieces ---------- */
+.cardbox{background:#fff;border:5px solid var(--ink);border-radius:28px;box-shadow:0 10px 0 var(--ink),0 30px 60px rgba(30,10,50,.35)}
+.btn{font-family:var(--disp);font-size:24px;padding:12px 18px 10px;border-radius:16px;border:4px solid var(--ink);cursor:pointer;
+  background:var(--yel);color:var(--ink);box-shadow:0 7px 0 var(--ink);text-align:center;letter-spacing:.02em}
+.btn small{display:block;font-family:var(--body);font-weight:600;font-size:15px;opacity:.75;letter-spacing:0}
+.btn:active{transform:translateY(5px);box-shadow:0 2px 0 var(--ink)}
+.btn.alt{background:#4ade80} .btn.ghost{background:#fff}
+.btn:disabled{filter:grayscale(1);opacity:.55;cursor:not-allowed}
+.mini{font-family:var(--disp);font-size:16px;background:#fff;border:3px solid var(--ink);border-radius:12px;padding:4px 12px;cursor:pointer;box-shadow:0 4px 0 var(--ink)}
+.mini:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.sw{width:12px;height:12px;border-radius:4px;flex:none;border:2px solid var(--ink)}
+.bill{width:58px;height:40px;flex:none;filter:drop-shadow(0 3px 0 rgba(0,0,0,.25))}
+
+.view{position:absolute;inset:0;display:flex;flex-direction:column;z-index:2}
 
 /* ---------- menu ---------- */
-#menu{align-items:center;justify-content:center;padding:24px;overflow:auto}
-.menu-in{width:min(860px,100%);display:grid;grid-template-columns:1.1fr .9fr;gap:28px;align-items:center}
-#boot{margin:0 0 6px;font-size:18px;line-height:1.05;color:var(--dim);min-height:5.3em;white-space:pre-wrap}
-.logo{font-family:var(--disp);font-size:clamp(64px,11vw,124px);line-height:.9;margin:0;color:var(--g);
-  text-shadow:0 0 18px rgba(57,255,122,.7),4px 4px 0 #063d1a;letter-spacing:-.02em}
-.logo span{color:var(--r);text-shadow:0 0 18px rgba(255,61,90,.7),4px 4px 0 #3d0610}
-.tagline{font-size:23px;margin:6px 0 18px;color:var(--amber)}
-.field{display:flex;flex-direction:column;gap:4px;margin-bottom:14px;font-size:18px;color:var(--dim)}
-.field input,#codeIn{background:#020d06;border:2px solid var(--g2);color:var(--g);font-size:28px;padding:4px 12px;border-radius:10px;outline:none}
-.field input:focus,#codeIn:focus{border-color:var(--g);box-shadow:0 0 14px rgba(57,255,122,.4)}
-.mbtns{display:flex;flex-direction:column;gap:12px}
-.btn{font-family:var(--disp);font-size:21px;padding:12px 18px;border-radius:14px;border:3px solid #021a0b;cursor:pointer;
-  background:linear-gradient(#5bff98,#14b54e);color:#02160a;box-shadow:0 6px 0 #06501f,0 0 22px rgba(57,255,122,.25);text-align:center}
-.btn small{display:block;font-family:var(--term);font-size:17px;letter-spacing:.06em;opacity:.8}
-.btn:active{transform:translateY(5px);box-shadow:0 1px 0 #06501f}
-.btn.alt{background:linear-gradient(#ffd86b,#e09a12);border-color:#2a1a02;box-shadow:0 6px 0 #6a4405,0 0 22px rgba(255,191,46,.25)}
-.btn.ghost{background:transparent;color:var(--g);border-color:var(--g2);box-shadow:none}
-.btn:disabled{filter:grayscale(1) brightness(.5);cursor:not-allowed}
+#menu,#lobby{align-items:center;justify-content:center;padding:20px;overflow:auto}
+.menu-in{width:min(940px,100%);display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center;padding:28px 30px 32px}
+.logo{font-family:var(--disp);font-size:clamp(76px,12vw,140px);line-height:.85;margin:0;color:var(--yel);-webkit-text-stroke:10px var(--ink);paint-order:stroke fill;
+  text-shadow:0 9px 0 var(--ink);letter-spacing:.01em;transform:rotate(-3deg)}
+.logo span{color:#ff4f6e}
+.sticker{display:inline-block;background:#ff4f6e;color:#fff;font-family:var(--disp);font-size:18px;padding:5px 12px;border:3px solid var(--ink);border-radius:10px;
+  transform:rotate(3deg);margin:14px 0 18px;box-shadow:0 4px 0 var(--ink)}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:14px;font-weight:600;font-size:15px;color:#555}
+.field input,#codeIn{background:#f4f1ff;border:4px solid var(--ink);color:var(--ink);font-family:var(--disp);font-size:26px;padding:6px 14px;border-radius:14px;outline:none}
+.field input:focus,#codeIn:focus{background:#fffbd0}
+.mbtns{display:flex;flex-direction:column;gap:14px}
 .joinrow{display:grid;grid-template-columns:1fr auto;gap:10px}
 #codeIn{text-transform:uppercase;letter-spacing:.3em;text-align:center;min-width:0}
-.how{border:2px solid var(--gdim);border-radius:14px;padding:14px 16px;font-size:20px;line-height:1.15;background:rgba(0,20,8,.5)}
-.how h3{font-family:var(--disp);font-size:15px;margin:0 0 8px;color:var(--amber);letter-spacing:.06em}
+.how{background:#fff59a;border-radius:4px;padding:20px 20px 16px;font-size:18px;line-height:1.25;transform:rotate(2deg);
+  box-shadow:0 14px 24px rgba(0,0,0,.18),inset 0 -30px 40px rgba(255,200,0,.18);position:relative}
+.how::before{content:"";position:absolute;top:-12px;left:42%;width:90px;height:26px;background:rgba(255,255,255,.65);transform:rotate(-4deg);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.how h3{font-family:var(--mark);font-size:22px;margin:0 0 8px;color:#c2185b;font-weight:400}
 .how p{margin:0 0 8px}
-.how kbd{border:1px solid var(--g2);border-radius:4px;padding:0 5px;color:var(--g)}
-.netnote{font-size:17px;color:var(--dim)}
+.how kbd{background:#fff;border:2px solid var(--ink);border-radius:6px;padding:0 5px;font-family:var(--disp);font-size:14px}
+.netnote{font-size:15px;color:#666}
 
-/* ---------- online lobby ---------- */
-#lobby{align-items:center;justify-content:center;padding:24px;overflow:auto}
-.lob{width:min(720px,100%);text-align:center}
-.lob .lbl{font-size:22px;color:var(--dim)}
-#roomCode{font-family:var(--disp);font-size:clamp(56px,10vw,96px);color:var(--amber);letter-spacing:.12em;text-shadow:0 0 18px rgba(255,191,46,.6);line-height:1}
-#seats{list-style:none;padding:0;margin:16px 0;display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;text-align:left;font-size:22px}
-#seats li{border:1px solid var(--gdim);border-radius:8px;padding:3px 10px;display:flex;gap:8px;align-items:center;white-space:nowrap;overflow:hidden}
-#seats li.bot{opacity:.55} #seats li.empty{opacity:.3}
-.sw{width:11px;height:11px;border-radius:3px;flex:none;box-shadow:0 0 6px currentColor}
-.lobrow{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:21px}
+/* ---------- lobby ---------- */
+.lob{width:min(760px,100%);text-align:center;padding:24px 26px 28px}
+.lob .lbl{font-weight:600;color:#666}
+#roomCode{font-family:var(--disp);font-size:clamp(64px,11vw,110px);color:var(--yel);-webkit-text-stroke:9px var(--ink);paint-order:stroke fill;text-shadow:0 7px 0 var(--ink);letter-spacing:.12em;line-height:1.05}
+#seats{list-style:none;padding:0;margin:16px 0;display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;text-align:left;font-size:20px;font-weight:600}
+#seats li{border:3px solid var(--ink);border-radius:12px;padding:5px 12px;display:flex;gap:10px;align-items:center;white-space:nowrap;overflow:hidden;background:#fff}
+#seats li.bot{opacity:.55;border-style:dashed} #seats li.empty{opacity:.35;border-style:dashed}
+.lobrow{display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:12px;font-size:19px;font-weight:600}
 .lobrow label{display:flex;gap:8px;align-items:center;cursor:pointer}
-.lobrow input{width:20px;height:20px;accent-color:#39ff7a}
+.lobrow input{width:22px;height:22px;accent-color:#9a7fb8}
 
-/* ---------- game ---------- */
-#game{padding:12px 14px 14px;gap:10px}
-#hud{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:18px;align-items:center}
-#coinName{font-family:var(--disp);font-size:clamp(18px,2.3vw,30px);color:var(--amber);text-shadow:0 0 12px rgba(255,191,46,.55);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
-#coinSub{font-size:20px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#coinSub b{color:var(--txt);font-weight:400}
-.px{text-align:right;line-height:1}
-#price{font-size:clamp(24px,2.7vw,36px);color:#fff;text-shadow:0 0 10px rgba(255,255,255,.4)}
-#chg{font-family:var(--disp);font-size:clamp(16px,1.6vw,22px)}
-#mcap{font-size:18px;color:var(--dim)}
-.clock{border:2px solid var(--g2);padding:2px 14px 4px;border-radius:12px;text-align:center;min-width:120px;background:rgba(0,30,12,.6)}
-#roundLbl{font-size:18px;color:var(--dim);letter-spacing:.08em}
-#timer{font-family:var(--disp);font-size:clamp(26px,3vw,40px);line-height:1;color:var(--g)}
-#timer.hot{color:var(--r);animation:pulse .5s infinite alternate}
-@keyframes pulse{to{transform:scale(1.08);text-shadow:0 0 16px var(--r)}}
-#main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(230px,300px);gap:12px}
-#chartWrap{position:relative;border:2px solid var(--gdim);border-radius:14px;overflow:hidden;background:rgba(0,22,9,.45)}
-#chart{position:absolute;inset:0;width:100%;height:100%;display:block}
-#chartMsg{position:absolute;left:12px;top:8px;font-size:20px;color:var(--amber)}
-#side{display:flex;flex-direction:column;gap:10px;min-height:0}
-.panel{border:2px solid var(--gdim);border-radius:14px;background:rgba(0,22,9,.45);display:flex;flex-direction:column;min-height:0;overflow:hidden}
-.ph{font-family:var(--disp);font-size:12px;letter-spacing:.1em;padding:6px 10px 5px;background:rgba(57,255,122,.12);color:var(--g)}
-#board{list-style:none;margin:0;padding:4px 6px;font-size:19px;overflow:hidden}
-#board li{display:grid;grid-template-columns:18px 10px minmax(0,1fr) 22px 64px;gap:6px;align-items:center;padding:0 4px;border-radius:5px;line-height:1.12}
-#board li.me{background:rgba(255,191,46,.16);outline:1px solid rgba(255,191,46,.5)}
+/* ---------- game layout ---------- */
+#game{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto}
+#topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:12px 18px 6px;position:relative;z-index:3}
+.tl{display:flex;gap:10px;align-items:center}
+.chip{white-space:nowrap;font-family:var(--disp);font-size:20px;background:#fff;border:4px solid var(--ink);border-radius:14px;padding:4px 14px;box-shadow:0 5px 0 var(--ink)}
+.neon{font-family:var(--disp);font-size:clamp(28px,4vw,52px);letter-spacing:.12em;line-height:1;padding:4px 18px;border-radius:14px;
+  background:rgba(20,8,30,.85);border:4px solid #2a1838;box-shadow:0 6px 0 rgba(0,0,0,.35)}
+.neon span{color:#fff;text-shadow:0 0 6px #ff4fd8,0 0 16px #ff4fd8,0 0 32px #ff2fc0;animation:flick 4s infinite}
+.neon .ng{display:none;color:#fff;text-shadow:0 0 6px #ff2847,0 0 16px #ff2847,0 0 32px #ff0030}
+#screen.ngmi .neon .wa{display:none} #screen.ngmi .neon .ng{display:inline;animation:flick .4s infinite}
+@keyframes flick{0%,18%,22%,62%,64%,100%{opacity:1}20%,63%{opacity:.35}}
+.tr{display:flex;gap:10px;align-items:center;justify-content:flex-end}
+.wallet{display:flex;align-items:center;gap:4px;background:#fff;border:4px solid var(--ink);border-radius:16px;padding:2px 4px 2px 14px;box-shadow:0 5px 0 var(--ink)}
+.wallet .wl{font-size:12px;font-weight:700;color:#777;line-height:1;text-align:right}
+#myTotal{font-family:var(--disp);font-size:clamp(22px,2.4vw,32px);line-height:1}
+
+#mid{display:grid;grid-template-columns:minmax(190px,250px) minmax(0,1fr) minmax(190px,250px);grid-template-rows:minmax(0,1fr);gap:20px;padding:6px 18px 0;min-height:0;position:relative;z-index:2}
+
+/* whiteboard leaderboard */
+.wb{align-self:start;max-height:100%;display:flex;flex-direction:column;background:#fff;border:9px solid #c4c9d1;border-radius:10px;
+  box-shadow:0 8px 0 rgba(0,0,0,.15),inset 0 0 30px rgba(0,0,0,.05);padding:6px 6px 10px;position:relative;margin-top:6px}
+.wb::after{content:"";position:absolute;left:20%;right:20%;bottom:-18px;height:9px;background:#aab0ba;border-radius:0 0 6px 6px}
+.wbh{font-family:var(--mark);font-size:22px;color:#1d4ed8;transform:rotate(-2deg);padding:2px 6px 4px;white-space:nowrap}
+#board{list-style:none;margin:0;padding:0;font-size:16px;font-weight:600;overflow:hidden}
+#board li{display:grid;grid-template-columns:18px 12px minmax(0,1fr) 20px 58px;gap:6px;align-items:center;padding:2px 4px;border-radius:6px;line-height:1.15}
+#board li.me{background:rgba(255,236,0,.7)}
 #board .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#board .nm i{font-style:normal;color:var(--dim);font-size:15px}
-#board .tot{text-align:right}
-#board .rk{color:var(--dim)}
-.tb{flex:1}
-#chat{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:4px 9px;font-size:18px;line-height:1.08}
-#chat .ln{margin-top:2px;word-wrap:break-word}
-#chat .sys{color:var(--amber)} #chat .rug{color:var(--r);text-shadow:0 0 6px rgba(255,61,90,.6)}
-#chatIn{width:100%;background:transparent;border:0;border-top:1px solid var(--gdim);color:var(--txt);font-size:18px;padding:6px 9px;outline:none}
-#dock{display:flex;flex-direction:column;gap:8px}
-#mine{display:grid;grid-template-columns:minmax(0,1.6fr) auto auto;gap:18px;align-items:end;font-size:22px;line-height:1}
-#myState{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#quip{display:block;font-size:17px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stat{text-align:right;white-space:nowrap}
-.stat small{display:block;font-size:15px;color:var(--dim);letter-spacing:.08em}
-#btns{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.big{font-family:var(--disp);font-size:clamp(38px,6.2vw,80px);line-height:.95;padding:12px 10px 10px;border-radius:22px;border:4px solid #021a0b;cursor:pointer;
-  color:#fff;position:relative;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:filter .15s}
-.big small{display:block;font-family:var(--term);font-size:clamp(15px,1.5vw,21px);letter-spacing:.14em;opacity:.9;margin-top:2px;text-shadow:none}
-.buy{background:linear-gradient(#5bff98,#12b44c);box-shadow:0 10px 0 #06501f,0 0 40px rgba(57,255,122,.38);text-shadow:0 3px 0 #06501f}
-.sell{background:linear-gradient(#ff7088,#cf1637);border-color:#2a0610;box-shadow:0 10px 0 #6b0a1d,0 0 40px rgba(255,61,90,.38);text-shadow:0 3px 0 #6b0a1d}
-.big.press,.big:active{transform:translateY(8px)}
-.buy.press,.buy:active{box-shadow:0 2px 0 #06501f,0 0 50px rgba(57,255,122,.6)}
-.sell.press,.sell:active{box-shadow:0 2px 0 #6b0a1d,0 0 50px rgba(255,61,90,.6)}
-.big.off{filter:grayscale(.9) brightness(.42)}
-.big.nope{animation:nope .32s}
-@keyframes nope{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
+#board .tot{text-align:right;font-family:var(--disp);font-weight:400}
+#board .rk{color:#888}
 
-/* overlays */
-.ovl{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(2,12,6,.93);overflow:hidden;padding:18px}
-.card{width:min(820px,100%);text-align:center;position:relative;z-index:2;max-height:100%;overflow:auto}
-.blink{font-family:var(--disp);color:var(--r);font-size:clamp(16px,2vw,22px);animation:blink .5s steps(2) infinite}
-@keyframes blink{50%{opacity:.2}}
-.cname{font-family:var(--disp);font-size:clamp(34px,6vw,72px);color:var(--amber);text-shadow:0 0 22px rgba(255,191,46,.7),4px 4px 0 #3b2502;line-height:1.02;margin:8px 0 2px}
-.ctick{font-size:32px;color:#fff}
-.facts{list-style:none;padding:0;margin:14px auto;display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;max-width:640px;text-align:left;font-size:21px}
-.facts b{color:var(--dim);font-weight:400}
-.rinfo{font-size:22px;color:var(--dim)}
-.cd{font-family:var(--disp);font-size:clamp(70px,12vw,140px);color:var(--g);text-shadow:0 0 30px rgba(57,255,122,.8);line-height:1;margin-top:6px}
+/* the monitor */
+#monWrap{display:flex;flex-direction:column;min-height:0}
+.mon{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;background:#0f0f0f;border-radius:24px;padding:14px 14px 0;
+  box-shadow:0 6px 0 #000,0 26px 50px rgba(30,10,50,.35),inset 0 2px 0 #333}
+.monin{flex:1;min-height:0;display:flex;flex-direction:column;border-radius:10px;overflow:hidden;background:var(--scr)}
+.monhead{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;align-items:center;gap:8px 12px;background:var(--head);padding:6px 14px 6px 8px;border-bottom:3px solid #b9c9e2}
+#myValue{font-family:var(--disp);font-size:clamp(28px,3.3vw,46px);color:var(--blue);line-height:1}
+.coin{min-width:0;text-align:center}
+#coinName{font-family:var(--disp);font-size:clamp(16px,1.7vw,24px);line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#coinSub{font-size:14px;font-weight:600;color:#55627a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{font-family:var(--disp);font-size:clamp(17px,1.7vw,24px);background:#4b4b4b;color:#fff;border:4px solid #2a2a2a;border-radius:999px;padding:3px 16px;white-space:nowrap;
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.12)}
+.pill .up{color:#6dffa5}.pill .dn{color:#ff8fa3}.pill .sep{opacity:.5;margin:0 6px}
+#timer.hot{color:#ff5a74;display:inline-block;animation:pulse .5s infinite alternate}
+@keyframes pulse{to{transform:scale(1.12)}}
+.monscreen{position:relative;flex:1;min-height:0}
+#chart{position:absolute;inset:0;width:100%;height:100%;display:block}
+.pxbox{position:absolute;right:12px;top:10px;display:flex;gap:8px;align-items:center;font-weight:700;font-size:17px;color:#fff;
+  background:rgba(0,0,0,.28);border-radius:12px;padding:3px 10px;pointer-events:none}
+.pxbox .up{color:#6dffa5}.pxbox .dn{color:#ffa0b0}
+#price{font-family:var(--disp);font-weight:400;font-size:20px}
+#mcap{opacity:.75;font-size:14px}
+#chartMsg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:var(--disp);font-size:34px;color:#fff;-webkit-text-stroke:5px var(--ink);paint-order:stroke fill}
+.chin{height:44px;flex:none;background:linear-gradient(#e2e2e2,#bdbdbd);margin:12px -14px 0;border-radius:0 0 24px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 22px;font-weight:600;font-size:17px;color:#333}
+#myState{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.chin .brand{font-family:var(--disp);color:#8a8a8a;letter-spacing:.08em;font-size:14px;white-space:nowrap}
+.stand{width:20%;min-width:90px;height:30px;margin:0 auto;flex:none;background:linear-gradient(90deg,#c7c7c7,#f2f2f2 50%,#bfbfbf);clip-path:polygon(30% 0,70% 0,88% 100%,12% 100%)}
+.sticky{position:absolute;z-index:3;width:92px;padding:8px 6px;font-family:var(--mark);font-size:13px;line-height:1.1;text-align:center;font-style:normal;
+  box-shadow:0 4px 8px rgba(0,0,0,.3);color:#333}
+.n1{left:-18px;top:62px;background:#fff59a;transform:rotate(-9deg)} .n2{right:-16px;bottom:72px;background:#ffb3d1;transform:rotate(8deg)}
+
+/* phone trollbox */
+.phone{align-self:end;height:min(100%,520px);display:flex;flex-direction:column;background:#141414;border-radius:30px;padding:12px 9px 14px;
+  box-shadow:0 6px 0 #000,0 20px 40px rgba(30,10,50,.35);transform:rotate(2deg);transform-origin:bottom center;margin-bottom:-4px}
+.notch{width:70px;height:16px;background:#000;border-radius:0 0 12px 12px;margin:-12px auto 4px}
+.tgh{background:#2aa3e0;color:#fff;border-radius:16px 16px 0 0;padding:6px 10px;line-height:1.1}
+.tgh b{display:block;font-family:var(--disp);font-weight:400;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tgh small{font-size:12px;opacity:.85}
+#chat{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:6px;font-size:14.5px;line-height:1.15;
+  background:#cfe3d4 radial-gradient(circle,rgba(255,255,255,.35) 1px,transparent 1.5px) 0 0/14px 14px}
+#chat .ln{background:#fff;border-radius:12px 12px 12px 4px;padding:4px 9px;margin-top:5px;align-self:flex-start;max-width:96%;box-shadow:0 1px 0 rgba(0,0,0,.18);word-wrap:break-word}
+#chat .ln b{display:block;font-size:12.5px}
+#chat .sys,#chat .rug{align-self:center;text-align:center;background:rgba(0,0,0,.45);color:#fff;border-radius:12px;font-size:13px;font-weight:600}
+#chat .rug{background:var(--dn)}
+#chatForm{margin:0}
+#chatIn{width:100%;background:#fff;border:0;border-radius:0 0 16px 16px;padding:8px 12px;font-size:15px;outline:none}
+
+/* desk + keys */
+#deskRow{position:relative;z-index:1;background:linear-gradient(var(--desk),var(--desk2));padding:14px 18px 22px;
+  box-shadow:inset 0 10px 0 rgba(255,255,255,.14),inset 0 -14px 0 rgba(0,0,0,.12)}
+#quip{text-align:center;color:#fff;font-weight:600;font-size:17px;text-shadow:0 2px 0 rgba(0,0,0,.25);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tray{display:grid;grid-template-columns:1fr 1fr;gap:24px;width:min(100%,900px);margin:0 auto;background:linear-gradient(#fff,#ececf2);
+  border-radius:24px;padding:16px 20px 26px;box-shadow:0 10px 0 #cbc8d6,0 24px 30px rgba(40,10,60,.35);transform:perspective(1100px) rotateX(14deg);transform-origin:50% 100%}
+.big{font-family:var(--disp);font-size:clamp(46px,6.6vw,92px);line-height:.95;color:#fff;-webkit-text-stroke:7px var(--ink);paint-order:stroke fill;text-shadow:0 6px 0 var(--ink);
+  border:0;border-radius:24px;padding:16px 10px 12px;cursor:pointer;position:relative;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  background:linear-gradient(170deg,#fff977 0%,var(--yel) 35%,#ffe600 100%);box-shadow:0 18px 0 var(--yel2),0 20px 0 rgba(0,0,0,.2),0 0 40px rgba(255,238,31,.55);transition:filter .15s}
+.big::after{content:"";position:absolute;left:8%;right:8%;top:8px;height:22%;border-radius:16px;background:linear-gradient(rgba(255,255,255,.55),rgba(255,255,255,0))}
+.big small{display:block;font-family:var(--body);font-weight:700;font-size:clamp(13px,1.3vw,17px);letter-spacing:.14em;color:#4a3b00;-webkit-text-stroke:0;text-shadow:none;margin-top:4px}
+.big.press,.big:active{transform:translateY(14px);box-shadow:0 4px 0 var(--yel2),0 6px 0 rgba(0,0,0,.2),0 0 60px rgba(255,238,31,.8)}
+.big.off{background:linear-gradient(170deg,#a4a4a4,#8b8b8b);box-shadow:0 18px 0 #666,0 20px 0 rgba(0,0,0,.2)}
+.big.off small{color:#3e3e3e}
+.big.off.press,.big.off:active{box-shadow:0 4px 0 #666}
+.big.nope{animation:nope .32s}
+@keyframes nope{20%{translate:-8px 0}40%{translate:8px 0}60%{translate:-5px 0}80%{translate:4px 0}}
+.props{position:absolute;inset:0;pointer-events:none}
+.can{position:absolute;left:3%;bottom:44%;width:52px;height:96px;border-radius:10px;background:linear-gradient(90deg,#0f0f0f,#2c2c2c 40%,#111);border:3px solid var(--ink);
+  color:#b6ff3b;font-family:var(--disp);font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center;text-align:center;writing-mode:vertical-rl;transform:rotate(-6deg);box-shadow:0 8px 0 rgba(0,0,0,.25)}
+.can::before{content:"";position:absolute;top:-8px;left:6px;right:6px;height:8px;background:#bbb;border-radius:4px 4px 0 0}
+.mug{position:absolute;right:5%;bottom:46%;width:70px;height:66px;background:#fff;border:4px solid var(--ink);border-radius:6px 6px 16px 16px;
+  font-family:var(--disp);font-size:26px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 0 rgba(0,0,0,.2)}
+.mug::after{content:"";position:absolute;right:-24px;top:12px;width:20px;height:28px;border:4px solid var(--ink);border-left:0;border-radius:0 14px 14px 0;background:transparent}
+
+/* ---------- overlays ---------- */
+.ovl{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(30,14,50,.55);backdrop-filter:blur(3px);overflow:hidden;padding:18px}
+.card{width:min(820px,100%);text-align:center;position:relative;z-index:2;max-height:100%;overflow:auto;background:#fff;border:5px solid var(--ink);border-radius:28px;
+  box-shadow:0 10px 0 var(--ink),0 30px 60px rgba(0,0,0,.35);padding:22px 24px}
+.blink{font-family:var(--disp);color:var(--dn);font-size:clamp(17px,2vw,24px);animation:blink .5s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+.cname{font-family:var(--disp);font-size:clamp(38px,6vw,76px);color:var(--yel);-webkit-text-stroke:8px var(--ink);paint-order:stroke fill;text-shadow:0 7px 0 var(--ink);line-height:1.05;margin:8px 0 2px}
+.ctick{font-family:var(--disp);font-size:28px;color:#555}
+.facts{list-style:none;padding:0;margin:14px auto;display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;max-width:640px;text-align:left;font-size:18px;font-weight:500}
+.facts b{color:#8a6bb0}
+.rinfo{font-weight:700;color:#666}
+.cd{font-family:var(--disp);font-size:clamp(70px,11vw,130px);color:#4ade80;-webkit-text-stroke:9px var(--ink);paint-order:stroke fill;text-shadow:0 8px 0 var(--ink);line-height:1;margin-top:6px}
 .cd.pop{animation:cdpop .3s ease-out}
 @keyframes cdpop{from{transform:scale(1.6);opacity:.3}}
-.ovl.rug{background:rgba(70,0,10,.82)}
+.ovl.rug{background:rgba(160,0,24,.62)}
 .rugscene{position:absolute;inset:0;z-index:1;pointer-events:none}
-.carpet{position:absolute;left:-6%;width:112%;top:30%;height:38%;border:14px double #ffcf4a;border-left:0;border-right:0;
+.carpet{position:absolute;left:-6%;width:112%;top:28%;height:40%;border:14px double #ffcf4a;border-left:0;border-right:0;
   background:radial-gradient(circle,#ffcf4a 0 9%,transparent 10%) 0 0/70px 70px,radial-gradient(circle,#1d6b5a 0 18%,transparent 19%) 35px 35px/70px 70px,
     repeating-linear-gradient(45deg,#7d1022 0 16px,#a6182e 16px 32px);
   animation:yank 1.25s cubic-bezier(.6,0,.9,.5) both;box-shadow:0 20px 40px rgba(0,0,0,.6)}
-.carpet::before,.carpet::after{content:"";position:absolute;top:-14px;bottom:-14px;width:22px;
-  background:repeating-linear-gradient(to bottom,#f2e3b8 0 3px,transparent 3px 7px)}
+.carpet::before,.carpet::after{content:"";position:absolute;top:-14px;bottom:-14px;width:22px;background:repeating-linear-gradient(to bottom,#f2e3b8 0 3px,transparent 3px 7px)}
 .carpet::before{left:-22px}.carpet::after{right:-22px}
 @keyframes yank{0%{transform:translateX(-120%)}30%{transform:translateX(0)}52%{transform:translateX(-3%) rotate(-1deg)}100%{transform:translateX(150%) rotate(9deg) scaleY(.5)}}
-.stamp{display:inline-block;margin-bottom:14px;font-family:var(--disp);font-size:clamp(64px,12vw,160px);color:var(--r);border:10px solid var(--r);border-radius:18px;
-  padding:0 26px;transform:rotate(-7deg);text-shadow:0 0 30px rgba(255,61,90,.8);box-shadow:0 0 40px rgba(255,61,90,.5),inset 0 0 30px rgba(255,61,90,.4);
-  animation:stamp .45s cubic-bezier(.2,1.7,.4,1) 1.05s both;line-height:1.05;background:rgba(40,0,6,.6)}
+.ovl.rug .card{background:transparent;border:0;box-shadow:none;padding:0;overflow:visible}
+.stamp{display:inline-block;margin-bottom:14px;font-family:var(--disp);font-size:clamp(64px,12vw,160px);color:#fff;background:var(--dn);-webkit-text-stroke:8px var(--ink);paint-order:stroke fill;
+  border:7px solid var(--ink);border-radius:22px;padding:0 28px;transform:rotate(-7deg);box-shadow:0 12px 0 var(--ink);text-shadow:0 7px 0 var(--ink);
+  animation:stamp .45s cubic-bezier(.2,1.7,.4,1) 1.05s both;line-height:1.1}
 @keyframes stamp{from{transform:rotate(-7deg) scale(3.2);opacity:0}}
-.later{animation:fadein .4s 1.5s both}
+.later{animation:fadein .4s 1.5s both;background:#fff;border:5px solid var(--ink);border-radius:24px;box-shadow:0 10px 0 var(--ink);padding:14px 18px}
 @keyframes fadein{from{opacity:0;transform:translateY(10px)}}
-.rugline{font-size:clamp(22px,2.6vw,32px);color:#fff;margin:16px 0 4px}
-.devtx{font-size:19px;color:#ff9aaa}
-.you{font-family:var(--disp);font-size:clamp(20px,2.6vw,30px);margin:12px 0 6px}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:left;margin-top:10px;font-size:20px}
-.cols h4{font-family:var(--disp);font-size:14px;margin:0 0 4px;letter-spacing:.08em}
-.res h2{font-family:var(--disp);font-size:clamp(26px,4vw,46px);margin:0;color:var(--g);text-shadow:0 0 16px rgba(57,255,122,.6)}
-.res h2.dn{color:var(--r);text-shadow:0 0 16px rgba(255,61,90,.6)}
-.res .sub{font-size:23px;color:var(--amber);margin:4px 0 10px}
-table.st{width:100%;border-collapse:collapse;font-size:21px}
-table.st th{font-weight:400;color:var(--dim);font-size:16px;letter-spacing:.08em;text-align:right;padding:0 8px}
+.rugline{font-size:clamp(20px,2.4vw,28px);font-weight:600;margin:4px 0}
+.devtx{font-size:15px;color:#a0102a;font-weight:600}
+.you{font-family:var(--disp);font-size:clamp(20px,2.6vw,30px);margin:10px 0 6px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:left;margin-top:8px;font-size:17px;font-weight:600}
+.cols h4{font-family:var(--disp);font-weight:400;font-size:16px;margin:0 0 4px;letter-spacing:.04em}
+.res h2{font-family:var(--disp);font-weight:400;font-size:clamp(30px,4.4vw,52px);margin:0;color:#4ade80;-webkit-text-stroke:6px var(--ink);paint-order:stroke fill;text-shadow:0 5px 0 var(--ink)}
+.res h2.dn{color:#ff4f6e}
+.res .sub{font-size:19px;font-weight:600;color:#555;margin:8px 0 10px}
+table.st{width:100%;border-collapse:collapse;font-size:18px;font-weight:600}
+table.st th{font-weight:700;color:#888;font-size:13px;letter-spacing:.08em;text-align:right;padding:0 8px}
 table.st th:nth-child(2){text-align:left}
-table.st td{padding:1px 8px;text-align:right;border-top:1px solid rgba(57,255,122,.12)}
+table.st td{padding:2px 8px;text-align:right;border-top:2px solid #eee}
 table.st td:nth-child(2){text-align:left;white-space:nowrap}
-table.st tr.me td{background:rgba(255,191,46,.14)}
-.mvp{font-family:var(--disp);font-size:clamp(17px,2vw,24px);color:var(--amber);margin:10px 0 2px}
-.nextin{font-size:20px;color:var(--dim);margin-top:8px}
-.champ{font-family:var(--disp);font-size:clamp(16px,2vw,22px);color:var(--amber);letter-spacing:.06em}
-.champname{font-family:var(--disp);font-size:clamp(40px,7vw,84px);line-height:1;margin:2px 0 6px;text-shadow:0 0 26px currentColor}
-.loser{font-size:21px;color:#ff9aaa;margin:6px 0}
-.fbtns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+table.st tr.me td{background:rgba(255,236,0,.6)}
+.mvp{font-family:var(--disp);font-size:clamp(18px,2vw,24px);margin:6px 0 4px}
+.nextin{font-weight:700;color:#8a6bb0;margin-top:10px}
+.champ{font-family:var(--disp);font-size:clamp(17px,2vw,22px);color:#8a6bb0;letter-spacing:.06em}
+.champname{font-family:var(--disp);font-size:clamp(44px,7vw,86px);line-height:1.05;margin:2px 0 6px;-webkit-text-stroke:8px var(--ink);paint-order:stroke fill;text-shadow:0 7px 0 var(--ink)}
+.loser{font-size:18px;font-weight:600;color:#a0102a;margin:6px 0}
+.fbtns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px}
 
 #flash{position:absolute;inset:0;z-index:25;pointer-events:none;opacity:0}
-#flash.buy{animation:fl .35s;background:radial-gradient(ellipse at 50% 100%,rgba(57,255,122,.35),transparent 70%)}
-#flash.sell{animation:fl .35s;background:radial-gradient(ellipse at 50% 100%,rgba(255,191,46,.35),transparent 70%)}
+#flash.buy{animation:fl .35s;background:radial-gradient(ellipse at 50% 100%,rgba(74,222,128,.45),transparent 70%)}
+#flash.sell{animation:fl .35s;background:radial-gradient(ellipse at 50% 100%,rgba(255,238,31,.5),transparent 70%)}
 #flash.rug{animation:fl 1.2s;background:rgba(255,0,30,.55)}
 @keyframes fl{from{opacity:1}to{opacity:0}}
-.pop{position:absolute;z-index:26;pointer-events:none;font-family:var(--disp);font-size:clamp(28px,4vw,48px);animation:popup 1.3s ease-out forwards;white-space:nowrap}
-@keyframes popup{from{transform:translate(-50%,0) scale(.6);opacity:0}15%{transform:translate(-50%,-10px) scale(1.15);opacity:1}to{transform:translate(-50%,-110px) scale(1);opacity:0}}
-#toast{position:absolute;left:50%;bottom:30%;transform:translateX(-50%);z-index:40;background:#020d06;border:2px solid var(--amber);color:var(--amber);
-  padding:8px 16px;border-radius:12px;font-size:22px;box-shadow:0 0 22px rgba(255,191,46,.35);max-width:90%;text-align:center}
+.pop{position:absolute;z-index:26;pointer-events:none;font-family:var(--disp);font-size:clamp(32px,4.4vw,56px);-webkit-text-stroke:7px var(--ink);paint-order:stroke fill;
+  text-shadow:0 5px 0 var(--ink);animation:popup 1.3s ease-out forwards;white-space:nowrap}
+@keyframes popup{from{transform:translate(-50%,0) scale(.6);opacity:0}15%{transform:translate(-50%,-10px) scale(1.15);opacity:1}to{transform:translate(-50%,-120px) scale(1);opacity:0}}
+#toast{position:absolute;left:50%;bottom:34%;transform:translateX(-50%);z-index:40;background:#fff;border:4px solid var(--ink);box-shadow:0 6px 0 var(--ink);
+  padding:8px 18px;border-radius:16px;font-size:20px;font-weight:700;max-width:90%;text-align:center}
 
+@media (max-width:1100px){ .props{display:none} }
 @media (max-width:900px){
   .menu-in{grid-template-columns:1fr}
-  #main{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}
-  .tb{display:none}
-  #board{max-height:24vh;overflow:auto;display:grid;grid-template-columns:1fr 1fr;column-gap:8px;font-size:17px}
-  #board li{grid-template-columns:16px 8px minmax(0,1fr) 18px 60px}
+  #mid{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:10px}
+  .phone{display:none}
+  .wb{margin:0;border-width:6px;padding:4px}
+  .wb::after{display:none}
+  .wbh{font-size:16px;padding:0 4px}
+  #board{max-height:15vh;overflow:auto;display:grid;grid-template-columns:1fr 1fr;column-gap:10px;font-size:14px}
+  #board li{grid-template-columns:16px 10px minmax(0,1fr) 18px 50px;padding:0 3px}
+  .sticky{display:none}
 }
-@media (max-width:640px){
-  #rig{padding:6px}
-  #monitor{padding:8px 8px 0;border-radius:16px}
-  #screen{border-radius:12px}
-  #bezel{height:34px}#bezel .model{display:none}
-  #game{padding:8px;gap:7px}
-  #hud{grid-template-columns:minmax(0,1fr) auto;gap:8px}
-  .px{display:none}
-  #coinSub{font-size:17px}
-  #mine{grid-template-columns:minmax(0,1fr) auto;font-size:19px;gap:10px}
-  #mine .stat.rnd{display:none}
-  #board{grid-template-columns:1fr;max-height:19vh}
-  .big{border-radius:16px}
+@media (max-width:600px){
+  #topbar{grid-template-columns:auto 1fr auto;padding:8px 10px 4px;gap:6px}
+  .neon{font-size:20px;padding:3px 8px;justify-self:center;letter-spacing:.06em}
+  #myTotal{font-size:18px}
+  .tl{gap:5px}
+  .chip{font-size:15px;padding:2px 8px}
+  .mini{font-size:13px;padding:2px 7px}
+  .wallet{padding:1px 2px 1px 8px}.wallet .wl{display:none}.bill{width:40px;height:28px}
+  #mid{padding:4px 10px 0}
+  #board{grid-template-columns:minmax(0,1fr)}
+  .mon{padding:9px 9px 0;border-radius:18px}
+  .monhead{grid-template-columns:auto auto minmax(0,1fr);padding:4px 8px 4px 4px}
+  .monhead .pill{grid-column:1 / -1;justify-self:center;padding:1px 12px}
+  .pxbox{font-size:13px;right:6px;top:6px}#price{font-size:15px}#mcap{display:none}
+  .chin{height:34px;margin:9px -9px 0;font-size:14px;padding:0 14px}.chin .brand{display:none}
+  .stand{height:18px}
+  #deskRow{padding:8px 10px 14px}
+  #quip{font-size:14px;margin-bottom:6px}
+  .tray{gap:14px;padding:12px 12px 20px}
+  .big{border-radius:18px;padding:12px 6px 8px;-webkit-text-stroke:6px var(--ink)}
   #seats{grid-template-columns:1fr}
   .facts,.cols{grid-template-columns:1fr}
 }
-@media (max-height:620px){ #board{font-size:16px} .big{font-size:clamp(30px,5vw,54px);padding:8px} #chat{font-size:16px} }
+@media (max-width:440px){ #topbar{grid-template-columns:auto auto auto} .neon{font-size:15px;padding:3px 6px;letter-spacing:.02em} #quitBtn{padding:2px 5px} #muteBtn{display:none} .bill{width:30px} }
+@media (max-height:500px){
+  #mid{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important;padding-top:2px}
+  .wb,.phone,.sticky,#quip,.chin .brand{display:none!important}
+  #topbar{padding-top:6px;padding-bottom:2px}
+  .monhead{padding:2px 8px}#myValue{font-size:24px}
+  .chin{height:28px;margin-top:6px;font-size:14px}.stand{height:12px}
+  #deskRow{padding:6px 14px 10px}
+  .pxbox{top:4px;font-size:12px}#price{font-size:14px}#mcap{display:none}
+  .tray{padding:8px 14px 14px;transform:none}.big{font-size:34px;padding:6px 6px 4px;box-shadow:0 8px 0 var(--yel2)}.big.off{box-shadow:0 8px 0 #666}
+}
+@media (max-height:640px) and (min-width:601px){ .big{font-size:clamp(36px,5vw,58px);padding:10px} .tray{padding:10px 16px 18px} #quip{display:none} }
 </style>
 </head>
 <body>
-<div id="rig"><div id="monitor">
-  <div id="screen">
-    <!-- main menu -->
-    <section id="menu" class="view">
-      <div class="menu-in">
-        <div>
-          <pre id="boot"></pre>
-          <h1 class="logo">RUGD<span>.EXE</span></h1>
-          <div class="tagline">the shitcoin simulator where the dev always wins. eventually.</div>
-          <label class="field">DEGEN NAME<input id="nameIn" maxlength="16" autocomplete="off" spellcheck="false"></label>
-          <div class="mbtns">
-            <button class="btn" id="soloBtn">PLAY VS 9 BOTS<small>playtest mode</small></button>
-            <button class="btn alt" id="hostBtn">HOST ONLINE ROOM<small>up to 10 degens</small></button>
-            <div class="joinrow"><input id="codeIn" maxlength="4" placeholder="CODE" autocomplete="off" spellcheck="false"><button class="btn ghost" id="joinBtn">JOIN</button></div>
-            <div class="netnote" id="netNote"></div>
-          </div>
-        </div>
-        <div class="how">
-          <h3>HOW NOT TO LOSE EVERYTHING</h3>
-          <p>Everybody starts each round with <b>$1,000</b> of fake money and a brand-new shitcoin.</p>
-          <p><b class="up">BUY</b> puts your whole stack in. <b class="dn">SELL</b> dumps it all. Buy low, sell high, repeat until your hands shake.</p>
-          <p>3 rounds × 30 seconds. Most profit across all three wins.</p>
-          <p>Some rounds the dev <b class="dn">pulls the rug</b>. Anyone holding the bag loses all of it. Not every round. Not every game. You won't see it coming.</p>
-          <p><kbd>B</kbd>/<kbd>↑</kbd> buy · <kbd>S</kbd>/<kbd>↓</kbd> sell · <kbd>Enter</kbd> trollbox · <kbd>M</kbd> mute</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- online lobby -->
-    <section id="lobby" class="view" hidden>
-      <div class="lob">
-        <div class="lbl">ROOM CODE</div>
-        <div id="roomCode">----</div>
-        <div class="lbl">send this to your degen friends</div>
-        <ol id="seats"></ol>
-        <div class="lobrow" id="hostRow">
-          <label><input type="checkbox" id="fillBots" checked> fill empty seats with bots</label>
-          <button class="btn" id="startBtn">START THE PUMP</button>
-        </div>
-        <div class="lobrow" id="guestRow"><span id="lobbyWait">waiting for the host to start the pump…</span></div>
-        <div class="lobrow"><button class="btn ghost" id="leaveBtn">LEAVE ROOM</button></div>
-      </div>
-    </section>
-
-    <!-- the game -->
-    <section id="game" class="view" hidden>
-      <header id="hud">
-        <div style="min-width:0"><div id="coinName">—</div><div id="coinSub"></div></div>
-        <div class="px"><div id="price">—</div><div id="chg">+0.00%</div><div id="mcap"></div></div>
-        <div class="clock"><div id="roundLbl">ROUND 1/3</div><div id="timer">30.0</div></div>
-      </header>
-      <div id="main">
-        <div id="chartWrap"><canvas id="chart"></canvas><div id="chartMsg"></div></div>
-        <aside id="side">
-          <div class="panel"><div class="ph">DEGEN LEADERBOARD</div><ol id="board"></ol></div>
-          <div class="panel tb"><div class="ph">TROLLBOX</div><div id="chat"></div>
-            <form id="chatForm"><input id="chatIn" maxlength="80" placeholder="say something stupid… (Enter)" autocomplete="off"></form></div>
-        </aside>
-      </div>
-      <footer id="dock">
-        <div id="mine">
-          <div style="min-width:0"><span id="myState">—</span><span id="quip"></span></div>
-          <div class="stat rnd"><small>THIS ROUND</small><span id="myRound">$0.00</span></div>
-          <div class="stat"><small>GAME TOTAL</small><span id="myTotal">$0.00</span></div>
-        </div>
-        <div id="btns">
-          <button class="big buy" id="buyBtn">BUY<small>APE IN · B</small></button>
-          <button class="big sell" id="sellBtn">SELL<small>JEET · S</small></button>
-        </div>
-      </footer>
-      <div id="ovl" class="ovl" hidden></div>
-    </section>
-    <div id="flash"></div>
-    <div id="toast" hidden></div>
+<div id="screen">
+  <div class="room" aria-hidden="true">
+    <div class="window w1"><div class="sky"><i class="moon"></i><i class="star" style="left:10%;top:20%"></i><i class="star" style="left:70%;top:12%;animation-delay:.7s"></i><i class="star" style="left:84%;top:46%;animation-delay:1.3s"></i></div><div class="blinds"></div></div>
+    <div class="window w2"><div class="sky"><i class="rocket">🚀</i><i class="star" style="left:20%;top:30%;animation-delay:.4s"></i><i class="star" style="left:55%;top:14%"></i><i class="star" style="left:88%;top:24%;animation-delay:1s"></i></div><div class="blinds"></div></div>
   </div>
-  <div id="bezel"><i class="led"></i><span class="brand">RUGD-9000</span><span class="model">DEGEN TERMINAL · 0.69% DEV TAX ON EVERY TRADE</span>
-    <button id="muteBtn" title="Mute (M)">SND ON</button><button id="quitBtn" hidden>QUIT</button></div>
-</div></div>
+
+  <!-- main menu -->
+  <section id="menu" class="view">
+    <div class="menu-in cardbox">
+      <div>
+        <h1 class="logo">RUG<span>D</span></h1>
+        <div class="sticker">dev is definitely not rugging this one™</div>
+        <label class="field">YOUR DEGEN NAME<input id="nameIn" maxlength="16" autocomplete="off" spellcheck="false"></label>
+        <div class="mbtns">
+          <button class="btn" id="soloBtn">PLAY VS 9 BOTS<small>playtest mode</small></button>
+          <button class="btn alt" id="hostBtn">HOST ONLINE ROOM<small>up to 10 degens</small></button>
+          <div class="joinrow"><input id="codeIn" maxlength="4" placeholder="CODE" autocomplete="off" spellcheck="false"><button class="btn ghost" id="joinBtn">JOIN</button></div>
+          <div class="netnote" id="netNote"></div>
+        </div>
+      </div>
+      <div class="how">
+        <h3>how not to lose everything</h3>
+        <p>Every round you get <b>$1,000</b> of fake money and a brand-new shitcoin.</p>
+        <p><b>BUY</b> = ape your whole stack in. <b>SELL</b> = jeet the whole bag. Buy low, sell high, try not to cry.</p>
+        <p>3 rounds × 30 seconds. Most profit across all three wins.</p>
+        <p>Some rounds the dev <b style="color:#e0193f">pulls the rug</b>. Holding when it happens = bag goes to $0. You won't see it coming.</p>
+        <p><kbd>B</kbd>/<kbd>↑</kbd> buy · <kbd>S</kbd>/<kbd>↓</kbd> sell · <kbd>Enter</kbd> chat · <kbd>M</kbd> mute</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- online lobby -->
+  <section id="lobby" class="view" hidden>
+    <div class="lob cardbox">
+      <div class="lbl">ROOM CODE</div>
+      <div id="roomCode">----</div>
+      <div class="lbl">send this to your degen friends</div>
+      <ol id="seats"></ol>
+      <div class="lobrow" id="hostRow">
+        <label><input type="checkbox" id="fillBots" checked> fill empty seats with bots</label>
+        <button class="btn" id="startBtn">START THE PUMP</button>
+      </div>
+      <div class="lobrow" id="guestRow"><span id="lobbyWait">waiting for the host to start the pump…</span></div>
+      <div class="lobrow"><button class="btn ghost" id="leaveBtn">LEAVE ROOM</button></div>
+    </div>
+  </section>
+
+  <!-- the game -->
+  <section id="game" class="view" hidden>
+    <div id="topbar">
+      <div class="tl"><span class="chip" id="roundLbl">ROUND 1/3</span><button class="mini" id="muteBtn" title="Mute (M)">🔊</button><button class="mini" id="quitBtn" hidden>QUIT</button></div>
+      <div class="neon"><span class="wa">WAGMI</span><span class="ng">NGMI</span></div>
+      <div class="tr"><div class="wallet"><span class="wl">GAME<br>P&amp;L</span><span id="myTotal">+$0.00</span><svg class="bill" viewBox="0 0 64 44"><g transform="rotate(-28 32 22)"><rect x="4" y="8" width="56" height="28" rx="4" fill="#3ddc5a" stroke="#0d5c1e" stroke-width="3"/><rect x="9" y="13" width="46" height="18" rx="2" fill="none" stroke="#0d5c1e" stroke-width="1.5"/><circle cx="32" cy="22" r="7" fill="#a6f7b2" stroke="#0d5c1e" stroke-width="2"/><text x="32" y="26.5" text-anchor="middle" font-size="12" font-weight="700" fill="#0d5c1e">$</text></g></svg></div></div>
+    </div>
+    <div id="mid">
+      <div class="wb"><div class="wbh">WHO'S NOT BROKE</div><ol id="board"></ol></div>
+      <div id="monWrap">
+        <div class="mon">
+          <i class="sticky n1">seed phrase:<br>on the fridge</i><i class="sticky n2">DYOR<br>(lol, no)</i>
+          <div class="monin">
+            <div class="monhead">
+              <svg class="bill" viewBox="0 0 64 44"><g transform="rotate(-28 32 22)"><rect x="4" y="8" width="56" height="28" rx="4" fill="#3ddc5a" stroke="#0d5c1e" stroke-width="3"/><rect x="9" y="13" width="46" height="18" rx="2" fill="none" stroke="#0d5c1e" stroke-width="1.5"/><circle cx="32" cy="22" r="7" fill="#a6f7b2" stroke="#0d5c1e" stroke-width="2"/><text x="32" y="26.5" text-anchor="middle" font-size="12" font-weight="700" fill="#0d5c1e">$</text></g></svg>
+              <span id="myValue">$1,000</span>
+              <div class="coin"><div id="coinName">—</div><div id="coinSub"></div></div>
+              <div class="pill"><span id="myRound">+$0.00</span><span class="sep">/</span><span id="timer">30.0</span></div>
+            </div>
+            <div class="monscreen"><canvas id="chart"></canvas><div class="pxbox"><span id="price"></span><span id="chg"></span><span id="mcap"></span></div><div id="chartMsg"></div></div>
+          </div>
+          <div class="chin"><span id="myState">—</span><span class="brand">RUGBOOK PRO</span></div>
+        </div>
+        <div class="stand"></div>
+      </div>
+      <div class="phone"><div class="notch"></div>
+        <div class="tgh"><b id="tgName">OFFICIAL CHAT</b><small id="tgMembers">40,069 members</small></div>
+        <div id="chat"></div>
+        <form id="chatForm"><input id="chatIn" maxlength="80" placeholder="say something stupid… (Enter)" autocomplete="off"></form>
+      </div>
+    </div>
+    <div id="deskRow">
+      <div class="props"><div class="can">DEGEN FUEL</div><div class="mug">GM</div></div>
+      <div id="quip"></div>
+      <div class="tray" id="btns">
+        <button class="big" id="buyBtn">BUY<small>APE IN · B</small></button>
+        <button class="big" id="sellBtn">SELL<small>JEET · S</small></button>
+      </div>
+    </div>
+    <div id="ovl" class="ovl" hidden></div>
+  </section>
+  <div id="flash"></div>
+  <div id="toast" hidden></div>
+</div>
 
 <script>
 'use strict';
@@ -499,17 +593,17 @@ const TXT = {
     "watching the chart like it owes you money.", "this is the one. (it's never the one.)", "your palms are sweaty. we can tell."],
   cashQuip: ["sitting in cash like a coward. respect.", "sidelined. safe. boring.", "cash is a position. a bitch position, but a position.",
     "waiting for the dip like a vulture.", "can't get rugged if you don't hold. galaxy brain."],
-  boot: ["RUGD BIOS v0.69 (c) 2026 Definitely Not A Scam LLC", "Checking wallet........ EMPTY", "Loading hopium......... 100%", "Disabling common sense.. OK", "Ready. Don't say we didn't warn you."]
+  _boot: ["RUGD BIOS v0.69 (c) 2026 Definitely Not A Scam LLC", "Checking wallet........ EMPTY", "Loading hopium......... 100%", "Disabling common sense.. OK", "Ready. Don't say we didn't warn you."]
 };
 const BOT_NAMES = ['PaperHandsPete', 'ExitLiquidity', 'WenLambo', 'RugPullRick', 'GasFeeGary', 'ApeInAndy', 'BagHolderBrenda', 'NGMI_Nate', 'FOMO_Fiona', 'CopeCaleb',
   'LadderTopLarry', 'JeetJerry', 'DegenDiane', 'Wassie420', 'PumpItPaul', 'CrabbyCarl', 'SnipeBot9000', 'DiamondDick', 'MoonBoyMarco', 'SolanaSusan'];
-const COLORS = ['#39ff7a', '#ff4f6e', '#ffcc00', '#3db8ff', '#c86bff', '#ff8a2a', '#00f0d0', '#ff5fd2', '#b6ff3b', '#f4f4f4'];
+const COLORS = ['#16a34a', '#e11d48', '#d97706', '#2563eb', '#9333ea', '#ea580c', '#0d9488', '#db2777', '#65a30d', '#1f2937'];
 const INTRO_MS = 4200, RUG_MS = 5600, RESULTS_MS = 7500;
 
 /* ================= helpers ================= */
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-const okColor = c => (/^#[0-9a-f]{6}$/i.test(c) ? c : '#9fdcb4');
+const okColor = c => (/^#[0-9a-f]{6}$/i.test(c) ? c : '#475569');
 const r2 = v => Math.round(v * 100) / 100;
 const money = v => Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const smoney = v => (v >= 0 ? '+$' : '-$') + money(v);
@@ -575,7 +669,7 @@ const SFX = {
   bell() { [988, 1319].forEach((f, i) => this.tone(f, 0.7, 'triangle', 0.18, null, i * 0.12)); },
   win() { [523, 659, 784, 1046, 784, 1046].forEach((f, i) => this.tone(f, 0.16, 'square', 0.15, null, i * 0.11)); },
   sad() { [392, 370, 349, 330].forEach((f, i) => this.tone(f, i === 3 ? 0.9 : 0.3, 'triangle', 0.18, i === 3 ? 260 : null, i * 0.32)); },
-  setMute(m) { this.muted = m; store.set('rugd.mute', m ? '1' : '0'); if (this.out) this.out.gain.value = m ? 0 : 0.45; $('#muteBtn').textContent = m ? 'SND OFF' : 'SND ON'; }
+  setMute(m) { this.muted = m; store.set('rugd.mute', m ? '1' : '0'); if (this.out) this.out.gain.value = m ? 0 : 0.45; $('#muteBtn').textContent = m ? '🔇' : '🔊'; }
 };
 
 /* ================= host authority ================= */
@@ -806,7 +900,7 @@ function onPeers(ch) {
       if (Array.isArray(pr.ch) && pr.ch[0] > (NET.lastCh[p.peer] || 0)) {
         NET.lastCh[p.peer] = pr.ch[0];
         const pl = G && G.players.find(q => q.id === p.peer);
-        if (G) pushChat(NET.names[p.peer], pl ? pl.color : '#9fdcb4', cleanText(pr.ch[1]), '');
+        if (G) pushChat(NET.names[p.peer], pl ? pl.color : '#475569', cleanText(pr.ch[1]), '');
       }
     }
     NET.order = NET.order.filter(id => alive.has(id));
@@ -839,7 +933,7 @@ function showView(v) {
   ['menu', 'lobby', 'game'].forEach(n => { $('#' + n).hidden = n !== v; });
   $('#quitBtn').hidden = v === 'menu';
 }
-function toMenu() { MODE = 'menu'; G = null; V = null; resetUI(); showView('menu'); renderMenuNet(); }
+function toMenu() { $('#screen').classList.remove('ngmi'); MODE = 'menu'; G = null; V = null; resetUI(); showView('menu'); renderMenuNet(); }
 function curK(now = performance.now()) {
   if (!V || V.ph === 'lobby') return 0;
   if (G) return G.R.k;
@@ -870,17 +964,17 @@ function act(side) {
     UI.pend = { side, at: performance.now(), last: me.tr[me.tr.length - 1] };
   } else return;
   flash(side === 'b' ? 'buy' : 'sell');
-  if (side === 'b') { SFX.buy(); popup(btn, 'APED IN', '#39ff7a'); }
+  if (side === 'b') { SFX.buy(); popup(btn, 'APED IN!', '#4ade80'); }
   else {
     SFX.sell();
     const pnl = me.co * price * (1 - RUGD.FEE) - me.co * me.en / (1 - RUGD.FEE);
-    popup(btn, smoney(pnl), pnl >= 0 ? '#39ff7a' : '#ff3d5a');
+    popup(btn, smoney(pnl), pnl >= 0 ? '#4ade80' : '#ff4f6e');
   }
 }
 function flash(kind) { const f = $('#flash'); f.className = ''; void f.offsetWidth; f.className = kind; }
 function popup(el, text, color) {
   const sc = $('#screen').getBoundingClientRect(), r = el.getBoundingClientRect(), d = document.createElement('div');
-  d.className = 'pop'; d.textContent = text; d.style.color = color; d.style.textShadow = `0 0 16px ${color}, 3px 3px 0 #000`;
+  d.className = 'pop'; d.textContent = text; d.style.color = color; 
   d.style.left = (r.left - sc.left + r.width / 2) + 'px'; d.style.top = (r.top - sc.top - 40) + 'px';
   $('#screen').appendChild(d); setTimeout(() => d.remove(), 1400);
 }
@@ -897,78 +991,79 @@ function sizeChart() {
 function drawChart(k, path, now) {
   sizeChart();
   const c = cx, d = DPR; c.clearRect(0, 0, CW, CH);
-  const narrow = CW / d < 520, padL = 8 * d, padR = (narrow ? 90 : 104) * d, padT = 18 * d, padB = 16 * d, W = CW - padL - padR, H = CH - padT - padB;
+  const narrow = CW / d < 520, short = CH / d < 220, padL = (narrow ? 70 : 96) * d, padR = 22 * d, padT = (short ? 12 : 46) * d, padB = (short ? 8 : 22) * d, W = CW - padL - padR, H = CH - padT - padB;
   const rugAt = V.rug >= 0 ? V.rug : -1, end = rugAt >= 0 ? Math.min(k, rugAt) : k;
   const base = V.coin ? V.coin.base : 1e-5;
   // y range in log space: grows instantly, shrinks smoothly
   let lo = 1, hi = 1; for (let i = 0; i <= end; i++) { const v = path[i]; if (v < lo) lo = v; if (v > hi) hi = v; }
-  const L0 = Math.log(lo), L1 = Math.log(hi), span = Math.max(0.35, L1 - L0), tlo = L0 - span * 0.14, thi = L1 + span * 0.16;
+  const L0 = Math.log(lo), L1 = Math.log(hi), span = Math.max(0.35, L1 - L0), tlo = L0 - span * 0.12, thi = L1 + span * 0.14;
   if (!UI.ys) UI.ys = { lo: tlo, hi: thi };
   const ys = UI.ys;
   ys.lo = tlo < ys.lo ? tlo : ys.lo + (tlo - ys.lo) * 0.06; ys.hi = thi > ys.hi ? thi : ys.hi + (thi - ys.hi) * 0.06;
   const X = t => padL + t / RUGD.ROUND_TICKS * W, Y = v => padT + (1 - (Math.log(v) - ys.lo) / (ys.hi - ys.lo)) * H;
-  c.font = `${(narrow ? 15 : 18) * d}px VT323, monospace`; c.textBaseline = 'middle';
-  // grid
-  c.lineWidth = d; c.strokeStyle = 'rgba(57,255,122,.07)';
-  for (let s = 0; s <= 30; s += 5) { const x = X(s * 20); c.beginPath(); c.moveTo(x, padT); c.lineTo(x, padT + H); c.stroke(); }
-  c.fillStyle = 'rgba(111,191,140,.75)';
-  for (let i = 0; i <= 4; i++) {
-    const L = ys.lo + (ys.hi - ys.lo) * (i / 4), y = Y(Math.exp(L));
-    c.beginPath(); c.moveTo(padL, y); c.lineTo(padL + W, y); c.stroke();
-    c.fillText(fmtPrice(Math.exp(L) * base), padL + W + 8 * d, y);
+  c.textBaseline = 'middle'; c.lineCap = 'round'; c.lineJoin = 'round';
+  // price labels down the left, faint guide lines
+  c.font = `600 ${(narrow ? 12 : 15) * d}px Fredoka, sans-serif`; c.textAlign = 'right';
+  const nl = short ? 2 : 5;
+  for (let i = 0; i <= nl; i++) {
+    const L = ys.lo + (ys.hi - ys.lo) * (i / nl), y = Y(Math.exp(L));
+    c.strokeStyle = 'rgba(255,255,255,.09)'; c.lineWidth = d; c.beginPath(); c.moveTo(padL, y); c.lineTo(padL + W, y); c.stroke();
+    c.fillStyle = '#fff'; c.fillText(fmtPrice(Math.exp(L) * base), padL - 10 * d, y);
   }
+  c.textAlign = 'left';
+  // axes + finish line
+  c.strokeStyle = '#fff'; c.lineWidth = 3 * d;
+  c.beginPath(); c.moveTo(padL, padT - 8 * d); c.lineTo(padL, padT + H); c.lineTo(padL + W, padT + H); c.lineTo(padL + W, padT - 8 * d); c.stroke();
   // launch price
-  const y1 = Y(1); c.setLineDash([6 * d, 6 * d]); c.strokeStyle = 'rgba(255,191,46,.45)';
+  const y1 = Y(1); c.setLineDash([7 * d, 7 * d]); c.strokeStyle = 'rgba(255,255,255,.45)'; c.lineWidth = 2 * d;
   c.beginPath(); c.moveTo(padL, y1); c.lineTo(padL + W, y1); c.stroke(); c.setLineDash([]);
-  c.fillStyle = 'rgba(255,191,46,.7)'; c.fillText('LAUNCH', padL + 6 * d, y1 - 10 * d);
+  c.font = `700 ${12 * d}px Fredoka, sans-serif`; c.fillStyle = 'rgba(255,255,255,.7)'; c.fillText('LAUNCH', padL + 8 * d, y1 - 10 * d);
   if (!path) return;
-  const pv = path[end], up = pv >= 1, col = up ? '#39ff7a' : '#ff3d5a';
-  // area + line
+  const me = myP();
+  // my entry: the red line
+  if (me && me.co > 0 && me.en > 0 && V.ph === 'live') {
+    const ye = Y(me.en); c.strokeStyle = '#ff2b3d'; c.lineWidth = 4 * d;
+    c.beginPath(); c.moveTo(padL, ye); c.lineTo(padL + W, ye); c.stroke();
+    c.fillStyle = '#ff2b3d'; c.textAlign = 'right'; c.fillText('YOUR ENTRY', padL + W - 8 * d, ye - 11 * d); c.textAlign = 'left';
+  }
+  // area + the white price line
   const trace = () => { c.beginPath(); c.moveTo(X(0), Y(path[0])); for (let i = 1; i <= end; i++) c.lineTo(X(i), Y(path[i])); };
   trace(); c.lineTo(X(end), padT + H); c.lineTo(X(0), padT + H); c.closePath();
-  const gr = c.createLinearGradient(0, padT, 0, padT + H); gr.addColorStop(0, up ? 'rgba(57,255,122,.28)' : 'rgba(255,61,90,.28)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  const gr = c.createLinearGradient(0, padT, 0, padT + H); gr.addColorStop(0, 'rgba(255,255,255,.22)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
   c.fillStyle = gr; c.fill();
-  trace(); c.strokeStyle = col; c.lineWidth = 2.6 * d; c.lineJoin = 'round'; c.shadowColor = col; c.shadowBlur = 14 * d; c.stroke(); c.shadowBlur = 0;
-  // everyone's trades: little dots; mine: big arrows
-  const me = myP();
+  trace(); c.strokeStyle = 'rgba(0,0,0,.25)'; c.lineWidth = 6 * d; c.save(); c.translate(0, 3 * d); c.stroke(); c.restore();
+  trace(); c.strokeStyle = '#fff'; c.lineWidth = 5 * d; c.stroke();
+  // everyone's trades as colored dots, mine as big B / S badges
   for (const p of V.pl || []) {
     if (p === me) continue;
-    c.fillStyle = okColor(p.c);
-    for (const t of p.tr) { const tk = Math.abs(t) - 1; if (tk > end) continue; c.globalAlpha = 0.85; c.beginPath(); c.arc(X(tk), Y(path[tk]), 3.2 * d, 0, 7); c.fill(); }
+    c.fillStyle = okColor(p.c); c.strokeStyle = '#fff'; c.lineWidth = 1.5 * d;
+    for (const t of p.tr) { const tk = Math.abs(t) - 1; if (tk > end) continue; c.beginPath(); c.arc(X(tk), Y(path[tk]), 4 * d, 0, 7); c.fill(); c.stroke(); }
   }
-  c.globalAlpha = 1;
   if (me) {
+    c.font = `${13 * d}px "Lilita One", sans-serif`; c.textAlign = 'center';
     for (const t of me.tr) {
       const tk = Math.abs(t) - 1; if (tk > end) continue;
-      const x = X(tk), y = Y(path[tk]), b = t > 0, s = 9 * d;
-      c.fillStyle = b ? '#39ff7a' : '#ffbf2e'; c.strokeStyle = '#000'; c.lineWidth = 2 * d;
-      c.beginPath();
-      if (b) { c.moveTo(x, y + 4 * d); c.lineTo(x - s, y + 4 * d + s * 1.4); c.lineTo(x + s, y + 4 * d + s * 1.4); }
-      else { c.moveTo(x, y - 4 * d); c.lineTo(x - s, y - 4 * d - s * 1.4); c.lineTo(x + s, y - 4 * d - s * 1.4); }
-      c.closePath(); c.fill(); c.stroke();
+      const b = t > 0, x = X(tk), y = Y(path[tk]) + (b ? 20 : -20) * d;
+      c.fillStyle = b ? '#4ade80' : '#ffee1f'; c.strokeStyle = '#161616'; c.lineWidth = 2.5 * d;
+      c.beginPath(); c.arc(x, y, 11 * d, 0, 7); c.fill(); c.stroke();
+      c.fillStyle = '#161616'; c.fillText(b ? 'B' : 'S', x, y + d);
     }
-    if (me.co > 0 && me.en > 0 && V.ph === 'live') {
-      const ye = Y(me.en); c.setLineDash([3 * d, 5 * d]); c.strokeStyle = 'rgba(255,255,255,.5)'; c.lineWidth = d;
-      c.beginPath(); c.moveTo(padL, ye); c.lineTo(padL + W, ye); c.stroke(); c.setLineDash([]);
-      c.fillStyle = 'rgba(255,255,255,.75)'; c.textAlign = 'right'; c.fillText('YOUR ENTRY', padL + W - 6 * d, ye - 10 * d); c.textAlign = 'left';
-    }
+    c.textAlign = 'left';
   }
-  // rug: straight down through the floor
+  // rug: straight through the floor
   if (rugAt >= 0 && k >= rugAt) {
     const x = X(rugAt), y = Y(path[rugAt]);
-    c.strokeStyle = '#ff3d5a'; c.lineWidth = 5 * d; c.shadowColor = '#ff3d5a'; c.shadowBlur = 22 * d;
-    c.beginPath(); c.moveTo(x, y); c.lineTo(x + 3 * d, CH + 10); c.stroke(); c.shadowBlur = 0;
-    c.font = `${30 * d}px Bungee, Impact, sans-serif`; c.fillStyle = '#ff3d5a'; c.textAlign = x > CW / 2 ? 'right' : 'left';
-    c.fillText('💀 RUGGED', x + (x > CW / 2 ? -14 : 14) * d, Math.min(padT + H - 30 * d, y + 50 * d)); c.textAlign = 'left';
+    c.strokeStyle = '#ff2b3d'; c.lineWidth = 7 * d;
+    c.beginPath(); c.moveTo(x, y); c.lineTo(x + 4 * d, CH + 10); c.stroke();
+    c.font = `${(narrow ? 26 : 38) * d}px "Lilita One", sans-serif`; c.textAlign = x > CW / 2 ? 'right' : 'left';
+    const tx = x + (x > CW / 2 ? -16 : 16) * d, ty = Math.min(padT + H - 30 * d, y + 50 * d);
+    c.lineWidth = 8 * d; c.strokeStyle = '#161616'; c.strokeText('RUGGED 💀', tx, ty); c.fillStyle = '#ff4f6e'; c.fillText('RUGGED 💀', tx, ty); c.textAlign = 'left';
     return;
   }
-  // now: pulsing dot + price tag
-  const x = X(end), y = Y(pv), pulse = 1 + 0.35 * Math.sin(now / 120);
-  c.fillStyle = col; c.shadowColor = col; c.shadowBlur = 18 * d;
-  c.beginPath(); c.arc(x, y, 5 * d * pulse, 0, 7); c.fill(); c.shadowBlur = 0;
-  const tag = fmtPrice(pv * base), tw = c.measureText(tag).width + 14 * d, tx = padL + W + 4 * d;
-  c.fillStyle = col; c.fillRect(tx, y - 12 * d, Math.min(tw, padR - 6 * d), 24 * d);
-  c.fillStyle = '#021006'; c.fillText(tag, tx + 7 * d, y + d);
+  // now: white dot with a breathing halo
+  const x = X(end), y = Y(path[end]), pulse = 1 + 0.25 * Math.sin(now / 140);
+  c.fillStyle = 'rgba(255,255,255,.38)'; c.beginPath(); c.arc(x, y, 17 * d * pulse, 0, 7); c.fill();
+  c.fillStyle = '#fff'; c.beginPath(); c.arc(x, y, 8 * d, 0, 7); c.fill();
 }
 
 /* ---------- HUD, board, chat, dock ---------- */
@@ -976,11 +1071,14 @@ function renderHud(k, path) {
   const coin = V.coin || { name: '—', tick: '', base: 1e-5 };
   const end = V.rug >= 0 ? Math.min(k, V.rug) : k, mult = V.rug >= 0 && k >= V.rug ? 0 : path[end];
   $('#coinName').textContent = coin.name;
-  const sub = `<b>${esc(coin.tick)}</b> · ${MODE === 'solo' ? 'vs bots' : 'room ' + esc(NET.code)} · start $1,000 · round ${V.rn + 1} of 3`;
+  const sub = `${esc(coin.tick)} · ${MODE === 'solo' ? 'vs bots' : 'room ' + esc(NET.code)}`;
   if ($('#coinSub').dataset.v !== sub) { $('#coinSub').innerHTML = sub; $('#coinSub').dataset.v = sub; }
+  const dead = V.rug >= 0 && k >= V.rug;
+  $('#tgName').textContent = dead ? 'Deleted Account' : coin.tick + ' OFFICIAL 🚀🌕';
+  $('#tgMembers').textContent = dead ? 'this group no longer exists' : `${(10000 + (V.seed % 80000)).toLocaleString('en-US')} members, ${(V.pl || []).length} online`;
   $('#price').textContent = '$' + (mult ? fmtPrice(mult * coin.base) : '0.00');
   const ch = mult - 1, chg = $('#chg');
-  chg.textContent = (mult ? pct(ch) : '-100% 💀'); chg.className = ch >= 0 ? 'up' : 'dn';
+  chg.textContent = (mult ? pct(ch) : '-100%'); chg.className = ch >= 0 ? 'up' : 'dn';
   $('#mcap').textContent = 'MC $' + fmtBig(mult * coin.base * 1e9);
   $('#roundLbl').textContent = `ROUND ${V.rn + 1}/3`;
   const tm = $('#timer');
@@ -1022,19 +1120,20 @@ function renderDock(k, path, now) {
   const me = myP(), buy = $('#buyBtn'), sell = $('#sellBtn');
   if (!me) {
     $('#myState').textContent = '👀 SPECTATING'; $('#quip').textContent = "you'll get a seat next game";
-    $('#myRound').textContent = '—'; $('#myTotal').textContent = '—';
+    $('#myRound').textContent = '—'; $('#myTotal').textContent = '—'; $('#myValue').textContent = '$—';
     buy.classList.add('off'); sell.classList.add('off'); return;
   }
   const o = liveRows(k, path).find(x => x.p === me), live = V.ph === 'live', hold = isHolding(me, now);
   const coin = V.coin || { tick: '' }, end = V.rug >= 0 ? Math.min(k, V.rug) : k;
   let st;
-  if (me.rg) st = '<span class="dn">💀 RUGGED. BAG = $0.00</span>';
+  if (me.rg) st = '<span class="dn">💀 RUGGED. your bag is now worth $0.00</span>';
   else if (hold && me.co > 0) { const g = path[end] / me.en - 1; st = `🎒 ${fmtCoins(me.co)} ${esc(coin.tick)} = <span class="${g >= 0 ? 'up' : 'dn'}">$${money(me.co * path[end])} (${pct(g)})</span>`; }
   else if (hold) st = '🎒 buying…';
   else st = `💵 CASH <span class="up">$${money(live || V.ph === 'intro' ? me.cash : RUGD.START_CASH + me.r)}</span>`;
   if ($('#myState').dataset.v !== st) { $('#myState').innerHTML = st; $('#myState').dataset.v = st; }
   const qs = !live ? 'idle' : hold ? 'hold' : 'cash';
   if (qs !== UI.quipState) { UI.quipState = qs; $('#quip').textContent = qs === 'hold' ? line('holdQuip') : qs === 'cash' ? line('cashQuip') : V.ph === 'intro' ? 'get ready to ape…' : 'trading closed.'; }
+  $('#myValue').textContent = '$' + Math.round(o.r + RUGD.START_CASH).toLocaleString('en-US');
   const mr = $('#myRound'); mr.textContent = smoney(o.r); mr.className = o.r >= 0 ? 'up' : 'dn';
   const mt = $('#myTotal'); mt.textContent = smoney(o.t); mt.className = o.t >= 0 ? 'up' : 'dn';
   buy.classList.toggle('off', !live || hold); sell.classList.toggle('off', !live || !hold);
@@ -1125,16 +1224,6 @@ function renderLobby() {
   $('#fillBots').checked = NET.fill;
   $('#lobbyWait').textContent = `waiting for the host to start the pump… (${fill ? 'empty seats get bots' : 'no bots'})`;
 }
-function bootText() {
-  if (UI.menuTyped) return; UI.menuTyped = true;
-  const el = $('#boot'), lines = TXT.boot; let i = 0, j = 0, out = '';
-  const t = setInterval(() => {
-    if (i >= lines.length) { clearInterval(t); return; }
-    out += lines[i][j++] || ''; if (j > lines[i].length) { out += '\n'; i++; j = 0; }
-    el.textContent = out + (i < lines.length ? '█' : '');
-  }, 18);
-}
-
 /* ---------- input ---------- */
 $('#nameIn').value = store.get('rugd.name', '') || 'degen' + (100 + Math.floor(Math.random() * 900));
 $('#nameIn').addEventListener('change', () => { store.set('rugd.name', myName()); if (NET.room) NET.room.presence({ name: myName() }).catch(() => {}); UI.lobbyKey = ''; });
@@ -1178,7 +1267,7 @@ $('#chatForm').addEventListener('submit', e => {
   e.preventDefault();
   const t = cleanText($('#chatIn').value); $('#chatIn').value = ''; $('#chatIn').blur();
   if (!t) return;
-  if (G) { const me = G.players.find(p => p.id === myId); pushChat(myName(), me ? me.color : '#9fdcb4', t, ''); }
+  if (G) { const me = G.players.find(p => p.id === myId); pushChat(myName(), me ? me.color : '#475569', t, ''); }
   else if (NET.room) { NET.chSeq++; NET.room.presence({ ch: [NET.chSeq, t] }).catch(() => {}); }
 });
 addEventListener('pointerdown', () => SFX.init(), { passive: true });
@@ -1205,6 +1294,7 @@ function render(now) {
   if (MODE === 'online' && (!V || V.ph === 'lobby')) { showView('lobby'); renderLobby(); return; }
   if (!V) return;
   showView('game');
+  $('#screen').classList.toggle('ngmi', V.rug >= 0 && V.ph !== 'intro');
   if (V.ph !== UI.ph || V.gen !== UI.gen || V.rn !== UI.rn) { UI.ph = V.ph; UI.gen = V.gen; UI.rn = V.rn; onPhase(V.ph, now); }
   const path = pathFor(V.seed), k = curK(now);
   renderHud(k, path); drawChart(k, path, now); renderBoard(k, path, now); renderChat(); renderDock(k, path, now); overlayTick(now);
@@ -1226,7 +1316,7 @@ function frame(now) {
 // keep the match running when the host's tab is in the background
 setInterval(() => { if (document.hidden) { const now = performance.now(); if (G) hostStep(now); sendSnap(now); } }, 100);
 SFX.setMute(SFX.muted);
-renderMenuNet(); bootText();
+renderMenuNet();
 requestAnimationFrame(frame);
 </script>
 </body>

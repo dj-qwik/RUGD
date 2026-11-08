@@ -2,6 +2,8 @@
 
 The 10-player shitcoin trading game where the dev always wins. Eventually.
 
+Set in a cartoon degen office: a black-bezel trading monitor, a WAGMI neon sign (it flips to NGMI when the coin gets rugged), a whiteboard leaderboard, the coin's fake Telegram group on a phone, and two chunky BUY / SELL keys.
+
 Everybody gets $1,000 of fake money and a freshly launched shitcoin. The chart rips and dumps in fast-forward. **BUY** puts your whole stack in, **SELL** dumps the whole bag. Three 30-second rounds, most total profit wins.
 
 Some rounds the dev pulls the rug. Anyone holding when it happens loses the entire bag and the round ends on the spot.
