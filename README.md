@@ -41,7 +41,8 @@ So any single round has roughly a 1-in-5 chance of being rugged. A rug lands bet
 
 ## Modes
 
-- **Play vs 9 bots**: solo playtest mode. Bots have six personalities (momentum chaser, dip buyer, diamond hands, paper hands, pure degen, scared money).
+- **Play vs 9 bots**: solo playtest mode. Bots have six personalities (momentum chaser, dip buyer, diamond hands, paper hands, pure degen, scared money) and play like distracted humans: reaction delay, missed moves, a rest after each trade, and 2-6 trades a round.
+- **Market impact**: any buy or sell has a 40% chance to shove the rest of the chart its way (1-5%, occasionally an 8-18% whale move with a trollbox callout).
   Add `?rug=101` to the URL to force which rounds get rugged while testing (solo only; each digit is a round).
 - **Host online room**: gives a 4-character code. Up to 10 humans; the host can fill the empty seats with bots.
 - **Join**: type the code.

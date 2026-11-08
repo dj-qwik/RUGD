@@ -1,6 +1,7 @@
 # Plays RUGD in a real headless Chrome against the local server and saves screenshots.
 #   node server.js &   then   python3 tools/browser_test.py [solo|online] [outdir]
-import sys, time, os
+import sys, time, os, json
+JSON = json
 from playwright.sync_api import sync_playwright
 
 MODE = sys.argv[1] if len(sys.argv) > 1 else 'solo'
@@ -71,6 +72,10 @@ with sync_playwright() as p:
         time.sleep(1.2)
         print('guest chat reached host:', any(c[2] == 'gm degens' for c in h.evaluate('G.chat')))
         print('tick host/guest:', h.evaluate('G.R.k'), g.evaluate('curK()'))
+        time.sleep(4)
+        nud = h.evaluate('G.R.imp.length')
+        diff = g.evaluate("(() => { const hp = window.__hp, gp = curPath(); let m = 0; for (let i = 0; i < hp.length; i++) m = Math.max(m, Math.abs(gp[i] - hp[i]) / hp[i]); return m; })()".replace('window.__hp', json.dumps(h.evaluate('Array.from(G.R.path).slice(0, G.R.k - 10)'))))
+        print('chart nudges so far:', nud, '| guest chart vs host chart, worst mismatch:', diff)
         g.screenshot(path=f'{OUT}/o2_guest_live.png')
         g.keyboard.press('s'); time.sleep(0.8)
         hp = h.evaluate(f"G.players.find(p => p.id === {gid!r})")

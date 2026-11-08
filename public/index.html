@@ -597,32 +597,64 @@ const RUGD = (() => {
   const equity = (p, price) => p.cash + p.coins * price;
 
   const STYLES = ['momentum', 'dip', 'diamond', 'paper', 'degen', 'scared'];
+  // Bots play like distracted humans: they glance at the chart every so often, take a moment to
+  // react, sometimes miss the move entirely, rest after each trade, and only have so many clicks in them.
+  const CAPS = { momentum: [4, 8], dip: [2, 5], diamond: [1, 3], paper: [5, 9], degen: [4, 8], scared: [3, 6] };
   function makeBot(rand, style) {
-    return { style, every: 2 + (rand() * 5 | 0), th: 0.02 + rand() * 0.04, tp: 0.08 + rand() * 0.25, sl: 0.05 + rand() * 0.1, next: 0, peak: 0 };
+    const cap = CAPS[style] || [3, 6];
+    return { style, every: 4 + (rand() * 6 | 0), th: 0.03 + rand() * 0.05, tp: 0.08 + rand() * 0.25, sl: 0.05 + rand() * 0.1,
+      react: 6 + (rand() * 10 | 0), miss: 0.2 + rand() * 0.25, cool: 22 + (rand() * 30 | 0), cap: cap[0] + (rand() * (cap[1] - cap[0] + 1) | 0),
+      next: 0, peak: 0, pend: null, restUntil: 0, trades: 0 };
   }
-  function resetBot(b, rand) { b.next = 4 + (rand() * 16 | 0); b.peak = 0; }
-  // Bots only see the chart up to now. None of them know when the rug is coming.
-  function botStep(p, path, k, rand) {
-    const b = p.bot;
-    if (k < b.next) return null;
-    b.next = k + b.every + (rand() * 3 | 0);
-    const pr = path[k], r1 = pr / path[Math.max(0, k - 20)] - 1, rh = pr / path[Math.max(0, k - 10)] - 1;
+  function resetBot(b, rand) { b.next = 10 + (rand() * 30 | 0); b.peak = 0; b.pend = null; b.restUntil = 0; b.trades = 0; b.bell = false; }
+  // what the bot WANTS to do right now (no timing rules)
+  function botWants(p, path, k, rand) {
+    const b = p.bot, pr = path[k], r1 = pr / path[Math.max(0, k - 20)] - 1, rh = pr / path[Math.max(0, k - 10)] - 1;
     let hi = 0; for (let i = Math.max(0, k - 60); i <= k; i++) if (path[i] > hi) hi = path[i];
     const hold = p.coins > 0, gain = hold ? pr / p.entry - 1 : 0;
     if (hold && pr > b.peak) b.peak = pr;
-    if (hold && k > ROUND_TICKS - 14 && b.style !== 'diamond') return 's';
-    if (!hold && k > ROUND_TICKS - 25) return null;
     switch (b.style) {
       case 'momentum': if (!hold) return rh > b.th ? 'b' : null; return (rh < -b.th * 0.8 || gain > b.tp || gain < -b.sl) ? 's' : null;
       case 'dip': if (!hold) return (pr < hi * (1 - b.th * 4) && rh > 0) ? 'b' : null; return (gain > b.tp || gain < -b.sl * 1.5) ? 's' : null;
       case 'diamond': if (!hold) return ((k < 160 && rand() < 0.4) || (r1 > 0.12 && rand() < 0.25)) ? 'b' : null; return gain > b.tp * 3 ? 's' : null;
-      case 'paper': if (!hold) return rh > b.th * 0.5 ? 'b' : null; return (gain > 0.04 || gain < -0.03) ? 's' : null;
-      case 'degen': return rand() < 0.14 ? (hold ? 's' : 'b') : null;
+      case 'paper': if (!hold) return rh > b.th * 0.5 ? 'b' : null; return (gain > 0.05 || gain < -0.04) ? 's' : null;
+      case 'degen': return rand() < 0.25 ? (hold ? 's' : 'b') : null;
       case 'scared': if (!hold) return (pr < hi * 0.82 && rand() < 0.4) ? 'b' : null; return (gain > 0.12 || pr < b.peak * 0.93) ? 's' : null;
     }
     return null;
   }
-  return { TICK_MS, ROUND_TICKS, ROUNDS, START_CASH, FEE, SEATS, RUG_ODDS, STYLES, rng, rugPlan, pricePath, pickRugTick, coin, player, resetRound, buy, sell, equity, makeBot, resetBot, botStep };
+  function botStep(p, path, k, rand) {
+    const b = p.bot, hold = p.coins > 0;
+    // a click that was "on its way" lands now (if it still makes sense)
+    if (b.pend && k >= b.pend.at) {
+      const d = b.pend.d; b.pend = null;
+      if ((d === 'b' && !hold && p.cash > 0) || (d === 's' && hold)) { b.trades++; b.restUntil = k + b.cool + (rand() * 30 | 0); return d; }
+      return null;
+    }
+    if (b.pend) return null;
+    // closing bell: most remember to sell, some freeze (the bell auto-sells them anyway)
+    if (hold && k > ROUND_TICKS - 40 && b.style !== 'diamond' && !b.bell) {
+      b.bell = true; if (rand() < 0.75) b.pend = { d: 's', at: k + b.react + (rand() * 10 | 0) }; return null;
+    }
+    if (k < b.next || k < b.restUntil) return null;
+    b.next = k + b.every + (rand() * 6 | 0);
+    if (!hold && (b.trades >= b.cap || k > ROUND_TICKS - 50)) return null;
+    const d = botWants(p, path, k, rand);
+    if (!d || rand() < b.miss) return null;
+    b.pend = { d, at: k + b.react + (rand() * 8 | 0) };
+    return null;
+  }
+  // Market impact: a trade can shove the rest of the chart its way, eased in over ~0.5 s.
+  // Returns the multiplier (1 = no effect). The host applies it and tells everyone.
+  function rollImpact(side, rand) {
+    if (rand() > 0.4) return 1;
+    const whale = rand() < 0.07, m = whale ? 0.08 + rand() * 0.1 : 0.008 + rand() * 0.045;
+    return side === 'b' ? 1 + m : 1 / (1 + m);
+  }
+  function applyImpact(path, k, f) {
+    for (let j = k + 1; j <= ROUND_TICKS; j++) path[j] *= 1 + (f - 1) * Math.min(1, (j - k) / 10);
+  }
+  return { TICK_MS, ROUND_TICKS, ROUNDS, START_CASH, FEE, SEATS, RUG_ODDS, STYLES, rng, rugPlan, pricePath, pickRugTick, coin, player, resetRound, buy, sell, equity, makeBot, resetBot, botStep, rollImpact, applyImpact };
 })();
 /* ===== ENGINE END ===== */
 
@@ -1122,7 +1154,7 @@ function hostNewGame(humans, fill) {
 function hostRound(rn) {
   const seed = (Math.random() * 4294967296) >>> 0, path = RUGD.pricePath(seed);
   G.rn = rn; G.res = null;
-  G.R = { seed, path, rug: G.plan[rn] ? RUGD.pickRugTick(path, Math.random) : -1, hit: false, coin: RUGD.coin(Math.random), k: 0, t0: 0 };
+  G.R = { seed, path, rug: G.plan[rn] ? RUGD.pickRugTick(path, Math.random) : -1, hit: false, coin: RUGD.coin(Math.random), k: 0, t0: 0, imp: [] };
   G.players.forEach(p => { RUGD.resetRound(p); if (p.bot) RUGD.resetBot(p.bot, Math.random); });
   sys(`🚀 ${G.R.coin.tick} just launched. ${line('launch')}`);
 }
@@ -1150,6 +1182,7 @@ function hostTrade(id, side, kReq) {
   const R = G.R; let k = Math.round(+kReq); if (!isFinite(k)) k = R.k;
   k = Math.max(R.k - 8, Math.min(R.k, k)); // honour a click up to 400 ms old (network lag), never a future price
   const ok = side === 'b' ? RUGD.buy(p, R.path[k], k) : side === 's' ? RUGD.sell(p, R.path[k], k) : false;
+  if (ok) moveMarket(p, side);
   if (ok && !p.bot) {
     if (k - (p.saidAt == null ? -99 : p.saidAt) >= 14) { say(p, line(side === 'b' ? 'buyChat' : 'sellChat')); p.saidAt = k; }
     roast(side === 'b' ? 'roastBuy' : 'roastSell', p, 0.45);
@@ -1198,7 +1231,8 @@ function botsAct(k) {
     if (!p.bot) continue;
     const d = RUGD.botStep(p, path, k, Math.random); if (!d) continue;
     const ok = d === 'b' ? RUGD.buy(p, path[k], k) : RUGD.sell(p, path[k], k);
-    if (ok && Math.random() < 0.13) say(p, line(d === 'b' ? 'buyChat' : 'sellChat'));
+    if (ok) moveMarket(p, d);
+    if (ok && Math.random() < 0.5) say(p, line(d === 'b' ? 'buyChat' : 'sellChat'));
   }
 }
 function chatter(k) {
@@ -1207,11 +1241,18 @@ function chatter(k) {
   const fewBots = G.players.filter(q => q.bot).length < 5;
   let key = ret > 0.3 ? 'pumpChat' : ret < -0.22 ? 'dumpChat' : Math.random() < 0.004 ? 'crabChat' : null;
   // fewer bots trading = fewer trade lines, so lurkers keep talking about whatever the chart is doing
-  if (!key && fewBots && k >= G.ambAt) { key = ret > 0.06 ? 'pumpChat' : ret < -0.06 ? 'dumpChat' : pick(['crabChat', 'pumpChat', 'dumpChat', 'crabChat']); G.ambAt = k + 26 + (Math.random() * 30 | 0); }
+  if (!key && k >= G.ambAt) { key = ret > 0.06 ? 'pumpChat' : ret < -0.06 ? 'dumpChat' : pick(['crabChat', 'pumpChat', 'dumpChat', 'crabChat']); G.ambAt = k + 26 + (Math.random() * 30 | 0); }
   if (!key) return;
   if (Math.random() < (fewBots ? 0.2 : 0.5)) { G.chatCd = k + 10; return; }
   const who = speaker(); if (!who) return;
   say(who, line(key)); G.chatCd = k + 18 + (Math.random() * 18 | 0);
+}
+// a trade can push the rest of the chart; everyone gets the same nudge list via the snapshot
+function moveMarket(p, side) {
+  const R = G.R, f = +RUGD.rollImpact(side, Math.random).toFixed(5);
+  if (f === 1 || R.imp.length >= 160) return;
+  RUGD.applyImpact(R.path, R.k, f); R.imp.push([R.k, f]);
+  if (Math.abs(f - 1) > 0.07) sys(`🐳 ${p.name} ${side === 'b' ? 'aped' : 'dumped'} so hard the chart moved ${pct(f - 1)}`);
 }
 const say = (p, text) => pushChat(p.name, p.color, text, '');
 const sys = (text, kind = 'sys') => pushChat('', '', text, kind);
@@ -1224,7 +1265,7 @@ function buildSnap(now) {
   if (!G) return { v: 1, ph: 'lobby', lb: lobbyList(), fill: NET.fill ? 1 : 0, hb };
   const R = G.R;
   return {
-    v: 1, hb, gen: G.gen, ph: G.ph, rn: G.rn, pe: Math.max(0, Math.round(G.phEnd - now)), seed: R.seed, coin: R.coin, k: R.k, rug: R.hit ? R.rug : -1,
+    v: 1, hb, gen: G.gen, ph: G.ph, rn: G.rn, pe: Math.max(0, Math.round(G.phEnd - now)), seed: R.seed, imp: R.imp, coin: R.coin, k: R.k, rug: R.hit ? R.rug : -1,
     pl: G.players.map(p => ({ i: p.id, n: p.name, b: p.bot ? 1 : 0, c: p.color, cash: r2(p.cash), co: +p.coins.toPrecision(8), en: +p.entry.toPrecision(8),
       r: r2(p.rpnl), t: r2(p.total), tr: p.trades.slice(-40), rg: p.rugged ? 1 : 0 })),
     chat: G.chat, cn: G.chatN, res: G.res, fin: G.fin
@@ -1361,7 +1402,14 @@ function applySnap(g, now) {
 /* ================= client view ================= */
 const UI = { view: '', ph: '', gen: -1, rn: -1, ys: null, boardAt: 0, chatN: -1, pend: null, cdLast: -1, quipState: '', lastTimerS: -1, lobbyKey: '', menuTyped: false };
 let PATH = null, PATH_SEED = null;
-const pathFor = seed => { if (seed !== PATH_SEED) { PATH = RUGD.pricePath(seed); PATH_SEED = seed; } return PATH; };
+let PATH_IMP = 0;
+function curPath() {
+  if (G) return G.R.path;
+  const imp = Array.isArray(V.imp) ? V.imp : [];
+  if (V.seed !== PATH_SEED || imp.length < PATH_IMP) { PATH = RUGD.pricePath(V.seed); PATH_SEED = V.seed; PATH_IMP = 0; }
+  for (; PATH_IMP < imp.length; PATH_IMP++) { const [k, f] = imp[PATH_IMP]; if (k >= 0 && k <= RUGD.ROUND_TICKS && f > 0.5 && f < 2) RUGD.applyImpact(PATH, k, f); }
+  return PATH;
+}
 const myName = () => cleanName($('#nameIn').value);
 const myP = () => (V && V.pl ? V.pl.find(p => p.i === myId) : null);
 function resetUI() { Object.assign(UI, { ph: '', gen: -1, rn: -1, ys: null, chatN: -1, pend: null, cdLast: -1, quipState: '', lobbyKey: '' }); $('#ovl').hidden = true; }
@@ -1394,7 +1442,7 @@ function act(side) {
     SFX.nope(); buzz([30, 40, 30]); btn.classList.remove('nope'); void btn.offsetWidth; btn.classList.add('nope');
     toast(line(side === 'b' ? 'alreadyIn' : 'noBag')); return;
   }
-  const k = curK(), price = pathFor(V.seed)[k];
+  const k = curK(), price = curPath()[k];
   if (G) { if (!hostTrade(myId, side, k)) return; }
   else if (NET.room) {
     NET.seq++; NET.tq.push([NET.seq, side, k, V.gen, V.rn]); NET.tq = NET.tq.slice(-4);
@@ -1811,7 +1859,7 @@ function render(now) {
   showView('game');
   $('#screen').classList.toggle('ngmi', V.rug >= 0 && V.ph !== 'intro');
   if (V.ph !== UI.ph || V.gen !== UI.gen || V.rn !== UI.rn) { UI.ph = V.ph; UI.gen = V.gen; UI.rn = V.rn; onPhase(V.ph, now); }
-  const path = pathFor(V.seed), k = curK(now);
+  const path = curPath(), k = curK(now);
   renderHud(k, path); drawChart(k, path, now); renderBoard(k, path, now); renderChat(); renderDock(k, path, now); overlayTick(now);
   $('#chartMsg').textContent = myP() ? '' : 'SPECTATING';
 }

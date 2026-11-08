@@ -44,18 +44,24 @@ check(med(ranges) > 2 && med(ranges) < 12, 'charts swing hard but not absurdly')
 console.log('\nBot tournament, 3,000 games x 10 bots');
 const stats = {};
 R.STYLES.forEach(s => { stats[s] = { pnl: 0, n: 0, rugged: 0, trades: 0 }; });
-let nan = 0;
+let nan = 0, impN = 0, replayBad = 0, rounds = 0;
 for (let g = 0; g < 3000; g++) {
   const plan = R.rugPlan(rand);
   const ps = Array.from({ length: 10 }, (_, i) => R.player('b' + i, 'b' + i, '#fff', R.makeBot(rand, R.STYLES[i % R.STYLES.length])));
   for (let rn = 0; rn < 3; rn++) {
-    const path = R.pricePath((rand() * 2 ** 32) >>> 0), rug = plan[rn] ? R.pickRugTick(path, rand) : -1;
+    const seed = (rand() * 2 ** 32) >>> 0, path = R.pricePath(seed), rug = plan[rn] ? R.pickRugTick(path, rand) : -1, imps = [];
     ps.forEach(p => { R.resetRound(p); R.resetBot(p.bot, rand); });
     let end = R.ROUND_TICKS;
     for (let k = 1; k <= R.ROUND_TICKS; k++) {
       if (rug >= 0 && k >= rug) { end = k; break; }
-      for (const p of ps) { const d = R.botStep(p, path, k, rand); if (d === 'b') R.buy(p, path[k], k); else if (d === 's') R.sell(p, path[k], k); }
+      for (const p of ps) {
+        const d = R.botStep(p, path, k, rand); if (!d) continue;
+        const ok = d === 'b' ? R.buy(p, path[k], k) : R.sell(p, path[k], k);
+        if (ok) { const f = +R.rollImpact(d, rand).toFixed(5); if (f !== 1) { R.applyImpact(path, k, f); imps.push([k, f]); impN++; } }
+      }
     }
+    rounds++;
+    if (rounds % 50 === 0) { const re = R.pricePath(seed); imps.forEach(([k, f]) => R.applyImpact(re, k, f)); for (let i = 0; i <= R.ROUND_TICKS; i++) if (Math.abs(re[i] - path[i]) > 1e-12 * path[i]) { replayBad++; break; } }
     for (const p of ps) {
       if (p.coins > 0) { if (rug >= 0) { p.coins = 0; p.rugged = true; } else R.sell(p, path[end], end); }
       const r = p.cash - R.START_CASH; if (!isFinite(r)) nan++;
@@ -65,6 +71,10 @@ for (let g = 0; g < 3000; g++) {
 }
 for (const [k, s] of Object.entries(stats)) console.log(`  ${k.padEnd(9)} avg round P&L ${(s.pnl / s.n).toFixed(1).padStart(7)}  rugged in ${(s.rugged / s.n * 100).toFixed(1).padStart(5)}% of rounds  ${(s.trades / s.n).toFixed(1)} trades/round`);
 check(nan === 0, 'no NaN scores');
+const tr = Object.values(stats).reduce((a, s) => a + s.trades, 0) / Object.values(stats).reduce((a, s) => a + s.n, 0);
+console.log(`  avg ${tr.toFixed(1)} trades per bot per round, ${(impN / rounds).toFixed(1)} chart nudges per round`);
+check(Math.max(...Object.values(stats).map(s => s.trades / s.n)) <= 10, 'no bot style averages more than 10 trades a round');
+check(replayBad === 0, 'replaying the nudge list rebuilds the exact same chart (what guests do)');
 
 // 4. a do-nothing player and a buy-at-launch-hold player, for reference
 let hold = 0, holdN = 0;
