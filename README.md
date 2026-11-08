@@ -36,7 +36,8 @@ So any single round has roughly a 1-in-5 chance of being rugged. A rug lands bet
 | Buy (all in) | B, W, ↑ | BUY button |
 | Sell (everything) | S, ↓ | SELL button |
 | Trollbox | Enter | — |
-| Mute | M | SND button |
+| Mute | M | 🔊 button |
+| Fullscreen | F | ⛶ button (iPhone: Share → Add to Home Screen) |
 
 ## Modes
 

@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>RUGD</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="RUGD">
+<meta name="theme-color" content="#26104a">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%92%80%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Fredoka:wght@400;500;600;700&family=Permanent+Marker&display=swap">
@@ -85,6 +90,9 @@ button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .track b{color:var(--yel);font-weight:400}.track .u{color:#4dff9a}.track .d{color:#ff5a7a}
 @keyframes tape{to{transform:translateX(-50%)}}
 #menu,#lobby{z-index:3}
+#fsMenu{position:absolute;right:14px;top:50px;z-index:5}
+#screen.ingame #fsMenu{display:none}
+.fsBtn.on{background:var(--yel)}
 #menu .cardbox,#lobby .cardbox{background:rgba(16,6,34,.78);border-color:#000;color:#fff;backdrop-filter:blur(6px);
   box-shadow:0 10px 0 #000,0 0 0 3px #ff4fd8,0 0 60px rgba(255,79,216,.55),0 30px 80px rgba(0,0,0,.6)}
 #menu .field{color:#c9b6ff}
@@ -362,7 +370,7 @@ table.st tr.me td{background:rgba(255,236,0,.6)}
 @media (max-width:600px) and (max-height:760px){ .facts li:nth-child(n+4){display:none} .rinfo{display:none} .cd{font-size:52px;margin-top:2px} .cname{margin:4px 0 0} }
 @media (max-height:760px) and (min-width:601px){ .card{padding:14px 20px} .cname{font-size:clamp(34px,5vw,58px)} .facts{margin:8px auto} .cd{font-size:72px} .res h2{font-size:38px} table.st{font-size:16px} .champname{font-size:58px} }
 @media (max-height:640px) and (min-width:601px){ .facts li:nth-child(n+3){display:none} .rinfo{display:none} .cd{font-size:58px} table.st{font-size:14px} table.st td{padding:1px 6px} .mvp{margin:2px 0} .res .sub{margin:2px 0 6px;font-size:16px} }
-@media (max-width:440px){ #topbar{grid-template-columns:auto auto auto} #myTotal{font-size:16px} .wallet .bill{display:none} .wallet{padding:2px 8px} .neon{font-size:15px;padding:3px 6px;letter-spacing:.02em} #quitBtn{padding:2px 5px} #muteBtn{display:none} .bill{width:30px} }
+@media (max-width:440px){ #topbar{grid-template-columns:auto auto auto} #myTotal{font-size:16px} .wallet .bill{display:none} .wallet{padding:2px 8px} .neon{font-size:15px;padding:3px 6px;letter-spacing:.02em} #quitBtn{padding:2px 5px} #muteBtn{display:none} .bill{width:30px} .tl .fsBtn{padding:2px 5px} #fsMenu{top:36px;right:8px;font-size:12px} }
 @media (max-height:500px){
   #mid{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important;padding-top:2px}
   .wb,.phone,.sticky,#quip,.chin .brand{display:none!important}
@@ -390,6 +398,7 @@ table.st tr.me td{background:rgba(255,236,0,.6)}
     <div class="tape top"><div class="track" id="tapeTop"></div></div>
     <div class="tape bot"><div class="track rev" id="tapeBot"></div></div>
   </div>
+  <button class="mini fsBtn" id="fsMenu" title="Fullscreen (F)">⛶ FULLSCREEN</button>
   <!-- main menu -->
   <section id="menu" class="view">
     <div class="menu-in cardbox">
@@ -411,7 +420,7 @@ table.st tr.me td{background:rgba(255,236,0,.6)}
         <p><b>BUY</b> = ape your whole stack in. <b>SELL</b> = jeet the whole bag. Buy low, sell high, try not to cry.</p>
         <p>3 rounds × 30 seconds. Most profit across all three wins.</p>
         <p>Some rounds the dev <b style="color:#e0193f">pulls the rug</b>. Holding when it happens = bag goes to $0. You won't see it coming.</p>
-        <p><kbd>B</kbd>/<kbd>↑</kbd> buy · <kbd>S</kbd>/<kbd>↓</kbd> sell · <kbd>Enter</kbd> chat · <kbd>M</kbd> mute</p>
+        <p><kbd>B</kbd>/<kbd>↑</kbd> buy · <kbd>S</kbd>/<kbd>↓</kbd> sell · <kbd>Enter</kbd> chat · <kbd>M</kbd> mute · <kbd>F</kbd> fullscreen</p>
       </div>
     </div>
   </section>
@@ -435,7 +444,7 @@ table.st tr.me td{background:rgba(255,236,0,.6)}
   <!-- the game -->
   <section id="game" class="view" hidden>
     <div id="topbar">
-      <div class="tl"><span class="chip" id="roundLbl">ROUND 1/3</span><button class="mini" id="muteBtn" title="Mute (M)">🔊</button><button class="mini" id="quitBtn" hidden>QUIT</button></div>
+      <div class="tl"><span class="chip" id="roundLbl">ROUND 1/3</span><button class="mini" id="muteBtn" title="Mute (M)">🔊</button><button class="mini fsBtn" title="Fullscreen (F)">⛶</button><button class="mini" id="quitBtn" hidden>QUIT</button></div>
       <div class="neon"><span class="wa">WAGMI</span><span class="ng">NGMI</span></div>
       <div class="tr"><div class="wallet"><span class="wl">GAME<br>P&amp;L</span><span id="myTotal">+$0.00</span><svg class="bill" viewBox="0 0 64 44"><g transform="rotate(-28 32 22)"><rect x="4" y="8" width="56" height="28" rx="4" fill="#3ddc5a" stroke="#0d5c1e" stroke-width="3"/><rect x="9" y="13" width="46" height="18" rx="2" fill="none" stroke="#0d5c1e" stroke-width="1.5"/><circle cx="32" cy="22" r="7" fill="#a6f7b2" stroke="#0d5c1e" stroke-width="2"/><text x="32" y="26.5" text-anchor="middle" font-size="12" font-weight="700" fill="#0d5c1e">$</text></g></svg></div></div>
     </div>
@@ -1712,12 +1721,32 @@ addEventListener('keydown', e => {
   const tag = (e.target && e.target.tagName) || '';
   if (tag === 'INPUT') { if (e.key === 'Escape') e.target.blur(); return; }
   if (e.code === 'KeyM') { SFX.setMute(!SFX.muted); return; }
+  if (e.code === 'KeyF') { toggleFullscreen(); return; }
   if (UI.view !== 'game' || e.repeat) return;
   if (['KeyB', 'KeyW', 'ArrowUp'].includes(e.code)) { e.preventDefault(); flashBtn('#buyBtn'); act('b'); }
   else if (['KeyS', 'ArrowDown'].includes(e.code)) { e.preventDefault(); flashBtn('#sellBtn'); act('s'); }
   else if (e.code === 'Enter') { e.preventDefault(); $('#chatIn').focus(); }
 });
 function flashBtn(sel) { const b = $(sel); b.classList.add('press'); setTimeout(() => b.classList.remove('press'), 110); }
+
+/* ---------- fullscreen ---------- */
+const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
+const fsOK = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+function toggleFullscreen() {
+  SFX.init();
+  if (!fsOK) { toast("This browser won't do fullscreen here. On iPhone: Share → Add to Home Screen."); return; }
+  try {
+    const de = document.documentElement;
+    const p = fsEl() ? (document.exitFullscreen || document.webkitExitFullscreen).call(document) : (de.requestFullscreen || de.webkitRequestFullscreen).call(de, { navigationUI: 'hide' });
+    if (p && p.catch) p.catch(() => toast("Fullscreen got blocked. Open the game in its own tab and try again."));
+  } catch (e) { toast("Fullscreen got blocked. Open the game in its own tab and try again."); }
+}
+function syncFs() {
+  const on = !!fsEl();
+  document.querySelectorAll('.fsBtn').forEach(b => { b.classList.toggle('on', on); b.textContent = b.id === 'fsMenu' ? (on ? '⛶ EXIT FULLSCREEN' : '⛶ FULLSCREEN') : '⛶'; });
+}
+document.querySelectorAll('.fsBtn').forEach(b => b.addEventListener('click', toggleFullscreen));
+document.addEventListener('fullscreenchange', syncFs); document.addEventListener('webkitfullscreenchange', syncFs);
 
 /* ---------- title screen backdrop ---------- */
 // A fake chart pumps across the screen behind the menu and sometimes gets rugged.
