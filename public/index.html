@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>RUGD</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%92%80%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,8 +20,9 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html,body{height:100%;margin:0;overflow:hidden;background:var(--wall);color:var(--ink);font-family:var(--body)}
+html,body{height:100%;margin:0;overflow:hidden;touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust:100%;background:var(--wall);color:var(--ink);font-family:var(--body)}
 button,input{font:inherit;color:inherit}
+button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .up{color:var(--up)} .dn{color:var(--dn)}
 .stroke{-webkit-text-stroke:6px var(--ink);paint-order:stroke fill}
 
@@ -71,7 +72,7 @@ button,input{font:inherit;color:inherit}
 .sticker{display:inline-block;background:#ff4f6e;color:#fff;font-family:var(--disp);font-size:18px;padding:5px 12px;border:3px solid var(--ink);border-radius:10px;
   transform:rotate(3deg);margin:14px 0 18px;box-shadow:0 4px 0 var(--ink)}
 .field{display:flex;flex-direction:column;gap:4px;margin-bottom:14px;font-weight:600;font-size:15px;color:#555}
-.field input,#codeIn{background:#f4f1ff;border:4px solid var(--ink);color:var(--ink);font-family:var(--disp);font-size:26px;padding:6px 14px;border-radius:14px;outline:none}
+.field input,#codeIn{width:100%;min-width:0;background:#f4f1ff;border:4px solid var(--ink);color:var(--ink);font-family:var(--disp);font-size:26px;padding:6px 14px;border-radius:14px;outline:none}
 .field input:focus,#codeIn:focus{background:#fffbd0}
 .mbtns{display:flex;flex-direction:column;gap:14px}
 .joinrow{display:grid;grid-template-columns:1fr auto;gap:10px}
@@ -170,6 +171,11 @@ button,input{font:inherit;color:inherit}
 #chat .sys,#chat .rug{align-self:center;text-align:center;background:rgba(0,0,0,.45);color:#fff;border-radius:12px;font-size:13px;font-weight:600}
 #chat .rug{background:var(--dn)}
 #chatForm{margin:0}
+#peek{display:none;position:absolute;left:8px;bottom:8px;max-width:72%;background:#fff;border:3px solid var(--ink);border-radius:14px 14px 14px 4px;
+  padding:3px 9px;font-size:13px;font-weight:600;line-height:1.15;box-shadow:0 3px 0 var(--ink);pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#peek b{margin-right:4px} #peek.sys{background:#333;color:#fff} #peek.rug{background:var(--dn);color:#fff}
+#peek.pk{animation:peekpop .25s ease-out}
+@keyframes peekpop{from{transform:scale(.6);opacity:0}}
 #chatIn{width:100%;background:#fff;border:0;border-radius:0 0 16px 16px;padding:8px 12px;font-size:15px;outline:none}
 
 /* desk + keys */
@@ -198,8 +204,8 @@ button,input{font:inherit;color:inherit}
 .mug::after{content:"";position:absolute;right:-24px;top:12px;width:20px;height:28px;border:4px solid var(--ink);border-left:0;border-radius:0 14px 14px 0;background:transparent}
 
 /* ---------- overlays ---------- */
-.ovl{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(30,14,50,.55);backdrop-filter:blur(3px);overflow:hidden;padding:18px}
-.card{width:min(820px,100%);text-align:center;position:relative;z-index:2;max-height:100%;overflow:auto;background:#fff;border:5px solid var(--ink);border-radius:28px;
+.ovl{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(30,14,50,.55);backdrop-filter:blur(3px);overflow:hidden;padding:18px}
+.card{flex:0 0 auto;width:min(820px,100%);text-align:center;position:relative;z-index:2;max-height:100%;overflow:auto;background:#fff;border:5px solid var(--ink);border-radius:28px;
   box-shadow:0 10px 0 var(--ink),0 30px 60px rgba(0,0,0,.35);padding:22px 24px}
 .blink{font-family:var(--disp);color:var(--dn);font-size:clamp(17px,2vw,24px);animation:blink .5s steps(2) infinite}
 @keyframes blink{50%{opacity:.25}}
@@ -209,7 +215,7 @@ button,input{font:inherit;color:inherit}
 .facts b{color:#8a6bb0}
 .rinfo{font-weight:700;color:#666}
 .cd{font-family:var(--disp);font-size:clamp(70px,11vw,130px);color:#4ade80;-webkit-text-stroke:9px var(--ink);paint-order:stroke fill;text-shadow:0 8px 0 var(--ink);line-height:1;margin-top:6px}
-.cd.pop{animation:cdpop .3s ease-out}
+.cd.cdp{animation:cdpop .3s ease-out}
 @keyframes cdpop{from{transform:scale(1.6);opacity:.3}}
 .ovl.rug{background:rgba(160,0,24,.62)}
 .rugscene{position:absolute;inset:0;z-index:1;pointer-events:none}
@@ -264,6 +270,8 @@ table.st tr.me td{background:rgba(255,236,0,.6)}
   .menu-in{grid-template-columns:1fr}
   #mid{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:10px}
   .phone{display:none}
+  #peek{display:block}
+  .menu-in{grid-template-columns:minmax(0,1fr)}
   .wb{margin:0;border-width:6px;padding:4px}
   .wb::after{display:none}
   .wbh{font-size:16px;padding:0 4px}
@@ -280,7 +288,24 @@ table.st tr.me td{background:rgba(255,236,0,.6)}
   .mini{font-size:13px;padding:2px 7px}
   .wallet{padding:1px 2px 1px 8px}.wallet .wl{display:none}.bill{width:40px;height:28px}
   #mid{padding:4px 10px 0}
-  #board{grid-template-columns:minmax(0,1fr)}
+  #board{grid-template-columns:minmax(0,1fr);max-height:11vh}
+  #menu,#lobby{padding:10px}
+  .menu-in{padding:18px 16px 22px;gap:18px}
+  .logo{font-size:72px}
+  .card{padding:14px 12px;border-radius:22px}
+  .cname{font-size:34px;-webkit-text-stroke:6px var(--ink)}
+  .ctick{font-size:20px}
+  .facts{font-size:15px;margin:8px auto;gap:3px}
+  .rinfo{font-size:14px}
+  .cd{font-size:62px}
+  table.st{font-size:13.5px}
+  table.st th{padding:0 3px;font-size:11px}
+  table.st td{padding:2px 3px}
+  table.st td:nth-child(2){max-width:30vw;overflow:hidden;text-overflow:ellipsis}
+  .bt{display:none}
+  .champname{font-size:38px;-webkit-text-stroke:6px var(--ink)}
+  .res h2{font-size:30px}
+  .res .sub{font-size:16px}
   .mon{padding:9px 9px 0;border-radius:18px}
   .monhead{grid-template-columns:auto auto minmax(0,1fr);padding:4px 8px 4px 4px}
   .monhead .pill{grid-column:1 / -1;justify-self:center;padding:1px 12px}
@@ -294,7 +319,8 @@ table.st tr.me td{background:rgba(255,236,0,.6)}
   #seats{grid-template-columns:1fr}
   .facts,.cols{grid-template-columns:1fr}
 }
-@media (max-width:440px){ #topbar{grid-template-columns:auto auto auto} .neon{font-size:15px;padding:3px 6px;letter-spacing:.02em} #quitBtn{padding:2px 5px} #muteBtn{display:none} .bill{width:30px} }
+@media (max-width:600px) and (max-height:760px){ .facts li:nth-child(n+4){display:none} .rinfo{display:none} .cd{font-size:52px;margin-top:2px} .cname{margin:4px 0 0} }
+@media (max-width:440px){ #topbar{grid-template-columns:auto auto auto} #myTotal{font-size:16px} .wallet .bill{display:none} .wallet{padding:2px 8px} .neon{font-size:15px;padding:3px 6px;letter-spacing:.02em} #quitBtn{padding:2px 5px} #muteBtn{display:none} .bill{width:30px} }
 @media (max-height:500px){
   #mid{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important;padding-top:2px}
   .wb,.phone,.sticky,#quip,.chin .brand{display:none!important}
@@ -375,7 +401,7 @@ table.st tr.me td{background:rgba(255,236,0,.6)}
               <div class="coin"><div id="coinName">—</div><div id="coinSub"></div></div>
               <div class="pill"><span id="myRound">+$0.00</span><span class="sep">/</span><span id="timer">30.0</span></div>
             </div>
-            <div class="monscreen"><canvas id="chart"></canvas><div class="pxbox"><span id="price"></span><span id="chg"></span><span id="mcap"></span></div><div id="chartMsg"></div></div>
+            <div class="monscreen"><canvas id="chart"></canvas><div class="pxbox"><span id="price"></span><span id="chg"></span><span id="mcap"></span></div><div id="chartMsg"></div><div id="peek"></div></div>
           </div>
           <div class="chin"><span id="myState">—</span><span class="brand">RUGBOOK PRO</span></div>
         </div>
@@ -466,14 +492,24 @@ const RUGD = (() => {
     return cands.length ? cands[Math.floor(rand() * cands.length)] : lo + Math.floor(rand() * (hi - lo));
   }
 
-  const PRE = ['BABY', 'TURBO', 'GIGA', 'SAFE', 'MEGA', 'BASED', 'SUPER', 'DEGEN', 'ULTRA', 'LIL', 'BIG', 'ROYAL', 'FAT', 'ANGRY', 'DRUNK', 'HAIRY', 'WET', 'SPICY', 'SAD', 'HORNY'];
-  const MID = ['FART', 'SHIT', 'BUTT', 'TURD', 'PISS', 'NUTS', 'GOBLIN', 'FROG', 'HAMSTER', 'POOP', 'BOOGER', 'DUMPSTER', 'WIENER', 'TOOT', 'CRAP', 'SKUNK', 'RAT', 'JORTS', 'TAINT', 'GREMLIN'];
-  const SUF = ['INU', 'COIN', 'AI', 'MOON', 'X', '69', '420', '2.0', 'ROCKET', 'GPT', 'DAO', 'CASH', 'TOKEN', 'MAXXING', 'CHAIN', 'PUMP', 'WIF HAT', 'CLASSIC', 'ON SOL'];
+  const PRE = ['BABY', 'TURBO', 'GIGA', 'SAFE', 'MEGA', 'BASED', 'SUPER', 'DEGEN', 'ULTRA', 'LIL', 'BIG', 'ROYAL', 'FAT', 'ANGRY', 'DRUNK', 'HAIRY', 'WET', 'SPICY', 'SAD', 'HORNY',
+    'TINY', 'MOIST', 'FERAL', 'CURSED', 'THICC', 'SNEAKY', 'HUNGRY', 'CRISPY', 'SOGGY', 'GOLDEN', 'STINKY', 'SLEEPY', 'SMELLY', 'LUMPY', 'CHUNKY', 'SAUCY',
+    'RABID', 'COSMIC', 'QUANTUM', 'NAKED', 'DIRTY', 'ANCIENT', 'BALD', 'SWEATY', 'HYPER', 'OMEGA', 'SIGMA', 'ALPHA', 'GREASY', 'HAUNTED', 'LOUD', 'FRISKY',
+    'SAVAGE', 'WOKE', 'UNHINGED', 'DEFINITELY NOT A', 'OFFICIAL', 'REAL', 'MOTHER', 'DADDY', 'GRANDMA'];
+  const MID = ['FART', 'SHIT', 'BUTT', 'TURD', 'PISS', 'NUTS', 'GOBLIN', 'FROG', 'HAMSTER', 'POOP', 'BOOGER', 'DUMPSTER', 'WIENER', 'TOOT', 'CRAP', 'SKUNK', 'RAT', 'JORTS', 'TAINT', 'GREMLIN',
+    'GOOSE', 'BEAVER', 'BURRITO', 'NUGGET', 'WEASEL', 'PICKLE', 'RACCOON', 'PIGEON', 'MULLET', 'DIAPER', 'CHEETO', 'SHART', 'CABBAGE', 'DINGLEBERRY', 'DOOKIE',
+    'LLAMA', 'POSSUM', 'BURP', 'SOCK', 'TOENAIL', 'MEATBALL', 'HOTDOG', 'TROLL', 'CLOWN', 'BANANA', 'BEANS', 'TACO', 'DONKEY', 'GRAVY', 'TURTLE', 'WAFFLE',
+    'TOILET', 'GOAT', 'SHRIMP', 'CHIHUAHUA', 'MOOSE', 'BIGFOOT', 'UNICORN', 'BALLSACK', 'NIPPLE', 'SPERM WHALE', 'COCKROACH', 'MAYO', 'KEBAB', 'SAUSAGE', 'BOOMER',
+    'KAREN', 'LANDLORD', 'DENTIST', 'PLUMBER', 'JANITOR', 'RUG', 'JEET', 'BAGHOLDER', 'LAMBO', 'WIFE', 'BOYFRIEND', 'DEV'];
+  const SUF = ['INU', 'COIN', 'AI', 'MOON', 'X', '69', '420', '2.0', 'ROCKET', 'GPT', 'DAO', 'CASH', 'TOKEN', 'MAXXING', 'CHAIN', 'PUMP', 'WIF HAT', 'CLASSIC', 'ON SOL',
+    'ZILLA', 'VERSE', 'SWAP', 'FI', 'ONCHAIN', 'PRO MAX', '2049', '9000', 'LAUNCH', 'CULT', 'INU 2.0', 'KING', 'LORD', 'HUB', 'CORE', 'ETF', 'V2', 'BET',
+    'NETWORK', 'PROTOCOL', 'FINANCE', 'CAPITAL', 'RESERVE', 'MAFIA', 'ARMY', 'GANG', 'SQUAD', 'OF WALL STREET', 'IN A HAT', 'WITH LASER EYES', 'ON STEROIDS',
+    'BUT ANGRY', 'ULTRA EDITION', 'TO THE MOON', 'FOREVER', 'REBORN', 'RETURNS', 'STRIKES BACK', 'DELUXE', 'EXTRA CRISPY', 'TREASURY', 'BANK', 'LABS'];
   function coin(rand) {
     const pk = a => a[Math.floor(rand() * a.length)];
     const a = rand() < 0.6 ? pk(PRE) : '', b = pk(MID), c = pk(SUF);
     const name = [a, b, c].filter(Boolean).join(' ');
-    const tick = '$' + ((a ? a.slice(0, 1) : '') + b + (c.length <= 3 && !/\s/.test(c) ? c : c.replace(/\W/g, '').slice(0, 1))).slice(0, 10);
+    const tick = '$' + ((a ? a.replace(/\W/g, '').slice(0, 1) : '') + b.replace(/\W/g, '') + (c.length <= 3 && !/\s/.test(c) ? c : c.replace(/\W/g, '').slice(0, 1))).slice(0, 10);
     const base = (1 + rand() * 8.99) * Math.pow(10, -(4 + Math.floor(rand() * 4)));
     return { name, tick, base: +base.toPrecision(4) };
   }
@@ -528,6 +564,7 @@ const RUGD = (() => {
 
 /* ================= words ================= */
 const TXT = {
+  // big line on the rug screen
   rug: [
     "The dev just bought a Lambo with your rent money.", "Liquidity: gone. Telegram: deleted. Dev: in Dubai.",
     "Congrats, you're now a long-term holder of absolutely fuck all.", "The dev said 'trust me bro'. You trusted him, bro.",
@@ -548,55 +585,268 @@ const TXT = {
     "Bagholders Anonymous meets Tuesdays. Bring your own copium.", "It was a 'community coin'. The community was one guy and his alts.",
     "Tell your wife it was a 'tax loss harvest'.", "You got rugged on a coin named after a fart. Read that back.",
     "Charts don't lie. Devs fucking do.", "The rug's gone. The floor's gone. The basement is flooded.",
-    "The dev is already launching the next one. You'll buy that too.", "Imagine holding. Couldn't be you. (It was you.)"
+    "The dev is already launching the next one. You'll buy that too.", "Imagine holding. Couldn't be you. (It was you.)",
+    "The dev's Telegram bio now just says 'lol'.", "Breaking: chart discovers gravity.",
+    "That green candle was bait. You were the fish.", "Dev just swapped your life savings for a jet ski.",
+    "You didn't buy the dip. You bought the hole.", "Liquidity left faster than your dad going out for milk.",
+    "Your bags have been upgraded to body bags.", "The only thing going to the moon is the dev's private jet.",
+    "Rug status: pulled. Dev status: tanning. Your status: fucked.", "Wen refund? Never. Wen lesson? Also never.",
+    "This chart was brought to you by a 19-year-old in a rented Lambo.", "Should've read the contract. Lol, like you read.",
+    "The dev minted 9 trillion tokens and dumped every one on your head.", "Your 'long-term hold' lasted 14 seconds.",
+    "Somewhere a dev is laughing so hard he dropped his Lambo keys.", "That's not a correction. That's an execution.",
+    "Dev said 'one more pump'. He meant for his wallet.", "You just provided exit liquidity. Thank you for your service.",
+    "Market cap went from 'life changing' to 'lunch money' to 'lol'.", "The roadmap was Q1: launch. Q2: Dubai. Q3: also Dubai.",
+    "Rugged so hard the blockchain needs therapy.", "You held through the rug like it was a personality trait.",
+    "The dev's dog has more money than you now.", "Imagine thinking a coin like this would make you rich. Oh wait.",
+    "That candle has a body count.", "F. Just F. All the F's.",
+    "Your seed phrase is now a decorative poem.", "'Locked liquidity' was locked in the dev's pocket.",
+    "Your financial advisor (a frog emoji) has left the chat.", "The dev is now selling a course on how to rug. You'll buy that too.",
+    "The SEC called. They're also laughing.", "Somebody frame this chart for the Museum of Bad Decisions.",
+    "Dev renounced ownership. Of his conscience.", "Price impact: 100%. Emotional impact: 1000%.",
+    "Good news: you can't lose any more. Bad news: everything else.", "Pump and dump? More like pump and done.",
+    "This is why your mom says crypto is a scam. She's right this time.", "You were early. Early to get fucked.",
+    "The coin's website now redirects to a picture of a middle finger.", "Your portfolio called. It wants a divorce.",
+    "Rug pulled. Floor pulled. Basement sold for parts.", "The chart now looks like a ski jump for your money.",
+    "Ever considered a career as exit liquidity? You're a natural.", "That rug had tassels and everything. Beautiful craftsmanship.",
+    "The dev just changed his Twitter name to 'ex-founder'.", "Even the honeypot thinks that was harsh.",
+    "Smart money left 3 seconds ago. Dumb money is reading this.", "There's a 0.0% chance this comes back. We checked.",
+    "Your 'conviction' has been converted to $0.00.", "Sir, this is a Wendy's. And now you'll be working here.",
+    "The developer has 'stepped away to focus on family' (his new yacht).", "Wallet says 'insufficient funds'. Soul says same.",
+    "You've been diamond-handed straight into the fucking dirt.", "Your bag is so heavy it fell through the floor.",
+    "Chart's new nickname: The Widowmaker.", "'Never selling' — you, 30 seconds ago. Accurate.",
+    "The liquidity pool has been drained. Please exit through the gift shop.", "Fun fact: 'rug' is 'gur' backwards, which is the sound you just made.",
+    "The only green you'll see now is envy.", "This coin had more red flags than a Soviet parade.",
+    "Liquidity: yeeted. Hopium: depleted. You: defeated.", "The auditor was the dev in a fake mustache.",
+    "Your portfolio is in the ICU and the surgeon is the dev.", "Your hopes were pumped. Your wallet was dumped.",
+    "Dev wallet just sent you 'ty' on-chain. Classy.", "And that, kids, is why grandpa works at Costco.",
+    "The rug got pulled so fast it left skid marks.", "Dev's last tweet: 'building'. He was building a getaway car.",
+    "Liquidity status: 404 not found.", "Somebody call the fire department, your bags are toast.",
+    "Honk if you just lost everything.", "'It's just a dip' — last words of every bag holder ever.",
+    "Crypto Twitter is already calling it 'a learning experience'. Cope.", "Rest in piss, sweet coin.",
+    "The pump was fake. The dump was very fucking real.", "Your net worth just did a swan dive into a puddle.",
+    "Dev pulled the rug, the floorboards and the copper wiring.", "Somebody just bought a Rolex with your bags. It's set to 'you're fucked' o'clock.",
+    "You were the bagholder the whole time. Plot twist.", "That chart shape is called a 'dev exit'. Learn it. Live it. Lose to it.",
+    "The dev is offline. Forever. On a beach.", "You now own 100% of a dead coin. Congrats on the monopoly.",
+    "Chart said 'up only'. Dev said 'down only'. Dev won."
   ],
+  // big line on the results screen after a round with no rug
   survive: [
     "Chart survived. Dev must be asleep.", "No rug this round. Don't get fucking cocky.", "Nobody got rugged. Suspicious as hell.",
     "The dev is still 'building'. Allegedly.", "Clean round. Enjoy it, it won't last.", "Dev forgot to pull. Probably still counting last week's money.",
     "Liquidity is somehow still there. Weird.", "Your wallet lives to get rugged another day.", "No rug. The bots are disappointed. They wanted drama.",
-    "The dev was taking a shit. You got lucky.", "Survived. Tell your therapist the good news.", "Not rugged. Yet. Keep your head on a swivel."
+    "The dev was taking a shit. You got lucky.", "Survived. Tell your therapist the good news.", "Not rugged. Yet. Keep your head on a swivel.",
+    "Clock ran out before the dev woke up. Lucky bastards.", "No rug. The dev's Wi-Fi must be down.", "Round survived. Pour one out for the dev's disappointment.",
+    "The rug stayed on the floor. For now.", "Bell rang. Liquidity's still here. Nobody believe it.", "Every bag auto-sold. Somehow nobody died.",
+    "The dev was busy rugging a different coin. You're welcome.", "Clean round. Frame it. It'll never happen again.", "Survived. Still sweating though, huh?",
+    "The dev forgot his password. Lucky you.", "Nobody got rugged. Please clap. Slowly.", "The dev's mom made him go to bed. No rug tonight.",
+    "Survived. Your heart rate didn't though.", "That was legit. Weird. Stay paranoid.", "Coin lived. Dev is plotting. Stay frosty.",
+    "No rug, just regular market violence.", "The floor held. Check again next round.", "Dev got distracted by his phone. Rug postponed.",
+    "The coin survived the round. Scientists are baffled.", "Your money's still here. Don't get used to it.", "No rug. Somebody check if the dev is okay.",
+    "Survived the round. Tell your grandkids.", "Zero rugs. Dev is saving it for something special.", "The rug is there. You just can't see it yet.",
+    "Round over. The dev is watching. The dev is always watching.", "Rug-free round. Enjoy the 30 seconds of peace you earned.",
+    "The dev blinked. You lived.", "No rug. The vibes were simply too strong.", "The bell saved you. The bell can't save you forever.",
+    "Round over. The only thing rugged was your nerves.", "Clean round. Unclear why. Don't ask questions.", "The dev rage-quit his own coin. Respect.",
+    "Liquidity still there. Contract still there. Your hair? Less there.", "Survived. Somewhere a dev is muttering 'next time'.",
+    "Round closed without a rug. Somebody check the dev's pulse.", "No rug. The trenches are quiet. Too quiet.",
+    "That was the most honest 30 seconds in crypto history.", "Auto-sold at the bell like responsible degenerates."
   ],
+  // line on the final standings
   final: [
     "Screenshot it and post it like you're a fucking genius.", "Somewhere an accountant just felt a disturbance.",
     "None of this was financial advice. All of it was stupid.", "The real rug was the friends we jeeted along the way.",
-    "Go touch grass. Then come back and do it again.", "Tax man has entered the chat.", "Winner buys the next round of copium."
+    "Go touch grass. Then come back and do it again.", "Tax man has entered the chat.", "Winner buys the next round of copium.",
+    "Winner: buy yourself something nice. Like therapy.", "GG. Now delete your browser history before your wife sees it.",
+    "Somewhere a dev is taking notes on all of you.", "Congrats to the winner, condolences to the bag holders.",
+    "That was 90 seconds of pure financial violence.", "Your therapist would like a word.", "Next game, the dev's coming back for revenge.",
+    "Imagine doing this with real money. (You do. We know.)", "Profits are fake. The trauma is real.", "Past performance doesn't mean shit.",
+    "Go outside. Look at a tree. Trees don't rug.", "Winner gets bragging rights. Losers get a lesson they'll ignore.",
+    "WAGMI? Absolutely not. Some of you are NGMI.", "Don't quit your day job. Seriously.", "Screenshot the leaderboard. Crop out where you lost.",
+    "Run it back? You know you want to. Degeneracy is a lifestyle.", "Everybody here needs a hug and a financial advisor.",
+    "Victory royale, but make it shitcoins.", "The dev salutes your liquidity.", "This game is a simulation. Unfortunately, so is your portfolio.",
+    "Three coins dead, zero lessons learned.", "The winner is now insufferable. Mute accordingly.",
+    "Losers, remember: it's not a loss until you tell your wife.", "Nobody's going to make it, but some of you made it further.",
+    "Gains are temporary. Screenshots are forever.", "Your degen license has been renewed for another game.",
+    "Well played. Now drink some water, you're shaking.", "Bag holders, please exit through the gift shop.", "Hit run it back. The dev needs a new jet.",
+    "This leaderboard is not legally binding. The losses are.", "The chart giveth and the dev taketh away.",
+    "Thanks for playing. Your liver and your wallet both need a break.", "Remember this feeling next time you ape your rent."
   ],
+  // trollbox system line when a coin launches
   launch: [
     "Dev says 'trust me bro'.", "LP locked (in a shoebox).", "Audited by the dev's cousin.", "Fair launch (dev bought 90%).",
     "Utility: coming soon™.", "Backed by pure fucking vibes.", "Roadmap: 1) launch 2) ??? 3) Dubai.", "Contract renounced-ish.",
-    "Telegram has 40k members (39,990 are bots).", "Elon might tweet about it. Might."
+    "Telegram has 40k members (39,990 are bots).", "Some billionaire might tweet about it. Might.",
+    "Dev says 'this one's different'.", "Website made in Canva 4 minutes ago.", "Logo is a JPEG of the dev's cat.",
+    "Marketing budget: two tweets and a prayer.", "100% of supply in 'community wallets' (the dev's wallets).", "Listing on the big sites: 'soon'.",
+    "Twitter has 80k followers, all named @user8834729.", "Dev promises 'no rug, pinky swear'.", "Contract copied from a coin that rugged yesterday.",
+    "Team is 'fully doxxed' (first names only, fake ones).", "Liquidity locked until next Tuesday.", "Influencer paid in exposure and Taco Bell.",
+    "Already up 300% on a chart nobody has seen.", "Whitepaper is a single meme.", "Founder's LinkedIn says 'visionary'.",
+    "Discord has 4 mods and 0 rules.", "Tokenomics: yes.", "Utility: being a coin.", "Supply: 69 quadrillion.",
+    "Partnerships 'in the works' (he DM'd a pizza place).", "Comes with a free sense of impending doom.", "Marketed exclusively in 3am Telegram raids.",
+    "Audit pending (forever).", "Built on vibes, secured by hope.", "The dev's mom is the biggest holder.", "First 100 buyers get a free bag to hold.",
+    "Roadmap says 'metaverse' 4 times.", "Comes with a 0.69% dev tax and a 100% chance of regret.", "Dev's last coin: rugged. The one before: also rugged.",
+    "Celebrity endorsement from a guy who looks like a celebrity.", "Holders are diamond-handed (can't figure out how to sell).",
+    "No presale (there was a presale).", "Contract verified by vibes.", "The dev's dog is the CMO.", "100% safe, says the guy who made it.",
+    "Chart already making whale noises.", "Dev just changed his pfp to a laser-eyed hamster.", "Ships with zero utility and maximum attitude.",
+    "Community calls are just the dev breathing into a mic.", "Launched from a Wendy's parking lot. Bullish."
   ],
+  // facts on the launch card, [label, value]
   facts: [
     ["HOLDERS", "4 (3 are the dev)"], ["AUDIT", "✅ dev's cousin"], ["LP LOCKED", "trust me bro"], ["UTILITY", "coming soon™"],
     ["DEV", "doxxed (to his mom)"], ["TAX", "0% (dev tax 100%)"], ["MARKETING", "one tweet, deleted"], ["COMMUNITY", "3 bots and a dream"],
     ["WHITEPAPER", "a napkin"], ["CHART", "about to go parabolic, trust"], ["CONTRACT", "renounced-ish"], ["VIBES", "immaculate"],
-    ["RUG RISK", "what's a rug?"], ["TELEGRAM", "40k members, 12 humans"], ["ROADMAP", "Dubai"], ["TEAM", "anon, 'very legit'"]
+    ["RUG RISK", "what's a rug?"], ["TELEGRAM", "40k members, 12 humans"], ["ROADMAP", "Dubai"], ["TEAM", "anon, 'very legit'"],
+    ["CEO", "a golden retriever"], ["CMO", "the dev's girlfriend's brother"], ["AUDIT", "passed a vibe check"], ["SECURITY", "a padlock emoji"],
+    ["SUPPLY", "69,420,000,000,000"], ["BURNED", "the dev's eyebrows"], ["MARKET CAP", "bigger than Belgium (trust)"], ["WEBSITE", "made in MS Paint"],
+    ["DISCORD", "4 members, 3 mods"], ["USE CASE", "laughing at you"], ["TEAM SIZE", "1 guy, 6 alts"], ["HQ", "a Dubai Airbnb"],
+    ["LP", "locked with a bike lock"], ["MINT", "still on, lol"], ["SELL TAX", "yes"], ["BUY TAX", "also yes"],
+    ["RENOUNCED", "emotionally"], ["PARTNERS", "a Panera Bread (unconfirmed)"], ["CHAIN", "the sketchy one"], ["LAUNCHPAD", "the dev's basement"],
+    ["AIRDROP", "to the dev's 400 wallets"], ["INFLUENCERS", "paid in gift cards"], ["VC BACKING", "a Venmo from his uncle"], ["WHALES", "3 (all the dev)"],
+    ["Q1", "launch"], ["Q2", "rug"], ["Q3", "Bali"], ["Q4", "do it again"],
+    ["SENTIMENT", "delusional"], ["RISK LEVEL", "yes"], ["APY", "∞% (source: trust me)"], ["STAKING", "phase 2"],
+    ["NFTs", "phase 3"], ["METAVERSE", "phase 4"], ["DEV RESUME", "rugged 7 coins (successfully)"], ["DEV IQ", "room temperature"],
+    ["DEV AGE", "19 (allegedly)"], ["LIQUIDITY", "$420 and a dream"], ["SOCIALS", "a Twitter with 1 tweet"], ["MEME QUALITY", "mid"],
+    ["MASCOT", "a frog in a hat"], ["TICKER", "regrettable"], ["HOLDER IQ", "don't ask"], ["TOP HOLDER", "definitely not the dev"],
+    ["SNIPERS", "all of them"], ["BOTS", "more than humans"], ["HYPE", "off the fucking charts"], ["RED FLAGS", "🚩🚩🚩🚩🚩🚩"],
+    ["GREEN FLAGS", "coming soon™"], ["EXIT PLAN", "what exit plan"], ["LAWYER", "none (it shows)"], ["COMPLIANCE", "lol"],
+    ["TAX ADVICE", "don't"], ["FAIR LAUNCH", "fairly rigged"], ["ORIGIN STORY", "dev was bored at Applebee's"], ["SMART CONTRACT", "dumb contract"],
+    ["GAS FEES", "more than your rent"], ["BACKED BY", "a dude named Kyle"], ["CHART PATTERN", "inverse cup and handjob"], ["PRICE TARGET", "the moon (or the floor)"],
+    ["RUG ODDS", "nonzero"], ["RATING", "10/10 would ape"], ["TG ADMIN", "bans anyone who asks questions"], ["FUD", "banned"],
+    ["VOLUME", "mostly wash trades"], ["SAFU", "not even a little"], ["SERIES A", "the dev's tax refund"], ["INSURANCE", "thoughts and prayers"],
+    ["MOAT", "a puddle"], ["COMPETITORS", "every other shitcoin"], ["DIVIDENDS", "emotional damage"], ["ESG SCORE", "Extremely Sus Garbage"],
+    ["UPTIME", "until the dev gets bored"], ["SUPPORT", "a voicemail that says 'lol'"], ["REFUND POLICY", "hahahaha"], ["LEGAL STATUS", "vibes-based"],
+    ["DEV LOCATION", "a yacht (rented)"], ["TOKEN STANDARD", "low"], ["DECIMALS", "too many"], ["INFLATION", "whenever dev needs gas money"],
+    ["WEBSITE UPTIME", "until the free trial ends"], ["MULTISIG", "1 of 1 (the dev)"], ["DEV'S SLEEP", "never, he's always plotting"], ["DEGEN SCORE", "over 9000"],
+    ["COMMUNITY VIBE", "cult, but fun"], ["DEX SCREENER", "trending (paid $300)"], ["MEMECOIN TIER", "S-tier shit"], ["SMELL", "faintly of farts"]
+  ],
+  // banner at the top of the launch card
+  launchBanner: [
+    "⚠ NEW LAUNCH DETECTED ⚠", "🚨 FRESH SHITCOIN JUST DROPPED 🚨", "⚠ DEV JUST DEPLOYED A CONTRACT ⚠", "🔥 STEALTH LAUNCH (NOT STEALTH) 🔥",
+    "⚠ 100x GEM ALERT (PROBABLY) ⚠", "🚀 TELEGRAM SAYS THIS IS THE ONE 🚀", "⚠ SNIPERS ALREADY IN ⚠", "💩 NEW COIN JUST HIT THE TRENCHES 💩",
+    "⚠ FAIR LAUNCH (ALLEGEDLY) ⚠", "🚨 AN INFLUENCER JUST SHILLED THIS 🚨", "⚠ DEFINITELY NOT A RUG ⚠", "🐸 THE FROG COUNCIL APPROVED THIS LAUNCH 🐸",
+    "⚠ YOUR NEXT LIFE MISTAKE IS LIVE ⚠", "🎰 THE CASINO IS OPEN 🎰", "⚠ NFA. DYOR. LOL. ⚠", "🚨 DEV IS ONLINE. HIDE YOUR WALLETS 🚨",
+    "⚠ CONTRACT DEPLOYED 3 SECONDS AGO ⚠", "💎 MAYBE THE NEXT 1000x 💎", "⚠ AUDIT: LOL ⚠", "🔔 THE TRENCHES ARE CALLING 🔔"
+  ],
+  // the rug screen, aimed at you
+  rugYou: [
+    "YOU GOT RUGGED. ENJOY YOUR BAGS.", "YOU WERE THE EXIT LIQUIDITY.", "BAG HOLDER DETECTED: YOU.", "CONGRATS, YOU FUNDED THE DEV'S LAMBO.",
+    "YOU HELD. YOU DIED.", "YOUR BAG IS NOW A PAPERWEIGHT.", "YOU GOT FUCKING RUGGED.", "DIAMOND HANDS, ZERO DOLLARS.",
+    "YOU'RE THE REASON THE DEV HAS A YACHT.", "YOU JUST GOT FINANCIALLY ASSASSINATED.", "NGMI. CONFIRMED.",
+    "TELL YOUR MOM IT WAS A 'LEARNING EXPERIENCE'.", "YOU WERE SO CLOSE TO SELLING. SO CLOSE.", "THE DEV THANKS YOU FOR YOUR DONATION.",
+    "YOU'RE THE BAG NOW."
+  ],
+  rugSafe: [
+    "YOU WERE IN CASH. SMUG MODE: ENGAGED.", "YOU DODGED IT. LOOK AT YOU.", "CASH GANG SURVIVES ANOTHER DAY.", "PAPER HANDS FOR THE WIN.",
+    "YOU SMELLED IT COMING. RESPECT.", "NOT TODAY, DEV.", "YOU JEETED AT THE PERFECT TIME. LEGEND.", "SAFE. SMUG. SLIGHTLY SWEATY.",
+    "THE DEV MISSED YOU. BARELY.", "COWARDICE PAID OFF. WELL PLAYED.", "YOU'RE NOT EXIT LIQUIDITY. TODAY.", "YOU ESCAPED. FOR NOW."
+  ],
+  // final screen titles
+  champ: [
+    "GIGACHAD OF THE TRENCHES", "KING OF THE DEGENS", "SUPREME LEADER OF THE PUMP", "CERTIFIED WHALE", "THE DEV'S WORST NIGHTMARE",
+    "GOD OF GREEN CANDLES", "LORD OF THE BAGS", "APEX APE", "THE CHOSEN DEGEN", "UNRUGGABLE LEGEND", "CHAMPION OF FAKE MONEY",
+    "HEDGE FUND IN A HOODIE", "MASTER OF THE JEET", "ARCHMAGE OF WAGMI", "EMPEROR OF THE TRENCHES"
+  ],
+  loser: [
+    "certified exit liquidity", "designated bag holder", "the dev's favorite customer", "professional donor", "official Lambo sponsor",
+    "chief financial victim", "NGMI hall of famer", "human liquidity pool", "rug magnet", "the reason devs keep launching",
+    "wallet-shaped piñata", "the dev's retirement fund", "top buyer, bottom seller", "walking red candle", "certified donation box"
   ],
   pumpChat: ["LFGGGGG 🚀🚀🚀", "wen lambo", "told you fuckers", "this is the one boys", "dev is based af", "100x incoming", "quitting my job tomorrow",
     "printing money baby", "SEND IT", "green dildos everywhere", "I'm so fucking back", "who's selling?? NGMI", "next stop: moon",
-    "my wife's boyfriend is gonna be so proud", "we're all gonna make it", "buy buy buy buy", "chart looking thicc", "imagine selling here lmao", "bullish af", "higher higher HIGHER"],
+    "my wife's boyfriend is gonna be so proud", "we're all gonna make it", "buy buy buy buy", "chart looking thicc", "imagine selling here lmao", "bullish af", "higher higher HIGHER",
+    "WE'RE SO FUCKING BACK", "green candle go brrrr", "this is my retirement plan", "calling my boss to quit rn", "buying a lambo in 20 seconds",
+    "1000x easy", "told my wife we're rich", "haters in shambles", "chart looking like a rocket ship", "sell? never heard of her",
+    "shorters getting liquidated lmaooo", "should've bought more fuck", "WAGMI WAGMI WAGMI", "generational wealth unlocked", "imagine not being in this",
+    "I'm literally shaking (in profit)", "just put my PS5 money in", "dev is a genius", "valhalla here we come", "moon mission confirmed 🌕",
+    "GOD CANDLE!!!", "screenshotting this for the haters", "quitting my job tmrw no cap", "bro the chart is erect", "bears are extinct",
+    "new ATH every 2 seconds", "holding till 10 mil mc", "I'm gonna buy a boat", "printer go brrrrrr", "this is better than sex",
+    "no thoughts just pump", "told y'all this was the play", "my mom's gonna be so proud", "buying a yacht to park my other yacht", "going parabolic boys",
+    "so green I'm getting seasick", "I feel like a hedge fund", "diamond hands paid off", "fuck it, buying more", "ATH ATH ATH",
+    "eating steak tonight boys", "I'm the smartest person alive", "can't stop won't stop", "bullish on literally everything", "everyone who sold is crying",
+    "only up from here (famous last words)", "the chart is in love with me", "made a month's rent in 6 seconds", "WEN BINANCE", "we're gonna be on the news",
+    "shitcoin season is HERE", "god I love this coin", "dev I'd take a bullet for you", "the frog was right", "mom get the camera"],
   dumpChat: ["who the fuck sold", "jeets everywhere", "healthy correction", "buying the dip with my kid's college fund", "it's fine. it's fine. it's fine.",
     "zoom out", "paper hands ngmi", "why is it red", "bro what", "SOMEONE DO SOMETHING", "shakeout before the pump, relax", "I'm not selling, you're selling",
-    "this is fud", "whales manipulating again", "down bad", "red candle = discount", "hold the line!!!", "my stop loss is my wife leaving", "ouch", "dev pls pump"],
+    "this is fud", "whales manipulating again", "down bad", "red candle = discount", "hold the line!!!", "my stop loss is my wife leaving", "ouch", "dev pls pump",
+    "bro what the fuck", "who's dumping on us", "dev pls do something", "red candles everywhere oh god", "I'm gonna be sick", "nothing to see here, just a dip",
+    "bear trap, obviously", "my stop loss got stop lossed", "whales hunting stops again", "why did I buy the top", "this is fine 🔥", "it'll come back (cope)",
+    "buying more (I'm out of money)", "didn't need that rent anyway", "are we getting rugged or just poor", "it's a shakeout. right? RIGHT?",
+    "someone just dumped their whole bag holy shit", "jeets ruining it for everyone", "my wife is going to murder me", "just a healthy 60% correction",
+    "I'm not crying you're crying", "the dip has a dip", "catching knives with my bare hands", "I'm too poor for this dip", "dev is just reloading, chill",
+    "bottom is in (it was not in)", "can't lose if I don't look", "closing my eyes until it's green", "fuck this chart in particular", "bears woke up and chose violence",
+    "I need an adult", "chart looks like my mental health", "HODL YOU COWARDS", "who taught you people to sell", "the floor is lava and so is the price",
+    "guess I'll die", "lower lows, lower highs, lower me", "my portfolio just jumped off a building", "this red candle is personal", "stop selling you absolute muppets",
+    "exit liquidity reporting for duty", "it's not a loss until I sell 🫠", "who pulled the fire alarm", "ngmi ngmi ngmi", "why is it always me",
+    "going down like the Titanic", "pain. just pain.", "getting liquidated by a frog coin", "thinking about getting a real job", "everybody calm down (I'm panicking)",
+    "red dildos everywhere", "this dip is sponsored by my bad decisions", "I can hear my bank account crying", "somebody hold me"],
   crabChat: ["wake me up when it moves", "chart flatter than my portfolio", "crab market zzz", "dev buy something", "anyone alive", "boring as shit",
-    "sideways like my career", "accumulation phase (cope)", "…", "volume where"],
-  buyChat: ["aped in", "full port lfg", "mortgage: deployed", "bought the top probably", "in. no regrets.", "sent my rent", "yolo", "bought more (all of it)", "ape together strong", "in it to win it"],
+    "sideways like my career", "accumulation phase (cope)", "…", "volume where", "is this thing on", "chart moving like my grandma", "snore",
+    "flatter than a pancake", "I came here for violence not this", "someone poke it with a stick", "dev wake up", "this is a stablecoin now",
+    "I could watch paint dry instead", "crab gang 🦀", "my eyelids are getting heavy", "someone buy something already", "even the bots are bored",
+    "sideways is a direction I guess", "EKG of a dead man", "more action in a library", "calm before the rug", "refreshing like it'll help",
+    "crabs in a bucket fr", "chart did a little wiggle", "not a single candle with a pulse", "boring = rug soon?", "anyone want tacos",
+    "we're consolidating (in a coma)", "nap time", "wake me up when we 10x", "still waiting on the pump...", "this chart has the personality of drywall"],
+  buyChat: ["aped in", "full port lfg", "mortgage: deployed", "bought the top probably", "in. no regrets.", "sent my rent", "yolo", "bought more (all of it)",
+    "ape together strong", "in it to win it", "just aped my whole paycheck", "bought, now pray", "fully deployed", "in with my eyes closed", "FOMO'd in like a champ",
+    "bag acquired", "sent it", "just bought the top, you're welcome", "in with the rent money", "aped with my lunch money", "all in. no plan.",
+    "my financial advisor said no so I said yes", "bought because the chart looked lonely", "bought because the name is funny", "in for the memes",
+    "ape mode: activated", "loaded up", "this better pump", "diamond hands engaged", "joining the cult", "bought the dip (I think)", "I'm in. hold my beer",
+    "yolo'd the emergency fund", "gonna be rich or gonna be funny", "in at the bottom (lie)", "my wife thinks I'm at the gym", "couldn't resist",
+    "bags packed, ready for the moon", "entered the trenches", "all chips on the table"],
   sellChat: ["took profits cya losers", "secured the bag", "jeeting respectfully", "sold. don't @ me", "profit is profit", "I'm out, good luck boys",
-    "paper hands, full pockets", "cashed out, buying nuggets", "sold the top (trust)", "bye bitches"],
+    "paper hands, full pockets", "cashed out, buying nuggets", "sold the top (trust)", "bye bitches", "sold, cya at the bottom", "taking my profits and running",
+    "jeet and proud", "out with my dignity intact", "booking profits like an adult", "sold, now I can afford groceries", "I'm out. good luck nerds",
+    "took the money and ran", "scared money don't make money but it keeps money", "bye bye bag", "sold at a loss to save my sanity", "paper hands, warm bed",
+    "cashing out before the dev does", "nope nope nope sold", "sold. smelled a rug", "dumping on you, sorry not sorry", "I'm the exit, you're the liquidity",
+    "took profits, going to Applebee's", "my hands are made of tissue paper", "rage sold lol", "cashed out, feeling smug", "jeeted with honor",
+    "sold before mom found out", "out like a fart in the wind", "ok I'm scared, sold", "I'm a jeet and I'm okay", "sold. dev can't rug me now",
+    "exit liquidity? not today", "ladder sold like a pro (I panicked)", "sold so I can buy back lower (I won't)"],
   rugChat: ["DEV WTF", "my rent money 😭", "TELEGRAM IS GONE???", "I'm calling the SEC (they laughed at me)", "bro I JUST bought", "that was my kid's college fund",
     "fuck fuck fuck fuck", "back to Wendy's I guess", "it's fine I'm a long term holder now", "is this a dip? tell me it's a dip", "not again. NOT AGAIN.",
-    "dev pls I have a family", "I'm literally shaking", "new coin when?", "f in chat", "so this is rock bottom", "I'm never doing this again (until next round)"],
-  surviveChat: ["no rug. weird.", "dev asleep?", "survived another one", "wallets intact. for now."],
-  alreadyIn: ["You're already all in, dumbass.", "Bro you're FULL PORT. There's no more money.", "Can't buy more. You spent it all.", "Already bagged up. Relax."],
-  noBag: ["Sell what? You don't own shit.", "No bag to dump, genius.", "You're in cash. Sell your dignity instead.", "Nothing to sell. Hit BUY first, chief."],
+    "dev pls I have a family", "I'm literally shaking", "new coin when?", "f in chat", "so this is rock bottom", "I'm never doing this again (until next round)",
+    "WHERE DID THE LIQUIDITY GO", "I just lost my house", "dev blocked me on Telegram", "rugged AGAIN??", "my lambo... it's gone", "this is a crime",
+    "someone call the internet police", "reporting this to my mom", "I held because the chat said hold", "diamond hands my ass", "I'm literally sobbing",
+    "bro took the liquidity AND the vibes", "can I get a refund", "worst 30 seconds of my life", "my wife's boyfriend is leaving her",
+    "holding for the comeback (there is no comeback)", "I trusted you dev", "everyone who said hold: fuck you", "there goes my retirement", "why didn't I sell",
+    "I had a feeling and I ignored it", "the bots knew. THE BOTS KNEW.", "gm (I'm broke)", "emotional damage", "my wallet is a ghost town",
+    "rug so big it needs its own zip code", "welp", "is it too late to sell", "my portfolio is on life support", "moving back in with my parents",
+    "that was literally my last $1000", "5th time this week", "told you all it was a scam (I bought too)", "I need a drink", "bag holder of the year",
+    "dev pls I'm begging", "my kids will never know", "goodbye cruel market", "writing a strongly worded tweet", "they always get you on the pump",
+    "why does this always happen to me", "I'll be back. with more money. to lose.", "refund my soul", "so much for 100x", "DEVVVVVV"],
+  surviveChat: ["no rug. weird.", "dev asleep?", "survived another one", "wallets intact. for now.", "phew", "still alive?", "no rug lets gooo",
+    "dev chickened out", "clean round baby", "we survived 💪", "auto-sold. heart still racing", "celebrating with nuggies", "the bell saved me",
+    "holy shit we lived", "rugless. suspicious.", "good round fellas", "made it out alive", "somehow still here", "not today dev", "gg",
+    "lived to ape another day", "who else was sweating", "dev is plotting something", "bell rang, wallets safe", "must be my lucky day"],
+  alreadyIn: ["You're already all in, dumbass.", "Bro you're FULL PORT. There's no more money.", "Can't buy more. You spent it all.", "Already bagged up. Relax.",
+    "You're all in already. Chill, degen.", "No cash left. You YOLO'd it all.", "Can't buy with $0, champ.", "Wallet empty. Bag full. That's the game.",
+    "Already full port. Pray instead.", "More? With what, your kidney?", "Already in. Sell first if you want to re-ape.", "You're maxed out. Like your credit card.",
+    "Already aped. Patience, grasshopper.", "No money left, only hope.", "You're already holding the bag. Enjoy.", "Can't ape twice. Unfortunately.",
+    "Your wallet is literally empty, genius.", "All in means ALL in.", "Bro, the money's already in the coin.", "Stop smashing the button. You're full port."],
+  noBag: ["Sell what? You don't own shit.", "No bag to dump, genius.", "You're in cash. Sell your dignity instead.", "Nothing to sell. Hit BUY first, chief.",
+    "Can't sell air, chief.", "You have zero coins. Zero.", "Sell? You're in cash, you coward.", "Nothing to jeet. Buy first.", "There's nothing to dump. Relax.",
+    "You can't paper-hand nothing.", "The sell button is for people who own stuff.", "Your coins: 0. Your confusion: 100.", "No bag. No sell. Simple math.",
+    "Sell what, your soul?", "Can't sell if you never bought, galaxy brain.", "Zero tokens detected.", "You're in cash. Safest you'll ever be.",
+    "Smashing sell won't make coins appear.", "Buy first. Then panic-sell. That's the order.", "You're bagless. Enjoy the freedom."],
   holdQuip: ["full port. what could go wrong?", "diamond hands or bag holder? we'll find out.", "dev is definitely not about to rug. definitely.",
-    "watching the chart like it owes you money.", "this is the one. (it's never the one.)", "your palms are sweaty. we can tell."],
+    "watching the chart like it owes you money.", "this is the one. (it's never the one.)", "your palms are sweaty. we can tell.",
+    "you're holding. the dev is watching.", "bag in hand. sweat on brow.", "one eye on the chart, one on the exit.", "is that a rug? no? okay. okay.",
+    "your heart rate is a chart now.", "praying to the green candle gods.", "don't look down.", "this is either genius or a cautionary tale.",
+    "you're the liquidity now. good luck.", "clench those diamond hands.", "every red candle is a personal attack.", "hope is not a strategy. but here we are.",
+    "the dev knows you're holding. probably.", "sell? hold? cry? all three?", "in it to win it (or bin it).", "remember: the rug never announces itself.",
+    "this is fine. this is totally fine.", "your wife's boyfriend believes in you.", "the bag is heavy. carry it with pride.", "greed is good until it isn't.",
+    "fortune favors the bold. so do rugs.", "hands: diamond. brain: smooth.", "one more candle. just one more.", "the exit is right there. you know where it is.",
+    "degen mode: fully engaged."],
   cashQuip: ["sitting in cash like a coward. respect.", "sidelined. safe. boring.", "cash is a position. a bitch position, but a position.",
-    "waiting for the dip like a vulture.", "can't get rugged if you don't hold. galaxy brain."],
-  _boot: ["RUGD BIOS v0.69 (c) 2026 Definitely Not A Scam LLC", "Checking wallet........ EMPTY", "Loading hopium......... 100%", "Disabling common sense.. OK", "Ready. Don't say we didn't warn you."]
+    "waiting for the dip like a vulture.", "can't get rugged if you don't hold. galaxy brain.", "cash gang. no bag, no rug.", "watching from the sidelines with popcorn.",
+    "waiting for the perfect entry (it doesn't exist)", "your money's safe. your ego isn't.", "fomo is knocking. don't answer.", "buy the dip? which dip? THAT dip?",
+    "you're a sniper. or a coward. same thing.", "the chart is calling you. it lies.", "patience pays. sometimes.", "cash is king. the king is bored.",
+    "staring at the buy button like an ex.", "no position, no problems.", "green candle without you. how's that feel?", "nothing ventured, nothing rugged.",
+    "dev can't rug what you don't hold.", "finger on the trigger. ready.", "doing nothing and losing nothing. elite.", "itching to ape? scratch it.",
+    "the sidelines are comfy.", "FOMO level: rising.", "ready to pounce. or panic.", "the price is moving without you.", "sitting this one out? brave or dumb."]
 };
 const BOT_NAMES = ['PaperHandsPete', 'ExitLiquidity', 'WenLambo', 'RugPullRick', 'GasFeeGary', 'ApeInAndy', 'BagHolderBrenda', 'NGMI_Nate', 'FOMO_Fiona', 'CopeCaleb',
-  'LadderTopLarry', 'JeetJerry', 'DegenDiane', 'Wassie420', 'PumpItPaul', 'CrabbyCarl', 'SnipeBot9000', 'DiamondDick', 'MoonBoyMarco', 'SolanaSusan'];
+  'LadderTopLarry', 'JeetJerry', 'DegenDiane', 'Wassie420', 'PumpItPaul', 'CrabbyCarl', 'SnipeBot9000', 'DiamondDick', 'MoonBoyMarco', 'SolanaSusan',
+  'HopiumHarry', 'RektRandy', 'BullTrapBetty', 'SlippageSam', 'CopiumCarla', 'DumpTruckDan', 'GigaBrainGreg', 'HodlHannah', 'PonziPatty', 'AlphaLeakAl',
+  'BottomBuyerBo', 'TxFailTina', 'ChartGazerChad', 'GreenCandleGina', 'LiquidatedLou', 'SatoshiNakaNOPE', 'FrogFlipFrank', 'WhaleWannabe', 'ShillShawn', 'MintMaxine'];
 const COLORS = ['#16a34a', '#e11d48', '#d97706', '#2563eb', '#9333ea', '#ea580c', '#0d9488', '#db2777', '#65a30d', '#1f2937'];
 const INTRO_MS = 4200, RUG_MS = 5600, RESULTS_MS = 7500;
 
@@ -628,6 +878,7 @@ function fmtPrice(v) {
 }
 function fmtBig(v) { return v >= 1e9 ? (v / 1e9).toFixed(2) + 'B' : v >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : v >= 1e3 ? (v / 1e3).toFixed(1) + 'K' : v.toFixed(0); }
 function fmtCoins(v) { return v >= 1e9 ? (v / 1e9).toFixed(2) + 'B' : v >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : v >= 1e3 ? (v / 1e3).toFixed(1) + 'K' : v.toFixed(1); }
+const buzz = p => { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} };
 let toastT = 0;
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 1800); }
 
@@ -749,14 +1000,14 @@ function hostClose(now) {
   G.res = roundRes(false); G.ph = 'results'; G.phEnd = now + RESULTS_MS;
 }
 function settle() { G.players.forEach(p => { p.rpnl = p.cash - RUGD.START_CASH; p.total += p.rpnl; }); }
-const devAddr = () => '0x' + Math.floor(Math.random() * 65536).toString(16).padStart(4, '0').toUpperCase() + '…' + pick(['DEAD', 'BEEF', 'C0DE', 'F00D', 'B0B0', '4200', '6969', 'FA27']);
+const devAddr = () => '0x' + Math.floor(Math.random() * 65536).toString(16).padStart(4, '0').toUpperCase() + '…' + pick(['DEAD', 'BEEF', 'C0DE', 'F00D', 'B0B0', '4200', '6969', 'FA27', 'DUMP', 'BA6S', 'RUGD', 'CA5H', 'B00B', 'FEED', 'BADD', '1337', 'DEAF', 'FACE']);
 function roundRes(rugged) {
   const rows = G.players.map(p => ({ i: p.id, n: p.name, c: p.color, r: r2(p.rpnl), t: r2(p.total), rg: p.rugged ? 1 : 0, b: p.bot ? 1 : 0 })).sort((a, b) => b.r - a.r);
   return { rn: G.rn, rugged, line: rugged ? line('rug') : line('survive'), dev: devAddr(), rows };
 }
 function finalRes() {
   const rows = G.players.map(p => ({ i: p.id, n: p.name, c: p.color, t: r2(p.total), b: p.bot ? 1 : 0 })).sort((a, b) => b.t - a.t);
-  return { rows, rugs: G.rugs, line: line('final') };
+  return { rows, rugs: G.rugs, line: line('final'), champ: line('champ'), loser: line('loser') };
 }
 function botsAct(k) {
   const path = G.R.path;
@@ -953,7 +1204,7 @@ function act(side) {
   const btn = side === 'b' ? $('#buyBtn') : $('#sellBtn');
   const holding = isHolding(me);
   if ((side === 'b' && holding) || (side === 's' && !holding)) {
-    SFX.nope(); btn.classList.remove('nope'); void btn.offsetWidth; btn.classList.add('nope');
+    SFX.nope(); buzz([30, 40, 30]); btn.classList.remove('nope'); void btn.offsetWidth; btn.classList.add('nope');
     toast(line(side === 'b' ? 'alreadyIn' : 'noBag')); return;
   }
   const k = curK(), price = pathFor(V.seed)[k];
@@ -963,7 +1214,7 @@ function act(side) {
     NET.room.presence({ tq: NET.tq }).catch(() => {});
     UI.pend = { side, at: performance.now(), last: me.tr[me.tr.length - 1] };
   } else return;
-  flash(side === 'b' ? 'buy' : 'sell');
+  flash(side === 'b' ? 'buy' : 'sell'); buzz(25);
   if (side === 'b') { SFX.buy(); popup(btn, 'APED IN!', '#4ade80'); }
   else {
     SFX.sell();
@@ -1112,6 +1363,12 @@ function renderBoard(k, path, now) {
 }
 function renderChat() {
   if (!V.chat || V.cn === UI.chatN) return; UI.chatN = V.cn;
+  const last = V.chat[V.chat.length - 1], pk = $('#peek');
+  if (last) {
+    pk.className = last[3] === 'rug' ? 'rug' : last[3] ? 'sys' : '';
+    pk.innerHTML = last[3] ? esc(last[2]) : `<b style="color:${okColor(last[1])}">${esc(last[0])}:</b>${esc(last[2])}`;
+    void pk.offsetWidth; pk.classList.add('pk');
+  }
   $('#chat').innerHTML = V.chat.slice(-14).map(([n, c, t, kind]) => kind
     ? `<div class="ln ${kind === 'rug' ? 'rug' : 'sys'}">${esc(t)}</div>`
     : `<div class="ln"><b style="color:${okColor(c)}">${esc(n)}:</b> ${esc(t)}</div>`).join('');
@@ -1145,8 +1402,8 @@ function onPhase(ph, now) {
   ov.className = 'ovl'; ov.hidden = false;
   if (ph === 'intro') {
     UI.ys = null; UI.pend = null; UI.cdLast = -1;
-    const r = RUGD.rng((V.seed ^ 0x5eed) >>> 0), facts = shuffle(TXT.facts.slice(), r).slice(0, 4), coin = V.coin;
-    ov.innerHTML = `<div class="card"><div class="blink">⚠ NEW LAUNCH DETECTED ⚠</div><div class="cname">${esc(coin.name)}</div><div class="ctick">${esc(coin.tick)}</div>` +
+    const r = RUGD.rng((V.seed ^ 0x5eed) >>> 0), facts = shuffle(TXT.facts.slice(), r).slice(0, 4), coin = V.coin, banner = TXT.launchBanner[Math.floor(r() * TXT.launchBanner.length)];
+    ov.innerHTML = `<div class="card"><div class="blink">${esc(banner)}</div><div class="cname">${esc(coin.name)}</div><div class="ctick">${esc(coin.tick)}</div>` +
       `<ul class="facts">${facts.map(([a, b]) => `<li><b>${esc(a)}:</b> ${esc(b)}</li>`).join('')}</ul>` +
       `<div class="rinfo">ROUND ${V.rn + 1} OF 3 · $1,000 EACH · 30 SECONDS</div><div class="cd" id="cd">3</div></div>`;
     SFX.launch();
@@ -1158,10 +1415,10 @@ function onPhase(ph, now) {
     ov.classList.add('rug');
     ov.innerHTML = `<div class="rugscene"><div class="carpet"></div></div><div class="card"><div class="stamp">RUGGED</div>` +
       `<div class="later"><div class="rugline">${esc(res.line)}</div><div class="devtx">dev wallet ${esc(res.dev)} removed 100% of liquidity · ${esc(V.coin.tick)} → $0.00</div>` +
-      (mine ? `<div class="you ${mine.rg ? 'dn' : 'up'}">${mine.rg ? 'YOU GOT RUGGED. ENJOY YOUR BAGS.' : 'YOU WERE IN CASH. SMUG MODE: ENGAGED.'}</div>` : '') +
+      (mine ? `<div class="you ${mine.rg ? 'dn' : 'up'}">${line(mine.rg ? 'rugYou' : 'rugSafe')}</div>` : '') +
       `<div class="cols"><div><h4 class="dn">BAG HOLDERS (${bag.length})</h4>${bag.map(x => `<div style="color:${okColor(x.c)}">💀 ${esc(x.n)}</div>`).join('') || '<div>nobody. dev is crying.</div>'}</div>` +
       `<div><h4 class="up">GOT OUT ALIVE (${out.length})</h4>${out.map(x => `<div style="color:${okColor(x.c)}">💵 ${esc(x.n)} <span class="${x.r >= 0 ? 'up' : 'dn'}">${smoney(x.r)}</span></div>`).join('') || '<div>nobody. everyone got rugged lmao</div>'}</div></div></div></div>`;
-    SFX.rug(); flash('rug');
+    SFX.rug(); flash('rug'); buzz([120, 60, 120, 60, 400]);
     const s = $('#screen'); s.classList.remove('shake'); void s.offsetWidth; s.classList.add('shake');
   } else if (ph === 'results') {
     const res = V.res || { rows: [], line: '' }, top = res.rows[0];
@@ -1173,15 +1430,15 @@ function onPhase(ph, now) {
 }
 function standings(rows, round) {
   return `<table class="st"><tr><th>#</th><th>DEGEN</th>${round ? '<th>ROUND</th>' : ''}<th>TOTAL</th></tr>` + rows.map((x, i) =>
-    `<tr class="${x.i === myId ? 'me' : ''}"><td>${i + 1}</td><td style="color:${okColor(x.c)}">${round && x.rg ? '💀 ' : ''}${esc(x.n)}${x.b ? ' <span style="color:var(--dim)">bot</span>' : ''}</td>` +
+    `<tr class="${x.i === myId ? 'me' : ''}"><td>${i + 1}</td><td style="color:${okColor(x.c)}">${round && x.rg ? '💀 ' : ''}${esc(x.n)}${x.b ? ' <span class="bt" style="color:#999">bot</span>' : ''}</td>` +
     (round ? `<td class="${x.r >= 0 ? 'up' : 'dn'}">${smoney(x.r)}</td>` : '') + `<td class="${x.t >= 0 ? 'up' : 'dn'}">${smoney(x.t)}</td></tr>`).join('') + '</table>';
 }
 function renderFinal() {
   const fin = V.fin || { rows: [], rugs: 0, line: '' }, w = fin.rows[0], last = fin.rows[fin.rows.length - 1], ov = $('#ovl');
   const canRun = MODE === 'solo' || NET.role === 'host';
-  ov.innerHTML = `<div class="card res"><div class="champ">GIGACHAD OF THE TRENCHES</div>` +
+  ov.innerHTML = `<div class="card res"><div class="champ">${esc(fin.champ || 'GIGACHAD OF THE TRENCHES')}</div>` +
     (w ? `<div class="champname" style="color:${okColor(w.c)}">${esc(w.n)}</div><div class="mvp">${smoney(w.t)} over 3 rounds</div>` : '') +
-    (last && last !== w ? `<div class="loser">certified exit liquidity: <b style="color:${okColor(last.c)}">${esc(last.n)}</b> (${smoney(last.t)})</div>` : '') +
+    (last && last !== w ? `<div class="loser">${esc(fin.loser || 'certified exit liquidity')}: <b style="color:${okColor(last.c)}">${esc(last.n)}</b> (${smoney(last.t)})</div>` : '') +
     `<div class="sub">${fin.rugs === 0 ? 'Zero rugs this game. The dev is losing his touch.' : fin.rugs === 1 ? 'One rug this game.' : 'TWO rugs in one game. The dev is in his bag.'} ${esc(fin.line)}</div>` +
     standings(fin.rows, false) +
     `<div class="fbtns">${canRun ? '<button class="btn" data-act="again">RUN IT BACK</button>' : '<span class="rinfo">waiting for the host to run it back…</span>'}` +
@@ -1193,7 +1450,7 @@ function renderFinal() {
 function overlayTick(now) {
   if (V.ph === 'intro') {
     const s = Math.max(1, Math.ceil(phaseLeft(now) / 1000) - 1), el = $('#cd');
-    if (el && s !== UI.cdLast) { UI.cdLast = s; el.textContent = s <= 3 ? s : 'GET READY'; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); if (s <= 3) SFX.beep(false); }
+    if (el && s !== UI.cdLast) { UI.cdLast = s; el.textContent = s <= 3 ? s : 'GET READY'; el.classList.remove('cdp'); void el.offsetWidth; el.classList.add('cdp'); if (s <= 3) SFX.beep(false); }
   } else if (V.ph === 'results') {
     const el = $('#nextIn'); if (el) { const s = Math.max(0, Math.ceil(phaseLeft(now) / 1000)); el.textContent = V.rn < 2 ? `next shitcoin launches in ${s}…` : `final standings in ${s}…`; }
   }
