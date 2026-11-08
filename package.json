@@ -1,0 +1,9 @@
+{
+  "name": "rugd",
+  "version": "1.0.0",
+  "private": true,
+  "description": "RUGD - the 10-player shitcoin trading game where the dev always wins (eventually)",
+  "main": "server.js",
+  "scripts": { "start": "node server.js", "test": "node tools/sim.js" },
+  "engines": { "node": ">=18" }
+}

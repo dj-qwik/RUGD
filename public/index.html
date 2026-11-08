@@ -1,0 +1,1233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RUGD</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%92%80%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=VT323&display=swap">
+<style>
+/* Layout: a beige CRT monitor fills the window; everything happens on its green phosphor screen.
+   Game view = ticker header, big chart + leaderboard/trollbox, giant BUY/SELL buttons at the bottom. */
+:root{
+  --g:#39ff7a; --g2:#19c45a; --gdim:rgba(57,255,122,.35); --r:#ff3d5a; --amber:#ffbf2e;
+  --txt:#c9ffd9; --dim:#6fbf8c; --bez1:#e8e0ca; --bez2:#b8ad93;
+  --term:"VT323",ui-monospace,Menlo,Consolas,monospace;
+  --disp:"Bungee",Impact,"Arial Black",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;overflow:hidden;color:var(--txt);font-family:var(--term);
+  background:#120d0a radial-gradient(ellipse at 50% 25%,#3b2b1d 0%,#160f0b 60%,#070504 100%);}
+button,input{font:inherit;color:inherit}
+#rig{height:100vh;height:100dvh;display:flex;justify-content:center;padding:min(2.2vh,20px) min(2.2vw,24px)}
+#monitor{position:relative;flex:1;max-width:1560px;display:flex;flex-direction:column;
+  background:linear-gradient(160deg,var(--bez1),var(--bez2));border-radius:30px;padding:20px 20px 0;
+  box-shadow:0 30px 70px rgba(0,0,0,.7),inset 0 2px 0 rgba(255,255,255,.75),inset 0 -8px 14px rgba(0,0,0,.25)}
+#screen{position:relative;flex:1;min-height:0;border-radius:22px;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 40%,#0c2516 0%,#04110a 70%,#020805 100%);
+  box-shadow:inset 0 0 0 3px #0a0a0a,inset 0 0 90px rgba(0,0,0,.85),0 0 0 6px #91876f,0 0 0 9px #6c6450}
+#screen::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:60;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.2) 2px 3px)}
+#screen::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:61;
+  background:radial-gradient(ellipse at 28% 6%,rgba(255,255,255,.08),transparent 38%),
+             radial-gradient(ellipse at 50% 50%,transparent 62%,rgba(0,0,0,.55) 100%)}
+#screen.shake{animation:shake .7s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes shake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(5px,-3px)}30%,50%,70%{transform:translate(-9px,4px) rotate(-.6deg)}40%,60%{transform:translate(9px,-4px) rotate(.6deg)}}
+#bezel{height:48px;display:flex;align-items:center;gap:14px;padding:0 8px;color:#5b533f;user-select:none}
+#bezel .brand{font-family:var(--disp);font-size:17px;letter-spacing:.06em;text-shadow:0 1px 0 rgba(255,255,255,.6)}
+#bezel .model{flex:1;font-size:17px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#bezel button{background:linear-gradient(#d8cfb6,#a99f86);border:2px solid #7d745f;border-radius:8px;padding:2px 10px;
+  font-size:17px;color:#3f392b;cursor:pointer;box-shadow:0 3px 0 #6f6753}
+#bezel button:active{transform:translateY(2px);box-shadow:0 1px 0 #6f6753}
+#bezel .led{width:11px;height:11px;border-radius:50%;background:#43ff6a;box-shadow:0 0 10px #43ff6a,inset 0 -2px 2px rgba(0,0,0,.3)}
+
+.view{position:absolute;inset:0;display:flex;flex-direction:column}
+.glow{text-shadow:0 0 8px currentColor}
+.up{color:var(--g)} .dn{color:var(--r)}
+
+/* ---------- menu ---------- */
+#menu{align-items:center;justify-content:center;padding:24px;overflow:auto}
+.menu-in{width:min(860px,100%);display:grid;grid-template-columns:1.1fr .9fr;gap:28px;align-items:center}
+#boot{margin:0 0 6px;font-size:18px;line-height:1.05;color:var(--dim);min-height:5.3em;white-space:pre-wrap}
+.logo{font-family:var(--disp);font-size:clamp(64px,11vw,124px);line-height:.9;margin:0;color:var(--g);
+  text-shadow:0 0 18px rgba(57,255,122,.7),4px 4px 0 #063d1a;letter-spacing:-.02em}
+.logo span{color:var(--r);text-shadow:0 0 18px rgba(255,61,90,.7),4px 4px 0 #3d0610}
+.tagline{font-size:23px;margin:6px 0 18px;color:var(--amber)}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:14px;font-size:18px;color:var(--dim)}
+.field input,#codeIn{background:#020d06;border:2px solid var(--g2);color:var(--g);font-size:28px;padding:4px 12px;border-radius:10px;outline:none}
+.field input:focus,#codeIn:focus{border-color:var(--g);box-shadow:0 0 14px rgba(57,255,122,.4)}
+.mbtns{display:flex;flex-direction:column;gap:12px}
+.btn{font-family:var(--disp);font-size:21px;padding:12px 18px;border-radius:14px;border:3px solid #021a0b;cursor:pointer;
+  background:linear-gradient(#5bff98,#14b54e);color:#02160a;box-shadow:0 6px 0 #06501f,0 0 22px rgba(57,255,122,.25);text-align:center}
+.btn small{display:block;font-family:var(--term);font-size:17px;letter-spacing:.06em;opacity:.8}
+.btn:active{transform:translateY(5px);box-shadow:0 1px 0 #06501f}
+.btn.alt{background:linear-gradient(#ffd86b,#e09a12);border-color:#2a1a02;box-shadow:0 6px 0 #6a4405,0 0 22px rgba(255,191,46,.25)}
+.btn.ghost{background:transparent;color:var(--g);border-color:var(--g2);box-shadow:none}
+.btn:disabled{filter:grayscale(1) brightness(.5);cursor:not-allowed}
+.joinrow{display:grid;grid-template-columns:1fr auto;gap:10px}
+#codeIn{text-transform:uppercase;letter-spacing:.3em;text-align:center;min-width:0}
+.how{border:2px solid var(--gdim);border-radius:14px;padding:14px 16px;font-size:20px;line-height:1.15;background:rgba(0,20,8,.5)}
+.how h3{font-family:var(--disp);font-size:15px;margin:0 0 8px;color:var(--amber);letter-spacing:.06em}
+.how p{margin:0 0 8px}
+.how kbd{border:1px solid var(--g2);border-radius:4px;padding:0 5px;color:var(--g)}
+.netnote{font-size:17px;color:var(--dim)}
+
+/* ---------- online lobby ---------- */
+#lobby{align-items:center;justify-content:center;padding:24px;overflow:auto}
+.lob{width:min(720px,100%);text-align:center}
+.lob .lbl{font-size:22px;color:var(--dim)}
+#roomCode{font-family:var(--disp);font-size:clamp(56px,10vw,96px);color:var(--amber);letter-spacing:.12em;text-shadow:0 0 18px rgba(255,191,46,.6);line-height:1}
+#seats{list-style:none;padding:0;margin:16px 0;display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;text-align:left;font-size:22px}
+#seats li{border:1px solid var(--gdim);border-radius:8px;padding:3px 10px;display:flex;gap:8px;align-items:center;white-space:nowrap;overflow:hidden}
+#seats li.bot{opacity:.55} #seats li.empty{opacity:.3}
+.sw{width:11px;height:11px;border-radius:3px;flex:none;box-shadow:0 0 6px currentColor}
+.lobrow{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:21px}
+.lobrow label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.lobrow input{width:20px;height:20px;accent-color:#39ff7a}
+
+/* ---------- game ---------- */
+#game{padding:12px 14px 14px;gap:10px}
+#hud{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:18px;align-items:center}
+#coinName{font-family:var(--disp);font-size:clamp(18px,2.3vw,30px);color:var(--amber);text-shadow:0 0 12px rgba(255,191,46,.55);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
+#coinSub{font-size:20px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#coinSub b{color:var(--txt);font-weight:400}
+.px{text-align:right;line-height:1}
+#price{font-size:clamp(24px,2.7vw,36px);color:#fff;text-shadow:0 0 10px rgba(255,255,255,.4)}
+#chg{font-family:var(--disp);font-size:clamp(16px,1.6vw,22px)}
+#mcap{font-size:18px;color:var(--dim)}
+.clock{border:2px solid var(--g2);padding:2px 14px 4px;border-radius:12px;text-align:center;min-width:120px;background:rgba(0,30,12,.6)}
+#roundLbl{font-size:18px;color:var(--dim);letter-spacing:.08em}
+#timer{font-family:var(--disp);font-size:clamp(26px,3vw,40px);line-height:1;color:var(--g)}
+#timer.hot{color:var(--r);animation:pulse .5s infinite alternate}
+@keyframes pulse{to{transform:scale(1.08);text-shadow:0 0 16px var(--r)}}
+#main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(230px,300px);gap:12px}
+#chartWrap{position:relative;border:2px solid var(--gdim);border-radius:14px;overflow:hidden;background:rgba(0,22,9,.45)}
+#chart{position:absolute;inset:0;width:100%;height:100%;display:block}
+#chartMsg{position:absolute;left:12px;top:8px;font-size:20px;color:var(--amber)}
+#side{display:flex;flex-direction:column;gap:10px;min-height:0}
+.panel{border:2px solid var(--gdim);border-radius:14px;background:rgba(0,22,9,.45);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.ph{font-family:var(--disp);font-size:12px;letter-spacing:.1em;padding:6px 10px 5px;background:rgba(57,255,122,.12);color:var(--g)}
+#board{list-style:none;margin:0;padding:4px 6px;font-size:19px;overflow:hidden}
+#board li{display:grid;grid-template-columns:18px 10px minmax(0,1fr) 22px 64px;gap:6px;align-items:center;padding:0 4px;border-radius:5px;line-height:1.12}
+#board li.me{background:rgba(255,191,46,.16);outline:1px solid rgba(255,191,46,.5)}
+#board .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#board .nm i{font-style:normal;color:var(--dim);font-size:15px}
+#board .tot{text-align:right}
+#board .rk{color:var(--dim)}
+.tb{flex:1}
+#chat{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:4px 9px;font-size:18px;line-height:1.08}
+#chat .ln{margin-top:2px;word-wrap:break-word}
+#chat .sys{color:var(--amber)} #chat .rug{color:var(--r);text-shadow:0 0 6px rgba(255,61,90,.6)}
+#chatIn{width:100%;background:transparent;border:0;border-top:1px solid var(--gdim);color:var(--txt);font-size:18px;padding:6px 9px;outline:none}
+#dock{display:flex;flex-direction:column;gap:8px}
+#mine{display:grid;grid-template-columns:minmax(0,1.6fr) auto auto;gap:18px;align-items:end;font-size:22px;line-height:1}
+#myState{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#quip{display:block;font-size:17px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat{text-align:right;white-space:nowrap}
+.stat small{display:block;font-size:15px;color:var(--dim);letter-spacing:.08em}
+#btns{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.big{font-family:var(--disp);font-size:clamp(38px,6.2vw,80px);line-height:.95;padding:12px 10px 10px;border-radius:22px;border:4px solid #021a0b;cursor:pointer;
+  color:#fff;position:relative;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:filter .15s}
+.big small{display:block;font-family:var(--term);font-size:clamp(15px,1.5vw,21px);letter-spacing:.14em;opacity:.9;margin-top:2px;text-shadow:none}
+.buy{background:linear-gradient(#5bff98,#12b44c);box-shadow:0 10px 0 #06501f,0 0 40px rgba(57,255,122,.38);text-shadow:0 3px 0 #06501f}
+.sell{background:linear-gradient(#ff7088,#cf1637);border-color:#2a0610;box-shadow:0 10px 0 #6b0a1d,0 0 40px rgba(255,61,90,.38);text-shadow:0 3px 0 #6b0a1d}
+.big.press,.big:active{transform:translateY(8px)}
+.buy.press,.buy:active{box-shadow:0 2px 0 #06501f,0 0 50px rgba(57,255,122,.6)}
+.sell.press,.sell:active{box-shadow:0 2px 0 #6b0a1d,0 0 50px rgba(255,61,90,.6)}
+.big.off{filter:grayscale(.9) brightness(.42)}
+.big.nope{animation:nope .32s}
+@keyframes nope{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
+
+/* overlays */
+.ovl{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(2,12,6,.93);overflow:hidden;padding:18px}
+.card{width:min(820px,100%);text-align:center;position:relative;z-index:2;max-height:100%;overflow:auto}
+.blink{font-family:var(--disp);color:var(--r);font-size:clamp(16px,2vw,22px);animation:blink .5s steps(2) infinite}
+@keyframes blink{50%{opacity:.2}}
+.cname{font-family:var(--disp);font-size:clamp(34px,6vw,72px);color:var(--amber);text-shadow:0 0 22px rgba(255,191,46,.7),4px 4px 0 #3b2502;line-height:1.02;margin:8px 0 2px}
+.ctick{font-size:32px;color:#fff}
+.facts{list-style:none;padding:0;margin:14px auto;display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;max-width:640px;text-align:left;font-size:21px}
+.facts b{color:var(--dim);font-weight:400}
+.rinfo{font-size:22px;color:var(--dim)}
+.cd{font-family:var(--disp);font-size:clamp(70px,12vw,140px);color:var(--g);text-shadow:0 0 30px rgba(57,255,122,.8);line-height:1;margin-top:6px}
+.cd.pop{animation:cdpop .3s ease-out}
+@keyframes cdpop{from{transform:scale(1.6);opacity:.3}}
+.ovl.rug{background:rgba(70,0,10,.82)}
+.rugscene{position:absolute;inset:0;z-index:1;pointer-events:none}
+.carpet{position:absolute;left:-6%;width:112%;top:30%;height:38%;border:14px double #ffcf4a;border-left:0;border-right:0;
+  background:radial-gradient(circle,#ffcf4a 0 9%,transparent 10%) 0 0/70px 70px,radial-gradient(circle,#1d6b5a 0 18%,transparent 19%) 35px 35px/70px 70px,
+    repeating-linear-gradient(45deg,#7d1022 0 16px,#a6182e 16px 32px);
+  animation:yank 1.25s cubic-bezier(.6,0,.9,.5) both;box-shadow:0 20px 40px rgba(0,0,0,.6)}
+.carpet::before,.carpet::after{content:"";position:absolute;top:-14px;bottom:-14px;width:22px;
+  background:repeating-linear-gradient(to bottom,#f2e3b8 0 3px,transparent 3px 7px)}
+.carpet::before{left:-22px}.carpet::after{right:-22px}
+@keyframes yank{0%{transform:translateX(-120%)}30%{transform:translateX(0)}52%{transform:translateX(-3%) rotate(-1deg)}100%{transform:translateX(150%) rotate(9deg) scaleY(.5)}}
+.stamp{display:inline-block;margin-bottom:14px;font-family:var(--disp);font-size:clamp(64px,12vw,160px);color:var(--r);border:10px solid var(--r);border-radius:18px;
+  padding:0 26px;transform:rotate(-7deg);text-shadow:0 0 30px rgba(255,61,90,.8);box-shadow:0 0 40px rgba(255,61,90,.5),inset 0 0 30px rgba(255,61,90,.4);
+  animation:stamp .45s cubic-bezier(.2,1.7,.4,1) 1.05s both;line-height:1.05;background:rgba(40,0,6,.6)}
+@keyframes stamp{from{transform:rotate(-7deg) scale(3.2);opacity:0}}
+.later{animation:fadein .4s 1.5s both}
+@keyframes fadein{from{opacity:0;transform:translateY(10px)}}
+.rugline{font-size:clamp(22px,2.6vw,32px);color:#fff;margin:16px 0 4px}
+.devtx{font-size:19px;color:#ff9aaa}
+.you{font-family:var(--disp);font-size:clamp(20px,2.6vw,30px);margin:12px 0 6px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:left;margin-top:10px;font-size:20px}
+.cols h4{font-family:var(--disp);font-size:14px;margin:0 0 4px;letter-spacing:.08em}
+.res h2{font-family:var(--disp);font-size:clamp(26px,4vw,46px);margin:0;color:var(--g);text-shadow:0 0 16px rgba(57,255,122,.6)}
+.res h2.dn{color:var(--r);text-shadow:0 0 16px rgba(255,61,90,.6)}
+.res .sub{font-size:23px;color:var(--amber);margin:4px 0 10px}
+table.st{width:100%;border-collapse:collapse;font-size:21px}
+table.st th{font-weight:400;color:var(--dim);font-size:16px;letter-spacing:.08em;text-align:right;padding:0 8px}
+table.st th:nth-child(2){text-align:left}
+table.st td{padding:1px 8px;text-align:right;border-top:1px solid rgba(57,255,122,.12)}
+table.st td:nth-child(2){text-align:left;white-space:nowrap}
+table.st tr.me td{background:rgba(255,191,46,.14)}
+.mvp{font-family:var(--disp);font-size:clamp(17px,2vw,24px);color:var(--amber);margin:10px 0 2px}
+.nextin{font-size:20px;color:var(--dim);margin-top:8px}
+.champ{font-family:var(--disp);font-size:clamp(16px,2vw,22px);color:var(--amber);letter-spacing:.06em}
+.champname{font-family:var(--disp);font-size:clamp(40px,7vw,84px);line-height:1;margin:2px 0 6px;text-shadow:0 0 26px currentColor}
+.loser{font-size:21px;color:#ff9aaa;margin:6px 0}
+.fbtns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+
+#flash{position:absolute;inset:0;z-index:25;pointer-events:none;opacity:0}
+#flash.buy{animation:fl .35s;background:radial-gradient(ellipse at 50% 100%,rgba(57,255,122,.35),transparent 70%)}
+#flash.sell{animation:fl .35s;background:radial-gradient(ellipse at 50% 100%,rgba(255,191,46,.35),transparent 70%)}
+#flash.rug{animation:fl 1.2s;background:rgba(255,0,30,.55)}
+@keyframes fl{from{opacity:1}to{opacity:0}}
+.pop{position:absolute;z-index:26;pointer-events:none;font-family:var(--disp);font-size:clamp(28px,4vw,48px);animation:popup 1.3s ease-out forwards;white-space:nowrap}
+@keyframes popup{from{transform:translate(-50%,0) scale(.6);opacity:0}15%{transform:translate(-50%,-10px) scale(1.15);opacity:1}to{transform:translate(-50%,-110px) scale(1);opacity:0}}
+#toast{position:absolute;left:50%;bottom:30%;transform:translateX(-50%);z-index:40;background:#020d06;border:2px solid var(--amber);color:var(--amber);
+  padding:8px 16px;border-radius:12px;font-size:22px;box-shadow:0 0 22px rgba(255,191,46,.35);max-width:90%;text-align:center}
+
+@media (max-width:900px){
+  .menu-in{grid-template-columns:1fr}
+  #main{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}
+  .tb{display:none}
+  #board{max-height:24vh;overflow:auto;display:grid;grid-template-columns:1fr 1fr;column-gap:8px;font-size:17px}
+  #board li{grid-template-columns:16px 8px minmax(0,1fr) 18px 60px}
+}
+@media (max-width:640px){
+  #rig{padding:6px}
+  #monitor{padding:8px 8px 0;border-radius:16px}
+  #screen{border-radius:12px}
+  #bezel{height:34px}#bezel .model{display:none}
+  #game{padding:8px;gap:7px}
+  #hud{grid-template-columns:minmax(0,1fr) auto;gap:8px}
+  .px{display:none}
+  #coinSub{font-size:17px}
+  #mine{grid-template-columns:minmax(0,1fr) auto;font-size:19px;gap:10px}
+  #mine .stat.rnd{display:none}
+  #board{grid-template-columns:1fr;max-height:19vh}
+  .big{border-radius:16px}
+  #seats{grid-template-columns:1fr}
+  .facts,.cols{grid-template-columns:1fr}
+}
+@media (max-height:620px){ #board{font-size:16px} .big{font-size:clamp(30px,5vw,54px);padding:8px} #chat{font-size:16px} }
+</style>
+</head>
+<body>
+<div id="rig"><div id="monitor">
+  <div id="screen">
+    <!-- main menu -->
+    <section id="menu" class="view">
+      <div class="menu-in">
+        <div>
+          <pre id="boot"></pre>
+          <h1 class="logo">RUGD<span>.EXE</span></h1>
+          <div class="tagline">the shitcoin simulator where the dev always wins. eventually.</div>
+          <label class="field">DEGEN NAME<input id="nameIn" maxlength="16" autocomplete="off" spellcheck="false"></label>
+          <div class="mbtns">
+            <button class="btn" id="soloBtn">PLAY VS 9 BOTS<small>playtest mode</small></button>
+            <button class="btn alt" id="hostBtn">HOST ONLINE ROOM<small>up to 10 degens</small></button>
+            <div class="joinrow"><input id="codeIn" maxlength="4" placeholder="CODE" autocomplete="off" spellcheck="false"><button class="btn ghost" id="joinBtn">JOIN</button></div>
+            <div class="netnote" id="netNote"></div>
+          </div>
+        </div>
+        <div class="how">
+          <h3>HOW NOT TO LOSE EVERYTHING</h3>
+          <p>Everybody starts each round with <b>$1,000</b> of fake money and a brand-new shitcoin.</p>
+          <p><b class="up">BUY</b> puts your whole stack in. <b class="dn">SELL</b> dumps it all. Buy low, sell high, repeat until your hands shake.</p>
+          <p>3 rounds × 30 seconds. Most profit across all three wins.</p>
+          <p>Some rounds the dev <b class="dn">pulls the rug</b>. Anyone holding the bag loses all of it. Not every round. Not every game. You won't see it coming.</p>
+          <p><kbd>B</kbd>/<kbd>↑</kbd> buy · <kbd>S</kbd>/<kbd>↓</kbd> sell · <kbd>Enter</kbd> trollbox · <kbd>M</kbd> mute</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- online lobby -->
+    <section id="lobby" class="view" hidden>
+      <div class="lob">
+        <div class="lbl">ROOM CODE</div>
+        <div id="roomCode">----</div>
+        <div class="lbl">send this to your degen friends</div>
+        <ol id="seats"></ol>
+        <div class="lobrow" id="hostRow">
+          <label><input type="checkbox" id="fillBots" checked> fill empty seats with bots</label>
+          <button class="btn" id="startBtn">START THE PUMP</button>
+        </div>
+        <div class="lobrow" id="guestRow"><span id="lobbyWait">waiting for the host to start the pump…</span></div>
+        <div class="lobrow"><button class="btn ghost" id="leaveBtn">LEAVE ROOM</button></div>
+      </div>
+    </section>
+
+    <!-- the game -->
+    <section id="game" class="view" hidden>
+      <header id="hud">
+        <div style="min-width:0"><div id="coinName">—</div><div id="coinSub"></div></div>
+        <div class="px"><div id="price">—</div><div id="chg">+0.00%</div><div id="mcap"></div></div>
+        <div class="clock"><div id="roundLbl">ROUND 1/3</div><div id="timer">30.0</div></div>
+      </header>
+      <div id="main">
+        <div id="chartWrap"><canvas id="chart"></canvas><div id="chartMsg"></div></div>
+        <aside id="side">
+          <div class="panel"><div class="ph">DEGEN LEADERBOARD</div><ol id="board"></ol></div>
+          <div class="panel tb"><div class="ph">TROLLBOX</div><div id="chat"></div>
+            <form id="chatForm"><input id="chatIn" maxlength="80" placeholder="say something stupid… (Enter)" autocomplete="off"></form></div>
+        </aside>
+      </div>
+      <footer id="dock">
+        <div id="mine">
+          <div style="min-width:0"><span id="myState">—</span><span id="quip"></span></div>
+          <div class="stat rnd"><small>THIS ROUND</small><span id="myRound">$0.00</span></div>
+          <div class="stat"><small>GAME TOTAL</small><span id="myTotal">$0.00</span></div>
+        </div>
+        <div id="btns">
+          <button class="big buy" id="buyBtn">BUY<small>APE IN · B</small></button>
+          <button class="big sell" id="sellBtn">SELL<small>JEET · S</small></button>
+        </div>
+      </footer>
+      <div id="ovl" class="ovl" hidden></div>
+    </section>
+    <div id="flash"></div>
+    <div id="toast" hidden></div>
+  </div>
+  <div id="bezel"><i class="led"></i><span class="brand">RUGD-9000</span><span class="model">DEGEN TERMINAL · 0.69% DEV TAX ON EVERY TRADE</span>
+    <button id="muteBtn" title="Mute (M)">SND ON</button><button id="quitBtn" hidden>QUIT</button></div>
+</div></div>
+
+<script>
+'use strict';
+/* ===== ENGINE START ===== */
+// Pure game rules, no DOM. The host (or solo player) runs these; tools/sim.js tests them in Node.
+const RUGD = (() => {
+  const TICK_MS = 50, ROUND_TICKS = 600, ROUNDS = 3, START_CASH = 1000, FEE = 0.0069, SEATS = 10;
+  // How many of a game's three rounds get rugged. Three rugs never happens.
+  const RUG_ODDS = [0.45, 0.51, 0.04]; // 0 rugs, 1 rug, 2 rugs
+
+  function rng(seed) {
+    let a = seed >>> 0;
+    return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  function gauss(r) { let u = 0; while (!u) u = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * r()); }
+
+  function rugPlan(rand) {
+    const x = rand(), n = x < RUG_ODDS[0] ? 0 : x < RUG_ODDS[0] + RUG_ODDS[1] ? 1 : 2;
+    const order = [0, 1, 2];
+    for (let i = 2; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+    const plan = [false, false, false];
+    for (let i = 0; i < n; i++) plan[order[i]] = true;
+    return plan;
+  }
+
+  // The chart: a log-price random walk that flips between pump, dump, crab, moon and nuke moods.
+  // Same seed = same chart on every screen, so only the seed has to travel over the network.
+  function pricePath(seed) {
+    const r = rng(seed), p = new Float64Array(ROUND_TICKS + 1);
+    const HI = Math.log(7), LO = Math.log(0.25);
+    let x = 0, left = 0, drift = 0, vol = 0.01;
+    p[0] = 1;
+    for (let k = 1; k <= ROUND_TICKS; k++) {
+      if (left-- <= 0) {
+        const u = r();
+        const type = k < 25 ? (u < 0.7 ? 0 : 2) : u < 0.27 ? 0 : u < 0.57 ? 1 : u < 0.78 ? 2 : u < 0.89 ? 3 : 4;
+        if (type === 0) { drift = 0.003 + r() * 0.008; vol = 0.009 + r() * 0.01; left = 14 + (r() * 36 | 0); }        // pump
+        else if (type === 1) { drift = -(0.003 + r() * 0.009); vol = 0.009 + r() * 0.012; left = 12 + (r() * 34 | 0); } // dump
+        else if (type === 2) { drift = (r() - 0.5) * 0.002; vol = 0.004 + r() * 0.007; left = 14 + (r() * 30 | 0); }  // crab
+        else if (type === 3) { drift = 0.014 + r() * 0.016; vol = 0.014 + r() * 0.012; left = 8 + (r() * 12 | 0); }   // moon
+        else { drift = -(0.018 + r() * 0.02); vol = 0.014 + r() * 0.014; left = 5 + (r() * 9 | 0); }                  // nuke
+      }
+      let pull = -x * 0.003; // gentle gravity back toward launch price
+      if (x > HI) pull -= (x - HI) * 0.05; else if (x < LO) pull += (LO - x) * 0.05;
+      const wick = r() < 0.01 ? gauss(r) * 0.09 : 0;
+      x += drift + pull + gauss(r) * vol + wick;
+      p[k] = Math.exp(x);
+    }
+    return p;
+  }
+
+  // When a round is rugged, the dev usually pulls right after a juicy pump (peak hopium),
+  // sometimes at a totally random moment. Never in the first 7 s or the last 1.5 s.
+  function pickRugTick(path, rand) {
+    const lo = 140, hi = 570;
+    if (rand() < 0.35) return lo + Math.floor(rand() * (hi - lo));
+    const cands = [];
+    for (let k = lo; k <= hi; k++) {
+      let mn = Infinity, mx = 0;
+      for (let i = k - 40; i <= k; i++) if (path[i] < mn) mn = path[i];
+      for (let i = k - 12; i <= k; i++) if (path[i] > mx) mx = path[i];
+      if (path[k] / mn > 1.25 && path[k] >= mx * 0.985) cands.push(k);
+    }
+    return cands.length ? cands[Math.floor(rand() * cands.length)] : lo + Math.floor(rand() * (hi - lo));
+  }
+
+  const PRE = ['BABY', 'TURBO', 'GIGA', 'SAFE', 'MEGA', 'BASED', 'SUPER', 'DEGEN', 'ULTRA', 'LIL', 'BIG', 'ROYAL', 'FAT', 'ANGRY', 'DRUNK', 'HAIRY', 'WET', 'SPICY', 'SAD', 'HORNY'];
+  const MID = ['FART', 'SHIT', 'BUTT', 'TURD', 'PISS', 'NUTS', 'GOBLIN', 'FROG', 'HAMSTER', 'POOP', 'BOOGER', 'DUMPSTER', 'WIENER', 'TOOT', 'CRAP', 'SKUNK', 'RAT', 'JORTS', 'TAINT', 'GREMLIN'];
+  const SUF = ['INU', 'COIN', 'AI', 'MOON', 'X', '69', '420', '2.0', 'ROCKET', 'GPT', 'DAO', 'CASH', 'TOKEN', 'MAXXING', 'CHAIN', 'PUMP', 'WIF HAT', 'CLASSIC', 'ON SOL'];
+  function coin(rand) {
+    const pk = a => a[Math.floor(rand() * a.length)];
+    const a = rand() < 0.6 ? pk(PRE) : '', b = pk(MID), c = pk(SUF);
+    const name = [a, b, c].filter(Boolean).join(' ');
+    const tick = '$' + ((a ? a.slice(0, 1) : '') + b + (c.length <= 3 && !/\s/.test(c) ? c : c.replace(/\W/g, '').slice(0, 1))).slice(0, 10);
+    const base = (1 + rand() * 8.99) * Math.pow(10, -(4 + Math.floor(rand() * 4)));
+    return { name, tick, base: +base.toPrecision(4) };
+  }
+
+  function player(id, name, color, bot) {
+    return { id, name, color, bot: bot || null, cash: START_CASH, coins: 0, entry: 0, rpnl: 0, total: 0, trades: [], rugged: false };
+  }
+  function resetRound(p) { p.cash = START_CASH; p.coins = 0; p.entry = 0; p.rpnl = 0; p.trades = []; p.rugged = false; }
+  // BUY = whole stack in, SELL = whole bag out. Each side pays the 0.69% dev tax.
+  function buy(p, price, k) {
+    if (p.coins > 0 || p.cash <= 0) return false;
+    p.coins = p.cash * (1 - FEE) / price; p.entry = price; p.cash = 0; p.trades.push(k + 1);
+    if (p.bot) p.bot.peak = price;
+    return true;
+  }
+  function sell(p, price, k) {
+    if (p.coins <= 0) return false;
+    p.cash = p.coins * price * (1 - FEE); p.coins = 0; p.trades.push(-(k + 1));
+    return true;
+  }
+  const equity = (p, price) => p.cash + p.coins * price;
+
+  const STYLES = ['momentum', 'dip', 'diamond', 'paper', 'degen', 'scared'];
+  function makeBot(rand, style) {
+    return { style, every: 2 + (rand() * 5 | 0), th: 0.02 + rand() * 0.04, tp: 0.08 + rand() * 0.25, sl: 0.05 + rand() * 0.1, next: 0, peak: 0 };
+  }
+  function resetBot(b, rand) { b.next = 4 + (rand() * 16 | 0); b.peak = 0; }
+  // Bots only see the chart up to now. None of them know when the rug is coming.
+  function botStep(p, path, k, rand) {
+    const b = p.bot;
+    if (k < b.next) return null;
+    b.next = k + b.every + (rand() * 3 | 0);
+    const pr = path[k], r1 = pr / path[Math.max(0, k - 20)] - 1, rh = pr / path[Math.max(0, k - 10)] - 1;
+    let hi = 0; for (let i = Math.max(0, k - 60); i <= k; i++) if (path[i] > hi) hi = path[i];
+    const hold = p.coins > 0, gain = hold ? pr / p.entry - 1 : 0;
+    if (hold && pr > b.peak) b.peak = pr;
+    if (hold && k > ROUND_TICKS - 14 && b.style !== 'diamond') return 's';
+    if (!hold && k > ROUND_TICKS - 25) return null;
+    switch (b.style) {
+      case 'momentum': if (!hold) return rh > b.th ? 'b' : null; return (rh < -b.th * 0.8 || gain > b.tp || gain < -b.sl) ? 's' : null;
+      case 'dip': if (!hold) return (pr < hi * (1 - b.th * 4) && rh > 0) ? 'b' : null; return (gain > b.tp || gain < -b.sl * 1.5) ? 's' : null;
+      case 'diamond': if (!hold) return ((k < 160 && rand() < 0.4) || (r1 > 0.12 && rand() < 0.25)) ? 'b' : null; return gain > b.tp * 3 ? 's' : null;
+      case 'paper': if (!hold) return rh > b.th * 0.5 ? 'b' : null; return (gain > 0.04 || gain < -0.03) ? 's' : null;
+      case 'degen': return rand() < 0.14 ? (hold ? 's' : 'b') : null;
+      case 'scared': if (!hold) return (pr < hi * 0.82 && rand() < 0.4) ? 'b' : null; return (gain > 0.12 || pr < b.peak * 0.93) ? 's' : null;
+    }
+    return null;
+  }
+  return { TICK_MS, ROUND_TICKS, ROUNDS, START_CASH, FEE, SEATS, RUG_ODDS, STYLES, rng, rugPlan, pricePath, pickRugTick, coin, player, resetRound, buy, sell, equity, makeBot, resetBot, botStep };
+})();
+/* ===== ENGINE END ===== */
+
+/* ================= words ================= */
+const TXT = {
+  rug: [
+    "The dev just bought a Lambo with your rent money.", "Liquidity: gone. Telegram: deleted. Dev: in Dubai.",
+    "Congrats, you're now a long-term holder of absolutely fuck all.", "The dev said 'trust me bro'. You trusted him, bro.",
+    "That wasn't a dip. That was a fucking cliff.", "Somewhere in Bali a 19-year-old just ordered bottle service on you.",
+    "Chart went vertical. Just the wrong fucking direction.", "LP was 'locked' for 0.00 days.",
+    "Dev's last message: 'gm'. Then he was gone. Like your money.", "Have you tried zooming out? Still zero.",
+    "This is not financial advice. This is a crime scene.", "The roadmap had one step and you just watched it happen.",
+    "Dev renounced the contract. And your savings.", "It's only a loss if you sell. Oh wait. You can't.",
+    "Rug pulled so hard the chart got whiplash.", "The 'community takeover' is you and three bots crying.",
+    "The whitepaper was a napkin with a dick drawn on it.", "Somebody tell the guy who said 'SAFU' to shut the fuck up.",
+    "Dev wallet sold. Dev wallet laughed. Dev wallet left.", "'Have fun staying poor.' — the dev, probably",
+    "Even the bots are asking for a refund.", "Diamond hands, meet concrete floor.",
+    "We are so back. (We are not back. We are never coming back.)", "That's not a candle, that's a fucking guillotine.",
+    "Your portfolio is now carbon neutral. Because it's zero.", "Funds are SAFU. Safely in someone else's wallet.",
+    "The audit was done by the dev's mom. She said it looked nice.", "Press F to pay respects. Respects are worth $0.",
+    "Liquidity left the chat. So did your dignity.", "Breaking: local degen learns what 'honeypot' means.",
+    "100x was the plan. 0x is the reality.", "Your exit strategy has been exited.",
+    "Bagholders Anonymous meets Tuesdays. Bring your own copium.", "It was a 'community coin'. The community was one guy and his alts.",
+    "Tell your wife it was a 'tax loss harvest'.", "You got rugged on a coin named after a fart. Read that back.",
+    "Charts don't lie. Devs fucking do.", "The rug's gone. The floor's gone. The basement is flooded.",
+    "The dev is already launching the next one. You'll buy that too.", "Imagine holding. Couldn't be you. (It was you.)"
+  ],
+  survive: [
+    "Chart survived. Dev must be asleep.", "No rug this round. Don't get fucking cocky.", "Nobody got rugged. Suspicious as hell.",
+    "The dev is still 'building'. Allegedly.", "Clean round. Enjoy it, it won't last.", "Dev forgot to pull. Probably still counting last week's money.",
+    "Liquidity is somehow still there. Weird.", "Your wallet lives to get rugged another day.", "No rug. The bots are disappointed. They wanted drama.",
+    "The dev was taking a shit. You got lucky.", "Survived. Tell your therapist the good news.", "Not rugged. Yet. Keep your head on a swivel."
+  ],
+  final: [
+    "Screenshot it and post it like you're a fucking genius.", "Somewhere an accountant just felt a disturbance.",
+    "None of this was financial advice. All of it was stupid.", "The real rug was the friends we jeeted along the way.",
+    "Go touch grass. Then come back and do it again.", "Tax man has entered the chat.", "Winner buys the next round of copium."
+  ],
+  launch: [
+    "Dev says 'trust me bro'.", "LP locked (in a shoebox).", "Audited by the dev's cousin.", "Fair launch (dev bought 90%).",
+    "Utility: coming soon™.", "Backed by pure fucking vibes.", "Roadmap: 1) launch 2) ??? 3) Dubai.", "Contract renounced-ish.",
+    "Telegram has 40k members (39,990 are bots).", "Elon might tweet about it. Might."
+  ],
+  facts: [
+    ["HOLDERS", "4 (3 are the dev)"], ["AUDIT", "✅ dev's cousin"], ["LP LOCKED", "trust me bro"], ["UTILITY", "coming soon™"],
+    ["DEV", "doxxed (to his mom)"], ["TAX", "0% (dev tax 100%)"], ["MARKETING", "one tweet, deleted"], ["COMMUNITY", "3 bots and a dream"],
+    ["WHITEPAPER", "a napkin"], ["CHART", "about to go parabolic, trust"], ["CONTRACT", "renounced-ish"], ["VIBES", "immaculate"],
+    ["RUG RISK", "what's a rug?"], ["TELEGRAM", "40k members, 12 humans"], ["ROADMAP", "Dubai"], ["TEAM", "anon, 'very legit'"]
+  ],
+  pumpChat: ["LFGGGGG 🚀🚀🚀", "wen lambo", "told you fuckers", "this is the one boys", "dev is based af", "100x incoming", "quitting my job tomorrow",
+    "printing money baby", "SEND IT", "green dildos everywhere", "I'm so fucking back", "who's selling?? NGMI", "next stop: moon",
+    "my wife's boyfriend is gonna be so proud", "we're all gonna make it", "buy buy buy buy", "chart looking thicc", "imagine selling here lmao", "bullish af", "higher higher HIGHER"],
+  dumpChat: ["who the fuck sold", "jeets everywhere", "healthy correction", "buying the dip with my kid's college fund", "it's fine. it's fine. it's fine.",
+    "zoom out", "paper hands ngmi", "why is it red", "bro what", "SOMEONE DO SOMETHING", "shakeout before the pump, relax", "I'm not selling, you're selling",
+    "this is fud", "whales manipulating again", "down bad", "red candle = discount", "hold the line!!!", "my stop loss is my wife leaving", "ouch", "dev pls pump"],
+  crabChat: ["wake me up when it moves", "chart flatter than my portfolio", "crab market zzz", "dev buy something", "anyone alive", "boring as shit",
+    "sideways like my career", "accumulation phase (cope)", "…", "volume where"],
+  buyChat: ["aped in", "full port lfg", "mortgage: deployed", "bought the top probably", "in. no regrets.", "sent my rent", "yolo", "bought more (all of it)", "ape together strong", "in it to win it"],
+  sellChat: ["took profits cya losers", "secured the bag", "jeeting respectfully", "sold. don't @ me", "profit is profit", "I'm out, good luck boys",
+    "paper hands, full pockets", "cashed out, buying nuggets", "sold the top (trust)", "bye bitches"],
+  rugChat: ["DEV WTF", "my rent money 😭", "TELEGRAM IS GONE???", "I'm calling the SEC (they laughed at me)", "bro I JUST bought", "that was my kid's college fund",
+    "fuck fuck fuck fuck", "back to Wendy's I guess", "it's fine I'm a long term holder now", "is this a dip? tell me it's a dip", "not again. NOT AGAIN.",
+    "dev pls I have a family", "I'm literally shaking", "new coin when?", "f in chat", "so this is rock bottom", "I'm never doing this again (until next round)"],
+  surviveChat: ["no rug. weird.", "dev asleep?", "survived another one", "wallets intact. for now."],
+  alreadyIn: ["You're already all in, dumbass.", "Bro you're FULL PORT. There's no more money.", "Can't buy more. You spent it all.", "Already bagged up. Relax."],
+  noBag: ["Sell what? You don't own shit.", "No bag to dump, genius.", "You're in cash. Sell your dignity instead.", "Nothing to sell. Hit BUY first, chief."],
+  holdQuip: ["full port. what could go wrong?", "diamond hands or bag holder? we'll find out.", "dev is definitely not about to rug. definitely.",
+    "watching the chart like it owes you money.", "this is the one. (it's never the one.)", "your palms are sweaty. we can tell."],
+  cashQuip: ["sitting in cash like a coward. respect.", "sidelined. safe. boring.", "cash is a position. a bitch position, but a position.",
+    "waiting for the dip like a vulture.", "can't get rugged if you don't hold. galaxy brain."],
+  boot: ["RUGD BIOS v0.69 (c) 2026 Definitely Not A Scam LLC", "Checking wallet........ EMPTY", "Loading hopium......... 100%", "Disabling common sense.. OK", "Ready. Don't say we didn't warn you."]
+};
+const BOT_NAMES = ['PaperHandsPete', 'ExitLiquidity', 'WenLambo', 'RugPullRick', 'GasFeeGary', 'ApeInAndy', 'BagHolderBrenda', 'NGMI_Nate', 'FOMO_Fiona', 'CopeCaleb',
+  'LadderTopLarry', 'JeetJerry', 'DegenDiane', 'Wassie420', 'PumpItPaul', 'CrabbyCarl', 'SnipeBot9000', 'DiamondDick', 'MoonBoyMarco', 'SolanaSusan'];
+const COLORS = ['#39ff7a', '#ff4f6e', '#ffcc00', '#3db8ff', '#c86bff', '#ff8a2a', '#00f0d0', '#ff5fd2', '#b6ff3b', '#f4f4f4'];
+const INTRO_MS = 4200, RUG_MS = 5600, RESULTS_MS = 7500;
+
+/* ================= helpers ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const okColor = c => (/^#[0-9a-f]{6}$/i.test(c) ? c : '#9fdcb4');
+const r2 = v => Math.round(v * 100) / 100;
+const money = v => Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const smoney = v => (v >= 0 ? '+$' : '-$') + money(v);
+const pct = v => (v >= 0 ? '+' : '') + (v * 100).toFixed(1) + '%';
+const cleanName = s => String(s || '').replace(/[^\w .\-$!?]/g, '').trim().slice(0, 16) || 'anon_degen';
+const cleanText = s => String(s || '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 80);
+function shuffle(a, r = Math.random) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const pick = (a, r = Math.random) => a[Math.floor(r() * a.length)];
+// draw lines from shuffled decks so nothing repeats until the deck runs out
+const DECKS = {};
+const line = key => { const d = DECKS[key] || (DECKS[key] = []); if (!d.length) d.push(...shuffle(TXT[key].slice())); return d.pop(); };
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+};
+// DexScreener-style tiny prices: 0.0000006346 -> 0.0₆6346
+function fmtPrice(v) {
+  if (!(v > 0)) return '0.00';
+  if (v >= 0.001) return v >= 1 ? v.toFixed(4) : v.toPrecision(4);
+  const z = Math.floor(-Math.log10(v)), digits = Math.min(9999, Math.round(v * Math.pow(10, z + 4)));
+  return '0.0' + String(z).split('').map(c => '₀₁₂₃₄₅₆₇₈₉'[c]).join('') + digits;
+}
+function fmtBig(v) { return v >= 1e9 ? (v / 1e9).toFixed(2) + 'B' : v >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : v >= 1e3 ? (v / 1e3).toFixed(1) + 'K' : v.toFixed(0); }
+function fmtCoins(v) { return v >= 1e9 ? (v / 1e9).toFixed(2) + 'B' : v >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : v >= 1e3 ? (v / 1e3).toFixed(1) + 'K' : v.toFixed(1); }
+let toastT = 0;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 1800); }
+
+/* ================= sound (synth, no files) ================= */
+const SFX = {
+  ctx: null, out: null, muted: store.get('rugd.mute', '0') === '1',
+  init() {
+    if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {}); return; }
+    try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); this.out = this.ctx.createGain(); this.out.gain.value = this.muted ? 0 : 0.45; this.out.connect(this.ctx.destination); } catch (e) { this.ctx = null; }
+  },
+  tone(f, d, type = 'square', v = 0.18, f2 = null, delay = 0) {
+    const c = this.ctx; if (!c) return;
+    const t = c.currentTime + delay, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(this.out); o.start(t); o.stop(t + d + 0.03);
+  },
+  noise(d, v = 0.2, freq = 1500, delay = 0, to = null) {
+    const c = this.ctx; if (!c) return;
+    const t = c.currentTime + delay, len = Math.ceil(c.sampleRate * d), buf = c.createBuffer(1, len, c.sampleRate), ch = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) ch[i] = Math.random() * 2 - 1;
+    const s = c.createBufferSource(), fl = c.createBiquadFilter(), g = c.createGain();
+    s.buffer = buf; fl.type = 'lowpass'; fl.frequency.setValueAtTime(freq, t); if (to) fl.frequency.exponentialRampToValueAtTime(to, t + d);
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    s.connect(fl); fl.connect(g); g.connect(this.out); s.start(t); s.stop(t + d);
+  },
+  buy() { this.tone(523, 0.07); this.tone(784, 0.07, 'square', 0.18, null, 0.06); this.tone(1046, 0.14, 'square', 0.18, null, 0.12); },
+  sell() { this.tone(1318, 0.06, 'triangle', 0.25); this.tone(1760, 0.3, 'triangle', 0.22, null, 0.06); this.noise(0.09, 0.18, 5000); },
+  nope() { this.tone(160, 0.16, 'square', 0.16, 90); },
+  beep(hi) { this.tone(hi ? 1046 : 660, hi ? 0.25 : 0.09, 'square', 0.14); },
+  tick() { this.tone(1500, 0.03, 'square', 0.06); },
+  launch() { this.tone(220, 0.5, 'sawtooth', 0.12, 880); },
+  rug() {
+    this.noise(0.25, 0.4, 6000, 0, 400);
+    this.tone(500, 1.3, 'sawtooth', 0.22, 30, 0.05); this.tone(250, 1.5, 'square', 0.12, 20, 0.1);
+    this.noise(1.6, 0.3, 1800, 0.25, 60);
+    [392, 370, 349, 330].forEach((f, i) => this.tone(f, i === 3 ? 1.0 : 0.32, 'triangle', 0.2, i === 3 ? 260 : null, 1.7 + i * 0.36));
+  },
+  bell() { [988, 1319].forEach((f, i) => this.tone(f, 0.7, 'triangle', 0.18, null, i * 0.12)); },
+  win() { [523, 659, 784, 1046, 784, 1046].forEach((f, i) => this.tone(f, 0.16, 'square', 0.15, null, i * 0.11)); },
+  sad() { [392, 370, 349, 330].forEach((f, i) => this.tone(f, i === 3 ? 0.9 : 0.3, 'triangle', 0.18, i === 3 ? 260 : null, i * 0.32)); },
+  setMute(m) { this.muted = m; store.set('rugd.mute', m ? '1' : '0'); if (this.out) this.out.gain.value = m ? 0 : 0.45; $('#muteBtn').textContent = m ? 'SND OFF' : 'SND ON'; }
+};
+
+/* ================= host authority ================= */
+// The host (or the solo player) runs the whole match: the chart seed, the secret rug plan,
+// every trade, the bots and the scores. Everyone else just renders the host's snapshots.
+let MODE = 'menu';   // menu | solo | online
+let G = null;        // the match, on the host only
+let V = null;        // the latest snapshot every screen renders from
+let myId = 'me';
+
+function forcedPlan() {
+  // playtest helper: ?rug=101 forces which rounds get rugged (solo only)
+  const m = /[?&]rug=([01]{3})/.exec(location.search || '');
+  return MODE === 'solo' && m ? m[1].split('').map(c => c === '1') : null;
+}
+function hostNewGame(humans, fill) {
+  const players = humans.slice(0, RUGD.SEATS).map((h, i) => RUGD.player(h.id, h.name, COLORS[i], null));
+  if (fill) {
+    const names = shuffle(BOT_NAMES.slice()), styles = shuffle(RUGD.STYLES.concat(RUGD.STYLES));
+    for (let n = 0; players.length < RUGD.SEATS; n++) players.push(RUGD.player('bot' + n, names[n], COLORS[players.length], RUGD.makeBot(Math.random, styles[n])));
+  }
+  G = { gen: (G ? G.gen : (Math.random() * 1e6 | 0)) + 1, ph: 'intro', rn: 0, plan: forcedPlan() || RUGD.rugPlan(Math.random), players,
+    chat: [], chatN: 0, chatCd: 0, res: null, fin: null, rugs: 0, phEnd: performance.now() + INTRO_MS, R: null };
+  hostRound(0);
+}
+function hostRound(rn) {
+  const seed = (Math.random() * 4294967296) >>> 0, path = RUGD.pricePath(seed);
+  G.rn = rn; G.res = null;
+  G.R = { seed, path, rug: G.plan[rn] ? RUGD.pickRugTick(path, Math.random) : -1, hit: false, coin: RUGD.coin(Math.random), k: 0, t0: 0 };
+  G.players.forEach(p => { RUGD.resetRound(p); if (p.bot) RUGD.resetBot(p.bot, Math.random); });
+  sys(`🚀 ${G.R.coin.tick} just launched. ${line('launch')}`);
+}
+function hostStep(now) {
+  if (!G) return;
+  const R = G.R;
+  if (G.ph === 'intro' && now >= G.phEnd) { G.ph = 'live'; R.t0 = now; }
+  if (G.ph === 'live') {
+    const target = Math.min(RUGD.ROUND_TICKS, Math.floor((now - R.t0) / RUGD.TICK_MS));
+    while (R.k < target) {
+      R.k++;
+      if (R.rug >= 0 && R.k >= R.rug) { R.k = R.rug; hostRug(now); return; }
+      botsAct(R.k); chatter(R.k);
+    }
+    if (R.k >= RUGD.ROUND_TICKS) hostClose(now);
+  } else if (G.ph === 'rugged' && now >= G.phEnd) { G.ph = 'results'; G.phEnd = now + RESULTS_MS; }
+  else if (G.ph === 'results' && now >= G.phEnd) {
+    if (G.rn < RUGD.ROUNDS - 1) { hostRound(G.rn + 1); G.ph = 'intro'; G.phEnd = now + INTRO_MS; }
+    else { G.ph = 'final'; G.fin = finalRes(); }
+  }
+}
+function hostTrade(id, side, kReq) {
+  if (!G || G.ph !== 'live') return false;
+  const p = G.players.find(q => q.id === id); if (!p) return false;
+  const R = G.R; let k = Math.round(+kReq); if (!isFinite(k)) k = R.k;
+  k = Math.max(R.k - 8, Math.min(R.k, k)); // honour a click up to 400 ms old (network lag), never a future price
+  if (side === 'b') return RUGD.buy(p, R.path[k], k);
+  if (side === 's') return RUGD.sell(p, R.path[k], k);
+  return false;
+}
+function hostRug(now) {
+  const R = G.R, price = R.path[R.k], holders = [];
+  R.hit = true; G.rugs++;
+  G.players.forEach(p => { if (p.coins > 0) { holders.push([p, p.coins * price]); p.coins = 0; p.rugged = true; } });
+  settle();
+  sys(`🚨 LIQUIDITY REMOVED. ${R.coin.tick} IS DEAD.`, 'rug');
+  let said = 0;
+  holders.forEach(([p, v]) => { if (!p.bot) sys(`💀 ${p.name} got rugged holding $${money(v)}`, 'rug'); else if (said++ < 4) say(p, line('rugChat')); });
+  if (!holders.length) sys('Nobody was holding. The dev rugged an empty room. Sad.', 'rug');
+  G.res = roundRes(true);
+  G.ph = 'rugged'; G.phEnd = now + RUG_MS;
+}
+function hostClose(now) {
+  const price = G.R.path[RUGD.ROUND_TICKS];
+  G.players.forEach(p => { if (p.coins > 0) RUGD.sell(p, price, RUGD.ROUND_TICKS); });
+  settle();
+  sys('🔔 Round over, bags auto-sold. ' + line('surviveChat'));
+  G.res = roundRes(false); G.ph = 'results'; G.phEnd = now + RESULTS_MS;
+}
+function settle() { G.players.forEach(p => { p.rpnl = p.cash - RUGD.START_CASH; p.total += p.rpnl; }); }
+const devAddr = () => '0x' + Math.floor(Math.random() * 65536).toString(16).padStart(4, '0').toUpperCase() + '…' + pick(['DEAD', 'BEEF', 'C0DE', 'F00D', 'B0B0', '4200', '6969', 'FA27']);
+function roundRes(rugged) {
+  const rows = G.players.map(p => ({ i: p.id, n: p.name, c: p.color, r: r2(p.rpnl), t: r2(p.total), rg: p.rugged ? 1 : 0, b: p.bot ? 1 : 0 })).sort((a, b) => b.r - a.r);
+  return { rn: G.rn, rugged, line: rugged ? line('rug') : line('survive'), dev: devAddr(), rows };
+}
+function finalRes() {
+  const rows = G.players.map(p => ({ i: p.id, n: p.name, c: p.color, t: r2(p.total), b: p.bot ? 1 : 0 })).sort((a, b) => b.t - a.t);
+  return { rows, rugs: G.rugs, line: line('final') };
+}
+function botsAct(k) {
+  const path = G.R.path;
+  for (const p of G.players) {
+    if (!p.bot) continue;
+    const d = RUGD.botStep(p, path, k, Math.random); if (!d) continue;
+    const ok = d === 'b' ? RUGD.buy(p, path[k], k) : RUGD.sell(p, path[k], k);
+    if (ok && Math.random() < 0.13) say(p, line(d === 'b' ? 'buyChat' : 'sellChat'));
+  }
+}
+function chatter(k) {
+  if (k < G.chatCd) return;
+  const p = G.R.path, ret = p[k] / p[Math.max(0, k - 30)] - 1;
+  const key = ret > 0.3 ? 'pumpChat' : ret < -0.22 ? 'dumpChat' : Math.random() < 0.004 ? 'crabChat' : null;
+  if (!key) return;
+  const bots = G.players.filter(q => q.bot);
+  if (!bots.length || Math.random() < 0.5) { G.chatCd = k + 10; return; }
+  say(pick(bots), line(key)); G.chatCd = k + 22 + (Math.random() * 20 | 0);
+}
+const say = (p, text) => pushChat(p.name, p.color, text, '');
+const sys = (text, kind = 'sys') => pushChat('', '', text, kind);
+function pushChat(n, c, t, kind) {
+  if (!G) return;
+  G.chat.push([n, c, t, kind]); if (G.chat.length > 24) G.chat.splice(0, G.chat.length - 24); G.chatN++;
+}
+function buildSnap(now) {
+  const hb = Math.floor(now / 1000);
+  if (!G) return { v: 1, ph: 'lobby', lb: lobbyList(), fill: NET.fill ? 1 : 0, hb };
+  const R = G.R;
+  return {
+    v: 1, hb, gen: G.gen, ph: G.ph, rn: G.rn, pe: Math.max(0, Math.round(G.phEnd - now)), seed: R.seed, coin: R.coin, k: R.k, rug: R.hit ? R.rug : -1,
+    pl: G.players.map(p => ({ i: p.id, n: p.name, b: p.bot ? 1 : 0, c: p.color, cash: r2(p.cash), co: +p.coins.toPrecision(8), en: +p.entry.toPrecision(8),
+      r: r2(p.rpnl), t: r2(p.total), tr: p.trades.slice(-40), rg: p.rugged ? 1 : 0 })),
+    chat: G.chat, cn: G.chatN, res: G.res, fin: G.fin
+  };
+}
+
+/* ================= online ================= */
+// Inside Claude: the artifact's room capability. On Render: a WebSocket at /ws with the same shape.
+// Everything travels as presence. The host's presence carries the snapshot (g); guests send
+// their trades (tq) and trollbox lines (ch).
+const NET = { api: null, ready: false, room: null, role: null, code: '', myPeer: null, order: [], names: {}, lastTq: {}, lastCh: {}, fill: true,
+  seq: 0, tq: [], chSeq: 0, hostSeen: 0, joinedAt: 0, sentAt: 0, unsub: [] };
+function makeWsRooms() {
+  return {
+    join(name) {
+      return new Promise((resolve, reject) => {
+        let ws;
+        try { ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws'); }
+        catch (e) { reject({ code: 'upstream_error' }); return; }
+        const peers = new Map(), listeners = new Set();
+        let myId = null, mine = {}, dirty = false, cached = null, done = false, ended = false;
+        const snapshot = () => cached || (cached = [...peers.values()].map(p => ({
+          peer: p.id, by: null, kind: 'viewer', guest: false, isMe: p.id === myId, sameTab: p.id === myId, presence: p.id === myId ? mine : p.presence, updatedAt: p.at
+        })));
+        const fire = (joined, left, updated) => { cached = null; const ch = { peers: snapshot(), joined, left, updated }; listeners.forEach(l => { try { l.h(ch); } catch (e) { console.error(e); } }); };
+        const fail = () => { if (ended) return; ended = true; listeners.forEach(l => l.onErr && l.onErr({ code: 'upstream_error', message: 'Connection to the game server closed.' })); };
+        const room = {
+          name,
+          peers: snapshot,
+          onPeers(h, onErr) { const l = { h, onErr }; listeners.add(l); setTimeout(() => { if (listeners.has(l)) h({ peers: snapshot(), joined: snapshot(), left: [], updated: [] }); }, 0); return () => listeners.delete(l); },
+          presence(patch) { for (const k in patch) { if (patch[k] === null) delete mine[k]; else mine[k] = patch[k]; } dirty = true; return Promise.resolve(); },
+          connected: () => ws.readyState === 1,
+          leave() { ended = true; clearInterval(timer); try { ws.close(); } catch (e) {} return Promise.resolve(); }
+        };
+        const timer = setInterval(() => { if (dirty && ws.readyState === 1) { dirty = false; ws.send(JSON.stringify({ t: 'p', presence: mine })); } }, 40);
+        ws.onopen = () => ws.send(JSON.stringify({ t: 'join', room: name }));
+        ws.onmessage = e => {
+          let m; try { m = JSON.parse(e.data); } catch (err) { return; }
+          if (m.t === 'welcome') {
+            myId = m.id; peers.set(myId, { id: myId, presence: mine, at: Date.now() });
+            (m.peers || []).forEach(p => peers.set(p.id, { id: p.id, presence: p.presence || {}, at: Date.now() }));
+            done = true; resolve(room); fire(snapshot(), [], []);
+          } else if (m.t === 'p') {
+            const isNew = !peers.has(m.id);
+            peers.set(m.id, { id: m.id, presence: m.presence || {}, at: Date.now() });
+            cached = null; const me = snapshot().find(x => x.peer === m.id);
+            fire(isNew ? [me] : [], [], isNew ? [] : [me]);
+          } else if (m.t === 'leave') {
+            const gone = snapshot().find(x => x.peer === m.id);
+            if (peers.delete(m.id)) fire([], gone ? [gone] : [], []);
+          } else if (m.t === 'full') {
+            if (!done) reject({ code: 'limit_reached' });
+          }
+        };
+        ws.onclose = ws.onerror = () => { clearInterval(timer); if (!done) { done = true; reject({ code: 'upstream_error' }); } else fail(); };
+      });
+    }
+  };
+}
+(async () => {
+  try {
+    if (window.claude && typeof window.claude.use === 'function') NET.api = await window.claude.use('room');
+    else if (/^https?:$/.test(location.protocol)) NET.api = makeWsRooms();
+  } catch (e) { NET.api = null; }
+  NET.ready = true; renderMenuNet();
+})();
+const CODE_CH = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+function lobbyList() { return [[NET.myPeer || 'host', myName()], ...NET.order.map(id => [id, NET.names[id] || 'anon_degen'])]; }
+async function netEnter(code, role) {
+  if (!NET.api) { toast("Online play isn't available in this view."); return; }
+  code = String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (code.length !== 4) { toast('Room codes are 4 characters.'); return; }
+  try {
+    const r = await NET.api.join('rugd-' + code.toLowerCase());
+    Object.assign(NET, { room: r, role, code, myPeer: null, order: [], names: {}, lastTq: {}, lastCh: {}, tq: [], hostSeen: 0, joinedAt: performance.now(), sentAt: 0 });
+    NET.unsub.push(r.onPeers(onPeers, () => netLeave('Lost the connection to the room.')));
+    r.presence({ app: 'rugd', role, name: myName(), tq: [], ch: null, g: null }).catch(() => {});
+    MODE = 'online'; G = null; V = null; resetUI(); showView('lobby'); renderLobby();
+  } catch (e) {
+    const c = e && e.code;
+    toast(c === 'not_permitted' ? "Online rooms aren't available for your account here." : c === 'limit_reached' ? 'That room is full (or too many rooms are open).' : "Couldn't reach the room. Try again in a sec.");
+  }
+}
+function netLeave(msg) {
+  NET.unsub.forEach(u => { try { u(); } catch (e) {} }); NET.unsub = [];
+  const r = NET.room; NET.room = null; NET.role = null; NET.code = ''; NET.myPeer = null;
+  if (r) r.leave().catch(() => {});
+  toMenu(); if (msg) toast(msg);
+}
+function onPeers(ch) {
+  const peers = (ch && ch.peers) || [], now = performance.now();
+  const me = peers.find(p => p.isMe); if (me) NET.myPeer = me.peer;
+  if (NET.role === 'host') {
+    if (!G) myId = NET.myPeer || 'host';
+    const alive = new Set();
+    for (const p of peers) {
+      if (p.isMe) continue;
+      const pr = p.presence || {};
+      if (pr.app !== 'rugd' || pr.role !== 'guest') continue;
+      alive.add(p.peer);
+      if (!NET.order.includes(p.peer)) NET.order.push(p.peer);
+      NET.names[p.peer] = cleanName(pr.name);
+      if (Array.isArray(pr.tq)) {
+        pr.tq.filter(Array.isArray).sort((a, b) => a[0] - b[0]).forEach(([s, side, k, gen, rn]) => {
+          if (!(s > (NET.lastTq[p.peer] || 0))) return;
+          NET.lastTq[p.peer] = s;
+          if (G && gen === G.gen && rn === G.rn) hostTrade(p.peer, side, k);
+        });
+      }
+      if (Array.isArray(pr.ch) && pr.ch[0] > (NET.lastCh[p.peer] || 0)) {
+        NET.lastCh[p.peer] = pr.ch[0];
+        const pl = G && G.players.find(q => q.id === p.peer);
+        if (G) pushChat(NET.names[p.peer], pl ? pl.color : '#9fdcb4', cleanText(pr.ch[1]), '');
+      }
+    }
+    NET.order = NET.order.filter(id => alive.has(id));
+  } else if (NET.role === 'guest') {
+    myId = NET.myPeer;
+    const h = peers.find(p => !p.isMe && p.presence && p.presence.app === 'rugd' && p.presence.role === 'host' && p.presence.g);
+    if (h) { NET.hostSeen = now; applySnap(h.presence.g, now); }
+  }
+}
+// guests: keep a local clock for the chart that tracks the host's tick
+const SYNC = { gen: -1, rn: -1, k0: 0, at: 0 };
+function applySnap(g, now) {
+  if (!g || g.v !== 1) return;
+  V = g; V._at = now;
+  if (g.ph === 'live') {
+    const pred = SYNC.k0 + Math.floor((now - SYNC.at) / RUGD.TICK_MS);
+    if (g.gen !== SYNC.gen || g.rn !== SYNC.rn || Math.abs(pred - g.k) > 4) Object.assign(SYNC, { gen: g.gen, rn: g.rn, k0: g.k, at: now });
+  }
+}
+
+/* ================= client view ================= */
+const UI = { view: '', ph: '', gen: -1, rn: -1, ys: null, boardAt: 0, chatN: -1, pend: null, cdLast: -1, quipState: '', lastTimerS: -1, lobbyKey: '', menuTyped: false };
+let PATH = null, PATH_SEED = null;
+const pathFor = seed => { if (seed !== PATH_SEED) { PATH = RUGD.pricePath(seed); PATH_SEED = seed; } return PATH; };
+const myName = () => cleanName($('#nameIn').value);
+const myP = () => (V && V.pl ? V.pl.find(p => p.i === myId) : null);
+function resetUI() { Object.assign(UI, { ph: '', gen: -1, rn: -1, ys: null, chatN: -1, pend: null, cdLast: -1, quipState: '', lobbyKey: '' }); $('#ovl').hidden = true; }
+function showView(v) {
+  if (UI.view === v) return; UI.view = v;
+  ['menu', 'lobby', 'game'].forEach(n => { $('#' + n).hidden = n !== v; });
+  $('#quitBtn').hidden = v === 'menu';
+}
+function toMenu() { MODE = 'menu'; G = null; V = null; resetUI(); showView('menu'); renderMenuNet(); }
+function curK(now = performance.now()) {
+  if (!V || V.ph === 'lobby') return 0;
+  if (G) return G.R.k;
+  if (V.ph === 'intro') return 0;
+  if (V.ph !== 'live') return V.rug >= 0 ? V.rug : V.k;
+  const k = SYNC.k0 + Math.floor((now - SYNC.at) / RUGD.TICK_MS);
+  return Math.max(0, Math.min(k, V.k + 6, RUGD.ROUND_TICKS));
+}
+function phaseLeft(now) { if (G) return G.phEnd - now; return V ? V.pe - (now - V._at) : 0; }
+function isHolding(me, now = performance.now()) {
+  if (UI.pend && now - UI.pend.at < 1200 && me.tr[me.tr.length - 1] === UI.pend.last) return UI.pend.side === 'b';
+  return me.co > 0;
+}
+function act(side) {
+  if (!V || V.ph !== 'live') return;
+  const me = myP(); if (!me) return;
+  const btn = side === 'b' ? $('#buyBtn') : $('#sellBtn');
+  const holding = isHolding(me);
+  if ((side === 'b' && holding) || (side === 's' && !holding)) {
+    SFX.nope(); btn.classList.remove('nope'); void btn.offsetWidth; btn.classList.add('nope');
+    toast(line(side === 'b' ? 'alreadyIn' : 'noBag')); return;
+  }
+  const k = curK(), price = pathFor(V.seed)[k];
+  if (G) { if (!hostTrade(myId, side, k)) return; }
+  else if (NET.room) {
+    NET.seq++; NET.tq.push([NET.seq, side, k, V.gen, V.rn]); NET.tq = NET.tq.slice(-4);
+    NET.room.presence({ tq: NET.tq }).catch(() => {});
+    UI.pend = { side, at: performance.now(), last: me.tr[me.tr.length - 1] };
+  } else return;
+  flash(side === 'b' ? 'buy' : 'sell');
+  if (side === 'b') { SFX.buy(); popup(btn, 'APED IN', '#39ff7a'); }
+  else {
+    SFX.sell();
+    const pnl = me.co * price * (1 - RUGD.FEE) - me.co * me.en / (1 - RUGD.FEE);
+    popup(btn, smoney(pnl), pnl >= 0 ? '#39ff7a' : '#ff3d5a');
+  }
+}
+function flash(kind) { const f = $('#flash'); f.className = ''; void f.offsetWidth; f.className = kind; }
+function popup(el, text, color) {
+  const sc = $('#screen').getBoundingClientRect(), r = el.getBoundingClientRect(), d = document.createElement('div');
+  d.className = 'pop'; d.textContent = text; d.style.color = color; d.style.textShadow = `0 0 16px ${color}, 3px 3px 0 #000`;
+  d.style.left = (r.left - sc.left + r.width / 2) + 'px'; d.style.top = (r.top - sc.top - 40) + 'px';
+  $('#screen').appendChild(d); setTimeout(() => d.remove(), 1400);
+}
+
+/* ---------- chart ---------- */
+const cv = $('#chart'), cx = cv.getContext('2d');
+let CW = 0, CH = 0, DPR = 1;
+function sizeChart() {
+  const r = cv.getBoundingClientRect(); DPR = Math.min(2, window.devicePixelRatio || 1);
+  const w = Math.max(1, Math.round(r.width * DPR)), h = Math.max(1, Math.round(r.height * DPR));
+  if (w !== cv.width || h !== cv.height) { cv.width = w; cv.height = h; }
+  CW = w; CH = h;
+}
+function drawChart(k, path, now) {
+  sizeChart();
+  const c = cx, d = DPR; c.clearRect(0, 0, CW, CH);
+  const narrow = CW / d < 520, padL = 8 * d, padR = (narrow ? 90 : 104) * d, padT = 18 * d, padB = 16 * d, W = CW - padL - padR, H = CH - padT - padB;
+  const rugAt = V.rug >= 0 ? V.rug : -1, end = rugAt >= 0 ? Math.min(k, rugAt) : k;
+  const base = V.coin ? V.coin.base : 1e-5;
+  // y range in log space: grows instantly, shrinks smoothly
+  let lo = 1, hi = 1; for (let i = 0; i <= end; i++) { const v = path[i]; if (v < lo) lo = v; if (v > hi) hi = v; }
+  const L0 = Math.log(lo), L1 = Math.log(hi), span = Math.max(0.35, L1 - L0), tlo = L0 - span * 0.14, thi = L1 + span * 0.16;
+  if (!UI.ys) UI.ys = { lo: tlo, hi: thi };
+  const ys = UI.ys;
+  ys.lo = tlo < ys.lo ? tlo : ys.lo + (tlo - ys.lo) * 0.06; ys.hi = thi > ys.hi ? thi : ys.hi + (thi - ys.hi) * 0.06;
+  const X = t => padL + t / RUGD.ROUND_TICKS * W, Y = v => padT + (1 - (Math.log(v) - ys.lo) / (ys.hi - ys.lo)) * H;
+  c.font = `${(narrow ? 15 : 18) * d}px VT323, monospace`; c.textBaseline = 'middle';
+  // grid
+  c.lineWidth = d; c.strokeStyle = 'rgba(57,255,122,.07)';
+  for (let s = 0; s <= 30; s += 5) { const x = X(s * 20); c.beginPath(); c.moveTo(x, padT); c.lineTo(x, padT + H); c.stroke(); }
+  c.fillStyle = 'rgba(111,191,140,.75)';
+  for (let i = 0; i <= 4; i++) {
+    const L = ys.lo + (ys.hi - ys.lo) * (i / 4), y = Y(Math.exp(L));
+    c.beginPath(); c.moveTo(padL, y); c.lineTo(padL + W, y); c.stroke();
+    c.fillText(fmtPrice(Math.exp(L) * base), padL + W + 8 * d, y);
+  }
+  // launch price
+  const y1 = Y(1); c.setLineDash([6 * d, 6 * d]); c.strokeStyle = 'rgba(255,191,46,.45)';
+  c.beginPath(); c.moveTo(padL, y1); c.lineTo(padL + W, y1); c.stroke(); c.setLineDash([]);
+  c.fillStyle = 'rgba(255,191,46,.7)'; c.fillText('LAUNCH', padL + 6 * d, y1 - 10 * d);
+  if (!path) return;
+  const pv = path[end], up = pv >= 1, col = up ? '#39ff7a' : '#ff3d5a';
+  // area + line
+  const trace = () => { c.beginPath(); c.moveTo(X(0), Y(path[0])); for (let i = 1; i <= end; i++) c.lineTo(X(i), Y(path[i])); };
+  trace(); c.lineTo(X(end), padT + H); c.lineTo(X(0), padT + H); c.closePath();
+  const gr = c.createLinearGradient(0, padT, 0, padT + H); gr.addColorStop(0, up ? 'rgba(57,255,122,.28)' : 'rgba(255,61,90,.28)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  c.fillStyle = gr; c.fill();
+  trace(); c.strokeStyle = col; c.lineWidth = 2.6 * d; c.lineJoin = 'round'; c.shadowColor = col; c.shadowBlur = 14 * d; c.stroke(); c.shadowBlur = 0;
+  // everyone's trades: little dots; mine: big arrows
+  const me = myP();
+  for (const p of V.pl || []) {
+    if (p === me) continue;
+    c.fillStyle = okColor(p.c);
+    for (const t of p.tr) { const tk = Math.abs(t) - 1; if (tk > end) continue; c.globalAlpha = 0.85; c.beginPath(); c.arc(X(tk), Y(path[tk]), 3.2 * d, 0, 7); c.fill(); }
+  }
+  c.globalAlpha = 1;
+  if (me) {
+    for (const t of me.tr) {
+      const tk = Math.abs(t) - 1; if (tk > end) continue;
+      const x = X(tk), y = Y(path[tk]), b = t > 0, s = 9 * d;
+      c.fillStyle = b ? '#39ff7a' : '#ffbf2e'; c.strokeStyle = '#000'; c.lineWidth = 2 * d;
+      c.beginPath();
+      if (b) { c.moveTo(x, y + 4 * d); c.lineTo(x - s, y + 4 * d + s * 1.4); c.lineTo(x + s, y + 4 * d + s * 1.4); }
+      else { c.moveTo(x, y - 4 * d); c.lineTo(x - s, y - 4 * d - s * 1.4); c.lineTo(x + s, y - 4 * d - s * 1.4); }
+      c.closePath(); c.fill(); c.stroke();
+    }
+    if (me.co > 0 && me.en > 0 && V.ph === 'live') {
+      const ye = Y(me.en); c.setLineDash([3 * d, 5 * d]); c.strokeStyle = 'rgba(255,255,255,.5)'; c.lineWidth = d;
+      c.beginPath(); c.moveTo(padL, ye); c.lineTo(padL + W, ye); c.stroke(); c.setLineDash([]);
+      c.fillStyle = 'rgba(255,255,255,.75)'; c.textAlign = 'right'; c.fillText('YOUR ENTRY', padL + W - 6 * d, ye - 10 * d); c.textAlign = 'left';
+    }
+  }
+  // rug: straight down through the floor
+  if (rugAt >= 0 && k >= rugAt) {
+    const x = X(rugAt), y = Y(path[rugAt]);
+    c.strokeStyle = '#ff3d5a'; c.lineWidth = 5 * d; c.shadowColor = '#ff3d5a'; c.shadowBlur = 22 * d;
+    c.beginPath(); c.moveTo(x, y); c.lineTo(x + 3 * d, CH + 10); c.stroke(); c.shadowBlur = 0;
+    c.font = `${30 * d}px Bungee, Impact, sans-serif`; c.fillStyle = '#ff3d5a'; c.textAlign = x > CW / 2 ? 'right' : 'left';
+    c.fillText('💀 RUGGED', x + (x > CW / 2 ? -14 : 14) * d, Math.min(padT + H - 30 * d, y + 50 * d)); c.textAlign = 'left';
+    return;
+  }
+  // now: pulsing dot + price tag
+  const x = X(end), y = Y(pv), pulse = 1 + 0.35 * Math.sin(now / 120);
+  c.fillStyle = col; c.shadowColor = col; c.shadowBlur = 18 * d;
+  c.beginPath(); c.arc(x, y, 5 * d * pulse, 0, 7); c.fill(); c.shadowBlur = 0;
+  const tag = fmtPrice(pv * base), tw = c.measureText(tag).width + 14 * d, tx = padL + W + 4 * d;
+  c.fillStyle = col; c.fillRect(tx, y - 12 * d, Math.min(tw, padR - 6 * d), 24 * d);
+  c.fillStyle = '#021006'; c.fillText(tag, tx + 7 * d, y + d);
+}
+
+/* ---------- HUD, board, chat, dock ---------- */
+function renderHud(k, path) {
+  const coin = V.coin || { name: '—', tick: '', base: 1e-5 };
+  const end = V.rug >= 0 ? Math.min(k, V.rug) : k, mult = V.rug >= 0 && k >= V.rug ? 0 : path[end];
+  $('#coinName').textContent = coin.name;
+  const sub = `<b>${esc(coin.tick)}</b> · ${MODE === 'solo' ? 'vs bots' : 'room ' + esc(NET.code)} · start $1,000 · round ${V.rn + 1} of 3`;
+  if ($('#coinSub').dataset.v !== sub) { $('#coinSub').innerHTML = sub; $('#coinSub').dataset.v = sub; }
+  $('#price').textContent = '$' + (mult ? fmtPrice(mult * coin.base) : '0.00');
+  const ch = mult - 1, chg = $('#chg');
+  chg.textContent = (mult ? pct(ch) : '-100% 💀'); chg.className = ch >= 0 ? 'up' : 'dn';
+  $('#mcap').textContent = 'MC $' + fmtBig(mult * coin.base * 1e9);
+  $('#roundLbl').textContent = `ROUND ${V.rn + 1}/3`;
+  const tm = $('#timer');
+  if (V.ph === 'rugged' || (V.rug >= 0 && k >= V.rug)) { tm.textContent = 'RUGD'; tm.className = 'hot'; }
+  else {
+    const left = Math.max(0, (RUGD.ROUND_TICKS - k) / 20);
+    tm.textContent = V.ph === 'intro' ? '30.0' : left.toFixed(1);
+    tm.className = V.ph === 'live' && left <= 5 ? 'hot' : '';
+    const s = Math.ceil(left);
+    if (V.ph === 'live' && s <= 5 && s !== UI.lastTimerS && s > 0) SFX.tick();
+    UI.lastTimerS = s;
+  }
+}
+function liveRows(k, path) {
+  const end = V.rug >= 0 ? Math.min(k, V.rug) : k, price = path[end], live = V.ph === 'live';
+  return (V.pl || []).map(p => {
+    const eq = live ? p.cash + p.co * price : p.cash;
+    const r = live ? eq - RUGD.START_CASH : p.r, t = live ? p.t + r : p.t;
+    return { p, eq, r, t };
+  });
+}
+function renderBoard(k, path, now) {
+  if (now - UI.boardAt < 100) return; UI.boardAt = now;
+  const rows = liveRows(k, path).sort((a, b) => b.t - a.t);
+  $('#board').innerHTML = rows.map((o, i) => {
+    const p = o.p, st = p.rg ? '💀' : p.co > 0 ? '🎒' : '💵';
+    return `<li class="${p.i === myId ? 'me' : ''}"><span class="rk">${i + 1}</span><span class="sw" style="background:${okColor(p.c)};color:${okColor(p.c)}"></span>` +
+      `<span class="nm">${esc(p.n)}</span><span>${st}</span>` +
+      `<span class="tot ${o.t >= 0 ? 'up' : 'dn'}">${o.t >= 0 ? '+' : '-'}$${Math.abs(o.t) >= 1000 ? fmtBig(Math.abs(o.t)) : Math.abs(o.t).toFixed(0)}</span></li>`;
+  }).join('');
+}
+function renderChat() {
+  if (!V.chat || V.cn === UI.chatN) return; UI.chatN = V.cn;
+  $('#chat').innerHTML = V.chat.slice(-14).map(([n, c, t, kind]) => kind
+    ? `<div class="ln ${kind === 'rug' ? 'rug' : 'sys'}">${esc(t)}</div>`
+    : `<div class="ln"><b style="color:${okColor(c)}">${esc(n)}:</b> ${esc(t)}</div>`).join('');
+}
+function renderDock(k, path, now) {
+  const me = myP(), buy = $('#buyBtn'), sell = $('#sellBtn');
+  if (!me) {
+    $('#myState').textContent = '👀 SPECTATING'; $('#quip').textContent = "you'll get a seat next game";
+    $('#myRound').textContent = '—'; $('#myTotal').textContent = '—';
+    buy.classList.add('off'); sell.classList.add('off'); return;
+  }
+  const o = liveRows(k, path).find(x => x.p === me), live = V.ph === 'live', hold = isHolding(me, now);
+  const coin = V.coin || { tick: '' }, end = V.rug >= 0 ? Math.min(k, V.rug) : k;
+  let st;
+  if (me.rg) st = '<span class="dn">💀 RUGGED. BAG = $0.00</span>';
+  else if (hold && me.co > 0) { const g = path[end] / me.en - 1; st = `🎒 ${fmtCoins(me.co)} ${esc(coin.tick)} = <span class="${g >= 0 ? 'up' : 'dn'}">$${money(me.co * path[end])} (${pct(g)})</span>`; }
+  else if (hold) st = '🎒 buying…';
+  else st = `💵 CASH <span class="up">$${money(live || V.ph === 'intro' ? me.cash : RUGD.START_CASH + me.r)}</span>`;
+  if ($('#myState').dataset.v !== st) { $('#myState').innerHTML = st; $('#myState').dataset.v = st; }
+  const qs = !live ? 'idle' : hold ? 'hold' : 'cash';
+  if (qs !== UI.quipState) { UI.quipState = qs; $('#quip').textContent = qs === 'hold' ? line('holdQuip') : qs === 'cash' ? line('cashQuip') : V.ph === 'intro' ? 'get ready to ape…' : 'trading closed.'; }
+  const mr = $('#myRound'); mr.textContent = smoney(o.r); mr.className = o.r >= 0 ? 'up' : 'dn';
+  const mt = $('#myTotal'); mt.textContent = smoney(o.t); mt.className = o.t >= 0 ? 'up' : 'dn';
+  buy.classList.toggle('off', !live || hold); sell.classList.toggle('off', !live || !hold);
+}
+
+/* ---------- phases and overlays ---------- */
+function onPhase(ph, now) {
+  const ov = $('#ovl'), me = myP();
+  ov.className = 'ovl'; ov.hidden = false;
+  if (ph === 'intro') {
+    UI.ys = null; UI.pend = null; UI.cdLast = -1;
+    const r = RUGD.rng((V.seed ^ 0x5eed) >>> 0), facts = shuffle(TXT.facts.slice(), r).slice(0, 4), coin = V.coin;
+    ov.innerHTML = `<div class="card"><div class="blink">⚠ NEW LAUNCH DETECTED ⚠</div><div class="cname">${esc(coin.name)}</div><div class="ctick">${esc(coin.tick)}</div>` +
+      `<ul class="facts">${facts.map(([a, b]) => `<li><b>${esc(a)}:</b> ${esc(b)}</li>`).join('')}</ul>` +
+      `<div class="rinfo">ROUND ${V.rn + 1} OF 3 · $1,000 EACH · 30 SECONDS</div><div class="cd" id="cd">3</div></div>`;
+    SFX.launch();
+  } else if (ph === 'live') {
+    ov.hidden = true; ov.innerHTML = ''; SFX.beep(true);
+  } else if (ph === 'rugged') {
+    const res = V.res || { rows: [], line: '', dev: '0x…' }, mine = res.rows.find(x => x.i === myId);
+    const bag = res.rows.filter(x => x.rg), out = res.rows.filter(x => !x.rg);
+    ov.classList.add('rug');
+    ov.innerHTML = `<div class="rugscene"><div class="carpet"></div></div><div class="card"><div class="stamp">RUGGED</div>` +
+      `<div class="later"><div class="rugline">${esc(res.line)}</div><div class="devtx">dev wallet ${esc(res.dev)} removed 100% of liquidity · ${esc(V.coin.tick)} → $0.00</div>` +
+      (mine ? `<div class="you ${mine.rg ? 'dn' : 'up'}">${mine.rg ? 'YOU GOT RUGGED. ENJOY YOUR BAGS.' : 'YOU WERE IN CASH. SMUG MODE: ENGAGED.'}</div>` : '') +
+      `<div class="cols"><div><h4 class="dn">BAG HOLDERS (${bag.length})</h4>${bag.map(x => `<div style="color:${okColor(x.c)}">💀 ${esc(x.n)}</div>`).join('') || '<div>nobody. dev is crying.</div>'}</div>` +
+      `<div><h4 class="up">GOT OUT ALIVE (${out.length})</h4>${out.map(x => `<div style="color:${okColor(x.c)}">💵 ${esc(x.n)} <span class="${x.r >= 0 ? 'up' : 'dn'}">${smoney(x.r)}</span></div>`).join('') || '<div>nobody. everyone got rugged lmao</div>'}</div></div></div></div>`;
+    SFX.rug(); flash('rug');
+    const s = $('#screen'); s.classList.remove('shake'); void s.offsetWidth; s.classList.add('shake');
+  } else if (ph === 'results') {
+    const res = V.res || { rows: [], line: '' }, top = res.rows[0];
+    ov.innerHTML = `<div class="card res"><h2 class="${res.rugged ? 'dn' : ''}">${res.rugged ? `ROUND ${res.rn + 1}: RUGGED` : `ROUND ${res.rn + 1} CLOSED`}</h2>` +
+      `<div class="sub">${esc(res.line)}</div>` + (top ? `<div class="mvp">ROUND MVP: <span style="color:${okColor(top.c)}">${esc(top.n)}</span> ${smoney(top.r)}</div>` : '') +
+      standings(res.rows, true) + `<div class="nextin" id="nextIn"></div></div>`;
+    if (!res.rugged) SFX.bell();
+  } else if (ph === 'final') renderFinal();
+}
+function standings(rows, round) {
+  return `<table class="st"><tr><th>#</th><th>DEGEN</th>${round ? '<th>ROUND</th>' : ''}<th>TOTAL</th></tr>` + rows.map((x, i) =>
+    `<tr class="${x.i === myId ? 'me' : ''}"><td>${i + 1}</td><td style="color:${okColor(x.c)}">${round && x.rg ? '💀 ' : ''}${esc(x.n)}${x.b ? ' <span style="color:var(--dim)">bot</span>' : ''}</td>` +
+    (round ? `<td class="${x.r >= 0 ? 'up' : 'dn'}">${smoney(x.r)}</td>` : '') + `<td class="${x.t >= 0 ? 'up' : 'dn'}">${smoney(x.t)}</td></tr>`).join('') + '</table>';
+}
+function renderFinal() {
+  const fin = V.fin || { rows: [], rugs: 0, line: '' }, w = fin.rows[0], last = fin.rows[fin.rows.length - 1], ov = $('#ovl');
+  const canRun = MODE === 'solo' || NET.role === 'host';
+  ov.innerHTML = `<div class="card res"><div class="champ">GIGACHAD OF THE TRENCHES</div>` +
+    (w ? `<div class="champname" style="color:${okColor(w.c)}">${esc(w.n)}</div><div class="mvp">${smoney(w.t)} over 3 rounds</div>` : '') +
+    (last && last !== w ? `<div class="loser">certified exit liquidity: <b style="color:${okColor(last.c)}">${esc(last.n)}</b> (${smoney(last.t)})</div>` : '') +
+    `<div class="sub">${fin.rugs === 0 ? 'Zero rugs this game. The dev is losing his touch.' : fin.rugs === 1 ? 'One rug this game.' : 'TWO rugs in one game. The dev is in his bag.'} ${esc(fin.line)}</div>` +
+    standings(fin.rows, false) +
+    `<div class="fbtns">${canRun ? '<button class="btn" data-act="again">RUN IT BACK</button>' : '<span class="rinfo">waiting for the host to run it back…</span>'}` +
+    `${MODE === 'online' && NET.role === 'host' ? '<button class="btn ghost" data-act="lobby">BACK TO LOBBY</button>' : ''}` +
+    `<button class="btn ghost" data-act="quit">${MODE === 'online' ? 'LEAVE ROOM' : 'MAIN MENU'}</button></div></div>`;
+  const me = fin.rows.findIndex(x => x.i === myId);
+  if (me === 0) SFX.win(); else SFX.sad();
+}
+function overlayTick(now) {
+  if (V.ph === 'intro') {
+    const s = Math.max(1, Math.ceil(phaseLeft(now) / 1000) - 1), el = $('#cd');
+    if (el && s !== UI.cdLast) { UI.cdLast = s; el.textContent = s <= 3 ? s : 'GET READY'; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); if (s <= 3) SFX.beep(false); }
+  } else if (V.ph === 'results') {
+    const el = $('#nextIn'); if (el) { const s = Math.max(0, Math.ceil(phaseLeft(now) / 1000)); el.textContent = V.rn < 2 ? `next shitcoin launches in ${s}…` : `final standings in ${s}…`; }
+  }
+}
+
+/* ---------- lobby & menu ---------- */
+function renderMenuNet() {
+  const ok = !!NET.api;
+  $('#hostBtn').disabled = !ok; $('#joinBtn').disabled = !ok; $('#codeIn').disabled = !ok;
+  $('#netNote').textContent = !NET.ready ? 'connecting…' : ok ? '' : 'online rooms need the hosted version of the game.';
+}
+function renderLobby() {
+  const host = NET.role === 'host';
+  const lb = host ? lobbyList() : (V && V.ph === 'lobby' && Array.isArray(V.lb) ? V.lb : []);
+  const fill = host ? NET.fill : !!(V && V.fill);
+  const key = JSON.stringify([NET.code, lb, fill, host, myId]);
+  if (key === UI.lobbyKey) return; UI.lobbyKey = key;
+  $('#roomCode').textContent = NET.code || '----';
+  const seats = [];
+  for (let i = 0; i < RUGD.SEATS; i++) {
+    const s = lb[i];
+    if (s) seats.push(`<li><span class="sw" style="background:${COLORS[i]};color:${COLORS[i]}"></span>${esc(cleanName(s[1]))}${i === 0 ? ' 👑' : ''}${s[0] === myId ? ' (you)' : ''}</li>`);
+    else seats.push(fill ? `<li class="bot"><span class="sw" style="background:#555"></span>🤖 bot</li>` : `<li class="empty">— empty —</li>`);
+  }
+  if (lb.length > RUGD.SEATS) seats.push(`<li class="empty">+${lb.length - RUGD.SEATS} waiting for a seat</li>`);
+  $('#seats').innerHTML = seats.join('');
+  $('#hostRow').hidden = !host; $('#guestRow').hidden = host;
+  $('#fillBots').checked = NET.fill;
+  $('#lobbyWait').textContent = `waiting for the host to start the pump… (${fill ? 'empty seats get bots' : 'no bots'})`;
+}
+function bootText() {
+  if (UI.menuTyped) return; UI.menuTyped = true;
+  const el = $('#boot'), lines = TXT.boot; let i = 0, j = 0, out = '';
+  const t = setInterval(() => {
+    if (i >= lines.length) { clearInterval(t); return; }
+    out += lines[i][j++] || ''; if (j > lines[i].length) { out += '\n'; i++; j = 0; }
+    el.textContent = out + (i < lines.length ? '█' : '');
+  }, 18);
+}
+
+/* ---------- input ---------- */
+$('#nameIn').value = store.get('rugd.name', '') || 'degen' + (100 + Math.floor(Math.random() * 900));
+$('#nameIn').addEventListener('change', () => { store.set('rugd.name', myName()); if (NET.room) NET.room.presence({ name: myName() }).catch(() => {}); UI.lobbyKey = ''; });
+$('#soloBtn').addEventListener('click', () => {
+  SFX.init(); store.set('rugd.name', myName());
+  MODE = 'solo'; myId = 'me'; resetUI(); hostNewGame([{ id: 'me', name: myName() }], true);
+});
+$('#hostBtn').addEventListener('click', () => {
+  SFX.init(); store.set('rugd.name', myName());
+  let code = ''; for (let i = 0; i < 4; i++) code += CODE_CH[Math.floor(Math.random() * CODE_CH.length)];
+  netEnter(code, 'host');
+});
+const doJoin = () => { SFX.init(); store.set('rugd.name', myName()); netEnter($('#codeIn').value, 'guest'); };
+$('#joinBtn').addEventListener('click', doJoin);
+$('#codeIn').addEventListener('keydown', e => { if (e.key === 'Enter') doJoin(); });
+$('#fillBots').addEventListener('change', e => { NET.fill = e.target.checked; UI.lobbyKey = ''; });
+$('#startBtn').addEventListener('click', () => {
+  if (NET.role !== 'host') return;
+  myId = NET.myPeer || 'host'; resetUI();
+  hostNewGame(lobbyList().slice(0, RUGD.SEATS).map(([id, n]) => ({ id, name: cleanName(n) })), NET.fill);
+});
+$('#leaveBtn').addEventListener('click', () => netLeave());
+$('#quitBtn').addEventListener('click', () => { if (MODE === 'online') netLeave(); else toMenu(); });
+$('#muteBtn').addEventListener('click', () => { SFX.init(); SFX.setMute(!SFX.muted); });
+$('#ovl').addEventListener('click', e => {
+  const a = e.target.closest('[data-act]'); if (!a) return;
+  const act = a.dataset.act;
+  if (act === 'again') {
+    resetUI();
+    if (MODE === 'solo') hostNewGame([{ id: 'me', name: myName() }], true);
+    else if (NET.role === 'host') hostNewGame(lobbyList().slice(0, RUGD.SEATS).map(([id, n]) => ({ id, name: cleanName(n) })), NET.fill);
+  } else if (act === 'lobby') { G = null; V = null; resetUI(); showView('lobby'); }
+  else if (act === 'quit') { if (MODE === 'online') netLeave(); else toMenu(); }
+});
+const press = (btn, side) => {
+  btn.addEventListener('pointerdown', e => { e.preventDefault(); SFX.init(); btn.classList.add('press'); act(side); });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => btn.addEventListener(t, () => btn.classList.remove('press')));
+};
+press($('#buyBtn'), 'b'); press($('#sellBtn'), 's');
+$('#chatForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const t = cleanText($('#chatIn').value); $('#chatIn').value = ''; $('#chatIn').blur();
+  if (!t) return;
+  if (G) { const me = G.players.find(p => p.id === myId); pushChat(myName(), me ? me.color : '#9fdcb4', t, ''); }
+  else if (NET.room) { NET.chSeq++; NET.room.presence({ ch: [NET.chSeq, t] }).catch(() => {}); }
+});
+addEventListener('pointerdown', () => SFX.init(), { passive: true });
+addEventListener('keydown', e => {
+  SFX.init();
+  const tag = (e.target && e.target.tagName) || '';
+  if (tag === 'INPUT') { if (e.key === 'Escape') e.target.blur(); return; }
+  if (e.code === 'KeyM') { SFX.setMute(!SFX.muted); return; }
+  if (UI.view !== 'game' || e.repeat) return;
+  if (['KeyB', 'KeyW', 'ArrowUp'].includes(e.code)) { e.preventDefault(); flashBtn('#buyBtn'); act('b'); }
+  else if (['KeyS', 'ArrowDown'].includes(e.code)) { e.preventDefault(); flashBtn('#sellBtn'); act('s'); }
+  else if (e.code === 'Enter') { e.preventDefault(); $('#chatIn').focus(); }
+});
+function flashBtn(sel) { const b = $(sel); b.classList.add('press'); setTimeout(() => b.classList.remove('press'), 110); }
+
+/* ================= main loop ================= */
+function sendSnap(now) {
+  if (MODE === 'online' && NET.role === 'host' && NET.room && now - NET.sentAt >= 50) {
+    NET.sentAt = now; NET.room.presence({ g: buildSnap(now) }).catch(() => {});
+  }
+}
+function render(now) {
+  if (MODE === 'menu') return;
+  if (MODE === 'online' && (!V || V.ph === 'lobby')) { showView('lobby'); renderLobby(); return; }
+  if (!V) return;
+  showView('game');
+  if (V.ph !== UI.ph || V.gen !== UI.gen || V.rn !== UI.rn) { UI.ph = V.ph; UI.gen = V.gen; UI.rn = V.rn; onPhase(V.ph, now); }
+  const path = pathFor(V.seed), k = curK(now);
+  renderHud(k, path); drawChart(k, path, now); renderBoard(k, path, now); renderChat(); renderDock(k, path, now); overlayTick(now);
+  $('#chartMsg').textContent = myP() ? '' : 'SPECTATING';
+}
+function frame(now) {
+  try {
+    if (G) { hostStep(now); V = buildSnap(now); V._at = now; }
+    else if (MODE === 'online' && NET.role === 'host') V = buildSnap(now);
+    sendSnap(now);
+    if (MODE === 'online' && NET.role === 'guest') {
+      const since = NET.hostSeen ? now - NET.hostSeen : now - NET.joinedAt;
+      if (since > 9000) netLeave(NET.hostSeen ? 'The host left. The whole room got rugged.' : 'No room with that code (or the host is asleep).');
+    }
+    render(now);
+  } catch (e) { console.error(e); }
+  requestAnimationFrame(frame);
+}
+// keep the match running when the host's tab is in the background
+setInterval(() => { if (document.hidden) { const now = performance.now(); if (G) hostStep(now); sendSnap(now); } }, 100);
+SFX.setMute(SFX.muted);
+renderMenuNet(); bootText();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
